@@ -12,3 +12,4 @@ Registro cronológico de cambios relevantes en el proyecto, su documentación y 
 | 13/10/2026 | — | Cambio de alcance | Solicitud CR-00: unificación del backlog del TP (80 SP) con el prototipo (97 SP). | CR-00 |
 | 14/10/2026 | — | Configuración | Publicación en GitHub de `develop`, `feature/F0-04-estructura-proyecto` y `feature/F0-documentacion-inicial`. Clon en la PC de desarrollo (`Documents\IS3`). | F0-06 |
 | 14/10/2026 | — | Configuración | Entorno verificado y versiones fijadas (ADR-01). Archivos base: `README.md`, `.gitignore`, `.gitattributes`, `.env.example`, `.node-version`, `infra/docker/docker-compose.yml`. | F0-05, F0-07 |
+| 14/10/2026 | — | Configuración | PostgreSQL 18 levantado con Docker Compose en la PC de desarrollo; bases `expediente` y `expediente_test` creadas. | F0-07 |

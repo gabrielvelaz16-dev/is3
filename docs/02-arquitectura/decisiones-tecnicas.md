@@ -28,7 +28,7 @@ Registro breve de decisiones de arquitectura (*Architecture Decision Records*). 
 | Prisma | **7.10.0** | 8.0.0-rc.22 | La etiqueta `latest` apunta a una versión candidata (`rc`), no estable. Se usa la última estable (`prev`). |
 | Vitest | 5.0.4 | 5.0.4 | Compatible con `vite ^8.0.0`. |
 | Supertest | a fijar en el Sprint 1 | — | No consultada en la Fase 0. |
-| PostgreSQL | 18 (`postgres:18-alpine`) | — | Imagen oficial; versión exacta registrada al levantar el contenedor (F0-07). |
+| PostgreSQL | 18 (`postgres:18-alpine`) | — | Imagen oficial; contenedor verificado el 14/10/2026 (F0-07). |
 | Git · Docker · Compose | 2.55.0 · 29.8.2 · v5.6.0 | — | Instalados en la máquina de desarrollo (Windows). |
 
 - **Consecuencias de las versiones:** Prisma 7 trabaja con archivo `prisma.config.ts` y adaptador de conexión para PostgreSQL; se configura en el Sprint 2 siguiendo su documentación oficial.

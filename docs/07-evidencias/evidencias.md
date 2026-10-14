@@ -19,7 +19,7 @@ Registro de evidencias verificables para la evaluación y la defensa. Cada evide
 | Solicitud de cambio CR-00 | 2, 3 | [control-cambios.md](../04-gestion/control-cambios.md) | Pendiente de decisión |
 | Bitácora de IA iniciada | Transversal | [bitacora-ia.md](../bitacora-ia/bitacora-ia.md) | Hecho |
 | Verificación del entorno (F0-05): Git 2.55.0, Node 24.20.0, npm 11.19.0, Docker 29.8.2, Compose v5.6.0 | 8 | [instalacion-ejecucion.md](../06-configuracion-devops/instalacion-ejecucion.md) · salida de consola del 14/10/2026 | Hecho |
-| PostgreSQL en Docker (F0-07) | 8 | `infra/docker/docker-compose.yml` | Archivo creado y validado (`docker compose config`); pendiente arranque en la PC |
+| PostgreSQL en Docker (F0-07): contenedor `is3-postgres` iniciado y bases `expediente` y `expediente_test` creadas | 8 | `infra/docker/docker-compose.yml` · salida de `docker compose up/ps` y `psql \l` del 14/10/2026 | Hecho |
 | Puerta G1 aprobada | 7 | Acta de aprobación | Pendiente |
 
 **Observaciones de la Fase 0:**

@@ -66,13 +66,13 @@ docker exec is3-postgres psql -U is3_app -d expediente -c "\l"             # deb
 
 Qué crea el archivo [`infra/docker/docker-compose.yml`](../../infra/docker/docker-compose.yml):
 - Contenedor `is3-postgres` con PostgreSQL 18, publicado solo en `127.0.0.1:${POSTGRES_PORT}`.
-- Volumen `is3_pgdata` para que los datos sobrevivan a `down` y a reinicios.
+- Volumen `is3_pgdata` (Docker lo muestra como `is3_is3_pgdata`, con el nombre del proyecto adelante) para que los datos sobrevivan a `down` y a reinicios.
 - Base `expediente` (desarrollo) y `expediente_test` (pruebas), esta última creada por `infra/docker/init/01-crear-bd-pruebas.sql` solo la primera vez.
 - Control de salud con `pg_isready`.
 
 Detener: `docker compose --env-file .env -f infra/docker/docker-compose.yml down` · Borrar también los datos: agregar `-v` (irreversible).
 
-Estado: archivo creado y validado con `docker compose config`; **pendiente** de verificar el arranque en la máquina de desarrollo.
+Estado: **verificado el 14/10/2026** en la máquina de desarrollo (Windows, Docker Desktop 29.8.2): imagen `postgres:18-alpine` descargada, contenedor `is3-postgres` iniciado en `127.0.0.1:5432`, bases `expediente` y `expediente_test` creadas con dueño `is3_app` y codificación UTF8.
 
 ## 5. Backend y frontend (Sprint 1)
 
@@ -111,3 +111,5 @@ Se documentará con el script de `scripts/backup/` (S7-04).
 | `Falta POSTGRES_USER en .env` al levantar Docker | No se creó `.env` o no se pasó `--env-file .env`; ejecutar desde la raíz del repositorio. |
 | Se cambió la clave en `.env` y ya no conecta | La clave solo se aplica al crear el volumen. En desarrollo: `down -v` y volver a levantar (borra los datos). |
 | `npm` bloqueado en PowerShell | Ver la nota de la sección 1 (`Set-ExecutionPolicy`). |
+| `failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine` | Docker Desktop no está abierto. Abrirlo, esperar *Engine running* y comprobar con `docker info`. |
+| `.env` editado con `Set-Content -Encoding utf8` en Windows PowerShell | Ese comando agrega una marca BOM al inicio. Quitarla con `[IO.File]::WriteAllLines("$PWD\.env", (Get-Content .env), (New-Object Text.UTF8Encoding $false))`. |
