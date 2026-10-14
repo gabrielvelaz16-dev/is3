@@ -13,7 +13,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],
-      exclude: ['src/server.ts'],
+      exclude: ['src/server.ts', 'src/generated/**', 'src/database/prisma/**'],
       reporter: ['text', 'html'],
     },
   },

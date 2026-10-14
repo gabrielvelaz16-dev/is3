@@ -1,0 +1,111 @@
+// Modelo de datos — Sprint 2 (S2-01): usuarios, roles, permisos, sesiones y auditoría.
+// Documentación: docs/03-modelo-datos/modelo-datos.md
+// La URL de conexión se configura en prisma.config.ts (Prisma 7).
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Dependencia {
+  id       Int       @id @default(autoincrement())
+  codigo   String    @unique @db.VarChar(20)
+  nombre   String    @db.VarChar(120)
+  activa   Boolean   @default(true)
+  usuarios Usuario[]
+
+  @@map("dependencias")
+}
+
+model Rol {
+  id          Int          @id @default(autoincrement())
+  clave       String       @unique @db.VarChar(40)
+  nombre      String       @db.VarChar(80)
+  descripcion String       @db.VarChar(255)
+  permisos    RolPermiso[]
+  usuarios    Usuario[]
+
+  @@map("roles")
+}
+
+model Permiso {
+  id          Int          @id @default(autoincrement())
+  clave       String       @unique @db.VarChar(60)
+  descripcion String       @db.VarChar(255)
+  roles       RolPermiso[]
+
+  @@map("permisos")
+}
+
+model RolPermiso {
+  rolId     Int     @map("rol_id")
+  permisoId Int     @map("permiso_id")
+  rol       Rol     @relation(fields: [rolId], references: [id], onDelete: Cascade)
+  permiso   Permiso @relation(fields: [permisoId], references: [id], onDelete: Cascade)
+
+  @@id([rolId, permisoId])
+  @@map("roles_permisos")
+}
+
+model Usuario {
+  id            Int         @id @default(autoincrement())
+  email         String      @unique @db.VarChar(160)
+  nombre        String      @db.VarChar(120)
+  passwordHash  String      @map("password_hash") @db.VarChar(255)
+  rolId         Int         @map("rol_id")
+  dependenciaId Int         @map("dependencia_id")
+  activo        Boolean     @default(true)
+  ultimoAcceso  DateTime?   @map("ultimo_acceso")
+  creadoEn      DateTime    @default(now()) @map("creado_en")
+  actualizadoEn DateTime    @updatedAt @map("actualizado_en")
+  rol           Rol         @relation(fields: [rolId], references: [id], onDelete: Restrict)
+  dependencia   Dependencia @relation(fields: [dependenciaId], references: [id], onDelete: Restrict)
+  sesiones      Sesion[]
+  auditoria     Auditoria[]
+
+  @@index([rolId])
+  @@index([dependenciaId])
+  @@map("usuarios")
+}
+
+/// Sesión del lado del servidor (ADR-05). El id es el hash SHA-256 del token;
+/// el token en claro solo existe en la cookie del navegador.
+model Sesion {
+  id        String   @id @db.Char(64)
+  usuarioId Int      @map("usuario_id")
+  creadaEn  DateTime @default(now()) @map("creada_en")
+  expiraEn  DateTime @map("expira_en")
+  ip        String?  @db.VarChar(64)
+  userAgent String?  @map("user_agent") @db.VarChar(255)
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+  @@index([expiraEn])
+  @@map("sesiones")
+}
+
+/// Registro de auditoría de solo inserción (ADR-07, RF-20).
+model Auditoria {
+  id        Int       @id @default(autoincrement())
+  fecha     DateTime  @default(now())
+  usuarioId Int?      @map("usuario_id")
+  accion    String    @db.VarChar(60)
+  resultado String    @db.VarChar(10)
+  entidad   String?   @db.VarChar(60)
+  entidadId String?   @map("entidad_id") @db.VarChar(60)
+  detalle   Json?
+  ip        String?   @db.VarChar(64)
+  requestId String?   @map("request_id") @db.VarChar(64)
+  usuario   Usuario?  @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@index([fecha])
+  @@index([usuarioId])
+  @@index([accion])
+  @@map("auditoria")
+}
