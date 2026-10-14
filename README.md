@@ -21,7 +21,7 @@ Prototipo académico del trabajo práctico integrador de **Ingeniería de Softwa
 | Frontend | React · Vite · Tailwind CSS | 19.3.0 · 8.3.4 · 4.3.3 |
 | Backend | Express · Zod | 5.3.0 · 4.6.7 |
 | Base de datos | PostgreSQL (Docker) · Prisma | 18 · 7.10.0 |
-| Pruebas | Vitest · Supertest | 5.0.4 · a fijar en el Sprint 1 |
+| Pruebas | Vitest · Supertest | 5.0.4 · 7.3.1 |
 
 El motivo de cada versión está en [ADR-01](docs/02-arquitectura/decisiones-tecnicas.md#adr-01--stack-tecnológico).
 

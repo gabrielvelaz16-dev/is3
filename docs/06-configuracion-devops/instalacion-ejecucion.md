@@ -77,11 +77,11 @@ Estado: **verificado el 14/10/2026** en la máquina de desarrollo (Windows, Dock
 ## 5. Backend y frontend (Sprint 1)
 
 ```bash
-# Backend
+# Backend (lee el .env de la raíz del repositorio)
 cd backend
 npm install
 npx prisma migrate dev      # desde el Sprint 2
-npm run dev
+npm run dev                 # http://localhost:3000/api/health
 
 # Frontend (otra terminal)
 cd frontend
@@ -89,7 +89,19 @@ npm install
 npm run dev
 ```
 
-Verificación esperada: `GET /api/health` responde 200 y el frontend muestra el estado de la API (criterio de S1-03).
+Verificación esperada: `GET /api/health` responde 200 y el frontend muestra el estado de la API (criterio de S1-03). Formato de respuestas y errores: [contrato de la API](../02-arquitectura/contrato-api.md).
+
+Scripts del backend:
+
+| Script | Qué hace |
+|---|---|
+| `npm run dev` | Servidor con recarga automática (`tsx watch`) |
+| `npm run build` / `npm start` | Compila a `dist/` y ejecuta la versión compilada |
+| `npm run typecheck` | Verificación de tipos de TypeScript |
+| `npm run lint` | ESLint |
+| `npm test` / `npm run test:coverage` | Pruebas con Vitest y Supertest (con cobertura) |
+
+Las pruebas del Sprint 1 no necesitan la base de datos: la comprobación de la base se reemplaza por una función simulada.
 
 ## 6. Pruebas
 
