@@ -25,8 +25,10 @@ describe('Administración de usuarios (RF-03, S2-05)', () => {
   it('lista los usuarios con rol, dependencia y estado, y marca al usuario actual', async () => {
     renderApp('/administracion', { handlers: handlersBase([sinPermisos(ADMIN), { ...sinPermisos(FUNCIONARIO), activo: false }]) });
     const tabla = await screen.findByRole('table', { name: 'Usuarios del sistema' });
+    // Esperar a que la lista termine de cargar (antes solo está la fila "No hay usuarios").
+    await within(tabla).findByText('funcionario@institucion.test');
 
-    const filas = await within(tabla).findAllByRole('row');
+    const filas = within(tabla).getAllByRole('row');
     expect(filas).toHaveLength(3);
     expect(within(filas[1]!).getByText('admin')).toBeInTheDocument();
     expect(within(filas[1]!).getByText('(usted)')).toBeInTheDocument();
