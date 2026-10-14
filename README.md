@@ -1,5 +1,7 @@
 # IS3 — Sistema Institucional de Expediente Electrónico
 
+[![CI](https://github.com/gabrielvelaz16-dev/is3/actions/workflows/ci.yml/badge.svg)](https://github.com/gabrielvelaz16-dev/is3/actions/workflows/ci.yml)
+
 Prototipo académico del trabajo práctico integrador de **Ingeniería de Software III** (FPUNA), con enfoque de gestión **híbrido**. Es un sistema web para registrar expedientes electrónicos de una institución pública **ficticia**: documentos, actuaciones, responsables, tareas, estados, historial, usuarios y roles, reportes, auditoría y copias de seguridad.
 
 > Uso exclusivamente académico. Se ejecuta en una sola computadora, con datos ficticios. No se conecta a servicios institucionales reales.
