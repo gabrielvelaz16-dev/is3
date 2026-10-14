@@ -14,6 +14,7 @@ Esta carpeta reúne los artefactos de gestión y técnicos del proyecto. Cada do
 | 01-alcance-requisitos | [resumen-alcance-requisitos.md](01-alcance-requisitos/resumen-alcance-requisitos.md) | 3 · 7 | Aprobado (G1) |
 | 02-arquitectura | [arquitectura.md](02-arquitectura/arquitectura.md) | 8 | Inicial |
 | 02-arquitectura | [decisiones-tecnicas.md](02-arquitectura/decisiones-tecnicas.md) | 8 | Inicial |
+| 02-arquitectura | [contrato-api.md](02-arquitectura/contrato-api.md) | 8 | Vigente (Sprint 1) |
 | 03-modelo-datos | [modelo-datos.md](03-modelo-datos/modelo-datos.md) | 3 | Borrador (se refina en Sprint 2) |
 | 04-gestion | [enfoque-gobernanza.md](04-gestion/enfoque-gobernanza.md) | 2 | Completo (TP Unidad 2) |
 | 04-gestion | [planificacion.md](04-gestion/planificacion.md) | 3 | Completo (TP Unidad 3) |
