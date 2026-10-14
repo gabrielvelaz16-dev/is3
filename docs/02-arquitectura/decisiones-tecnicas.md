@@ -13,7 +13,25 @@ Registro breve de decisiones de arquitectura (*Architecture Decision Records*). 
 - **Decisión:** React + Vite + TypeScript (frontend), Node.js + Express + TypeScript (backend), PostgreSQL con Prisma, Tailwind CSS, Zod, Vitest + Supertest, Docker Compose para la base de datos, Git y GitHub.
 - **Alternativas:** NestJS (más estructura pero mayor curva de aprendizaje); SQLite (más simple pero no representa el entorno institucional).
 - **Consecuencias:** TypeScript en todo el proyecto; contratos tipados compartidos.
-- **Pendiente (F0-05 / Sprint 1):** verificar en la máquina de desarrollo las versiones vigentes con `node -v`, `npm view <paquete> version` y los requisitos de motor (`engines`) de Prisma y Vite antes de instalar. Las versiones fijadas se registran en este documento y en `package-lock.json`.
+- **Versiones fijadas (F0-05, 14/10/2026):** consultadas en la máquina de desarrollo con `npm view <paquete> version`, `npm view <paquete> dist-tags` y `npm view <paquete> peerDependencies`. Se instalarán con versión exacta y quedarán registradas en `package-lock.json`.
+
+| Herramienta | Versión fijada | Última publicada | Motivo |
+|---|---|---|---|
+| Node.js | 24.20.0 (LTS) | — | Versión LTS instalada; cumple con lo que exigen Vitest (`@types/node >=24`) y Vite 8. Fijada en `.node-version`. |
+| npm | 11.19.0 | 12.2.0 | La que trae Node 24. No se actualiza a npm 12 para no mezclar versiones. |
+| TypeScript | **6.0.3** | 7.0.2 | `typescript-eslint` solo admite `typescript >=4.8.4 <6.1.0`. TypeScript 7 (compilador reescrito) se reevalúa cuando el linter lo soporte. |
+| React | 19.3.0 | 19.3.0 | — |
+| Vite | 8.3.4 | 8.3.4 | `@vitejs/plugin-react` exige `vite ^8.0.0`. |
+| Tailwind CSS | 4.3.3 | 4.3.3 | — |
+| Express | 5.3.0 | 5.3.0 | — |
+| Zod | 4.6.7 | 4.6.7 | — |
+| Prisma | **7.10.0** | 8.0.0-rc.22 | La etiqueta `latest` apunta a una versión candidata (`rc`), no estable. Se usa la última estable (`prev`). |
+| Vitest | 5.0.4 | 5.0.4 | Compatible con `vite ^8.0.0`. |
+| Supertest | a fijar en el Sprint 1 | — | No consultada en la Fase 0. |
+| PostgreSQL | 18 (`postgres:18-alpine`) | — | Imagen oficial; versión exacta registrada al levantar el contenedor (F0-07). |
+| Git · Docker · Compose | 2.55.0 · 29.8.2 · v5.6.0 | — | Instalados en la máquina de desarrollo (Windows). |
+
+- **Consecuencias de las versiones:** Prisma 7 trabaja con archivo `prisma.config.ts` y adaptador de conexión para PostgreSQL; se configura en el Sprint 2 siguiendo su documentación oficial.
 
 ## ADR-02 · Monorepo con dos aplicaciones
 
