@@ -7,6 +7,11 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+    // El frontend llama a /api y Vite lo reenvía al backend: mismo origen,
+    // la cookie de sesión (SameSite=Strict) funciona y no hace falta CORS.
+    proxy: {
+      '/api': 'http://localhost:3000',
+    },
   },
   test: {
     environment: 'jsdom',

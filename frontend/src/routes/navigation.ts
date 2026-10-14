@@ -9,6 +9,10 @@ export interface Section {
   /** Sprint en el que se implementa la funcionalidad de la sección. */
   sprint: number;
   requisitos: string;
+  /** Permiso necesario para ver la sección en el menú (el servidor lo vuelve a verificar). */
+  permiso?: string;
+  /** true si la sección ya tiene funcionalidad (no muestra "en construcción"). */
+  implementada?: boolean;
 }
 
 export const sections: Section[] = [
@@ -39,5 +43,7 @@ export const sections: Section[] = [
     description: 'Usuarios, roles y permisos, auditoría y copias de seguridad.',
     sprint: 2,
     requisitos: 'RF-01 a RF-03, RF-20 a RF-22',
+    permiso: 'usuarios.gestionar',
+    implementada: true,
   },
 ];

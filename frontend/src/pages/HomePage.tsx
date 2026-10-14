@@ -1,22 +1,29 @@
 import { Link } from 'react-router';
+import { useAuth } from '../auth/AuthContext';
 import { PageHeader } from '../components/PageHeader';
+import { SystemStatus } from '../components/SystemStatus';
 import { sections } from '../routes/navigation';
 
-/** Página de inicio: acceso a las secciones del sistema (S1-04). */
+/** Página de inicio: estado del sistema y acceso a las secciones permitidas (S1-03, S1-04). */
 export function HomePage() {
+  const { usuario, puede } = useAuth();
+  const visibles = sections.filter((s) => !s.permiso || puede(s.permiso));
+
   return (
     <>
       <PageHeader
         title="Inicio"
-        subtitle="Registro y tramitación de expedientes electrónicos entre dependencias."
+        subtitle={usuario ? `Bienvenido/a, ${usuario.nombre} · ${usuario.dependencia.nombre}` : undefined}
       />
+
+      <SystemStatus />
 
       <section aria-labelledby="titulo-secciones">
         <h2 id="titulo-secciones" className="sr-only">
           Secciones del sistema
         </h2>
         <ul className="grid gap-4 sm:grid-cols-2">
-          {sections.map((s) => (
+          {visibles.map((s) => (
             <li key={s.path}>
               <Link
                 to={s.path}
