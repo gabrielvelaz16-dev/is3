@@ -28,9 +28,9 @@ Registro breve de decisiones de arquitectura (*Architecture Decision Records*). 
 | Prisma | **7.10.0** | 8.0.0-rc.22 | La etiqueta `latest` apunta a una versión candidata (`rc`), no estable. Se usa la última estable (`prev`). |
 | Vitest | 5.0.4 | 5.0.4 | Compatible con `vite ^8.0.0`. |
 | Supertest | a fijar en el Sprint 1 | — | No consultada en la Fase 0. |
-| Frontend (S1-02) | React Router 8.4.0 · `@vitejs/plugin-react` 6.1.2 · `@tailwindcss/vite` 4.3.3 · jsdom 30.1.2 · Testing Library (react 16.3.3, dom 10.4.2, user-event 14.6.8, jest-dom 7.0.1) · `eslint-plugin-react-hooks` 7.1.1 | — | Versión exacta registrada en `frontend/package.json` y `package-lock.json`. |
 | PostgreSQL | 18 (`postgres:18-alpine`) | — | Imagen oficial; contenedor verificado el 14/10/2026 (F0-07). |
 | Git · Docker · Compose | 2.55.0 · 29.8.2 · v5.6.0 | — | Instalados en la máquina de desarrollo (Windows). |
+| Frontend (S1-02) | React Router 8.4.0 · `@vitejs/plugin-react` 6.1.2 · `@tailwindcss/vite` 4.3.3 · jsdom 30.1.2 · Testing Library (react 16.3.3, dom 10.4.2, user-event 14.6.8, jest-dom 7.0.1) · `eslint-plugin-react-hooks` 7.1.1 | — | Versión exacta registrada en `frontend/package.json` y `package-lock.json`. |
 
 - **Consecuencias de las versiones:** Prisma 7 trabaja con archivo `prisma.config.ts` y adaptador de conexión para PostgreSQL; se configura en el Sprint 2 siguiendo su documentación oficial.
 
