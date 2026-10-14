@@ -11,6 +11,7 @@ Esta carpeta reúne los artefactos de gestión y técnicos del proyecto. Cada do
 |---|---|---|---|
 | 01-alcance-requisitos | [alcance.md](01-alcance-requisitos/alcance.md) | 3 | Línea base inicial |
 | 01-alcance-requisitos | [requisitos.md](01-alcance-requisitos/requisitos.md) | 3 · 7 | Línea base inicial |
+| 01-alcance-requisitos | [resumen-alcance-requisitos.md](01-alcance-requisitos/resumen-alcance-requisitos.md) | 3 · 7 | Aprobado (G1) |
 | 02-arquitectura | [arquitectura.md](02-arquitectura/arquitectura.md) | 8 | Inicial |
 | 02-arquitectura | [decisiones-tecnicas.md](02-arquitectura/decisiones-tecnicas.md) | 8 | Inicial |
 | 03-modelo-datos | [modelo-datos.md](03-modelo-datos/modelo-datos.md) | 3 | Borrador (se refina en Sprint 2) |
