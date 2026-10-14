@@ -1,0 +1,28 @@
+# Bitácora de uso de inteligencia artificial
+
+**Estado:** Vivo · **Referencia:** Anexo D de la guía de TP y reglas 4 a 6 de uso responsable de IA
+
+Herramienta utilizada: **Claude (Anthropic)**, a través de la app de Claude, con acceso al navegador integrado para operar Trello y GitHub con la sesión del responsable.
+
+**Reglas que sigue el equipo:**
+- No se ingresan contraseñas, credenciales ni datos personales de terceros en la herramienta. Los inicios de sesión los realiza el responsable.
+- Todo resultado de la IA se revisa antes de aceptarse; el equipo es responsable de errores, sesgos o referencias inexistentes.
+- Los resultados de pruebas solo se registran si se ejecutaron realmente.
+
+## Registro
+
+| # | Fecha | Propósito | Entrada (resumen, sin datos sensibles) | Salida utilizada | Validación | Correcciones | Responsable |
+|---|---|---|---|---|---|---|---|
+| 1 | 13/10/2026 | Analizar las instrucciones del proyecto, la guía del TP y los TP de las Unidades 2 a 6 | Instrucciones del proyecto y documentos de la cátedra | Resumen del estado del trabajo y lista de inconsistencias (backlog vs sprints, CI/CD faltante, dos tableros distintos) | Lectura y comparación con los documentos originales por el responsable | — | Carlos G. Velázquez F. |
+| 2 | 13/10/2026 | Crear el tablero de gestión en Trello | Estructura propuesta de listas, etiquetas y tarjetas de la Fase 0 y los 8 sprints | Tablero con 6 listas, 17 etiquetas y 63 tarjetas | Revisión visual del tablero; verificación automática de duplicados y checklists | Se quitaron los íconos de los nombres de las listas a pedido del responsable | Carlos G. Velázquez F. |
+| 3 | 13/10/2026 | Configurar el espacio de trabajo y el repositorio | Pedido de renombrar el espacio de Trello y revisar el repositorio IS3 | Espacio de trabajo renombrado a IS3; ramas `develop` y `feature/F0-04-estructura-proyecto` con estructura de carpetas | Revisión de la estructura propuesta antes de crearla | Se detectó que el navegador tenía otra cuenta de GitHub; se agregó la cuenta de FPUNA | Carlos G. Velázquez F. |
+| 4 | 13/10/2026 | Redactar la documentación inicial de `docs/` | Contenido de los TP de las Unidades 2 a 6 y requisitos del prototipo | Documentos de alcance, requisitos, arquitectura, modelo de datos, gestión, calidad, configuración, evidencias | **Pendiente:** revisión completa por el responsable antes de aprobar la puerta G1 | — | Carlos G. Velázquez F. |
+| 5 | 14/10/2026 | Recuperar y publicar la Fase 0 en GitHub | Registro de la conversación anterior; vinculación de la cuenta de GitHub de FPUNA | Ramas `develop`, `feature/F0-04-estructura-proyecto` y `feature/F0-documentacion-inicial` publicadas | Verificación automática de enlaces internos, suma del backlog (97 SP) y cantidad de riesgos; revisión de ramas en GitHub y clon en la PC | Se corrigió la cuenta vinculada (primero quedó la personal, luego la de FPUNA) | Carlos G. Velázquez F. |
+| 6 | 14/10/2026 | Verificar el entorno y fijar versiones (F0-05, F0-07) | Salidas de consola de la PC (versiones instaladas y `npm view`) | Guía de instalación, versiones fijadas (ADR-01), `README.md`, `.gitignore`, `.env.example`, `docker-compose.yml` | Las versiones salen de comandos ejecutados por el responsable, no de la IA; `docker compose config` sin errores | Se descartaron TypeScript 7 y Prisma 8 rc por compatibilidad y estabilidad | Carlos G. Velázquez F. |
+
+## Contenido generado por IA que requiere validación especial
+
+- Story Points de las historias nuevas (backlog): estimaciones iniciales, validar con Planning Poker.
+- Riesgos R13 a R16 y deudas técnicas DT-01 a DT-04: propuestas, validar probabilidad e impacto.
+- Umbrales de métricas (cobertura 70 %, p95 < 1 s, etc.): supuestos iniciales.
+- Máquina de estados y modelo de datos: borradores para el Sprint 2 y 5.
