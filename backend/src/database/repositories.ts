@@ -99,10 +99,85 @@ export interface AuditoriaRepo {
   insert(evento: EventoAuditoria): Promise<void>;
 }
 
+// ── Sprint 3: Expedientes ──────────────────────────────────────────
+
+export interface ExpedienteRecord {
+  id: number;
+  numero: string;
+  caratula: string;
+  asunto: string;
+  tipo: string;
+  iniciador: string;
+  estado: string;
+  prioridad: string;
+  dependenciaActualId: number;
+  creadoPorId: number;
+  responsableId: number | null;
+  fechaVencimiento: Date | null;
+  descripcion: string | null;
+  creadoEn: Date;
+  actualizadoEn: Date;
+  dependenciaActual: DependenciaRecord;
+  creadoPor: { id: number; nombre: string; username: string };
+  responsable: { id: number; nombre: string; username: string } | null;
+}
+
+export interface NuevoExpediente {
+  numero: string;
+  caratula: string;
+  asunto: string;
+  tipo: string;
+  iniciador: string;
+  estado?: string;
+  prioridad?: string;
+  dependenciaActualId: number;
+  creadoPorId: number;
+  responsableId?: number | null;
+  fechaVencimiento?: Date | null;
+  descripcion?: string | null;
+}
+
+export type CambiosExpediente = Partial<{
+  caratula: string;
+  asunto: string;
+  tipo: string;
+  iniciador: string;
+  estado: string;
+  prioridad: string;
+  dependenciaActualId: number;
+  responsableId: number | null;
+  fechaVencimiento: Date | null;
+  descripcion: string | null;
+}>;
+
+export interface FiltrosExpediente {
+  q?: string;
+  estado?: string;
+  prioridad?: string;
+  dependenciaId?: number;
+  skip: number;
+  take: number;
+}
+
+export interface ExpedientesRepo {
+  findById(id: number): Promise<ExpedienteRecord | null>;
+  findByNumero(numero: string): Promise<ExpedienteRecord | null>;
+  list(filtros: FiltrosExpediente): Promise<{ items: ExpedienteRecord[]; total: number }>;
+  create(data: NuevoExpediente): Promise<ExpedienteRecord>;
+  update(id: number, data: CambiosExpediente): Promise<ExpedienteRecord>;
+}
+
+export interface SecuenciaRepo {
+  /** Incrementa atómicamente y devuelve el próximo número para el año dado. */
+  siguienteNumero(anio: number): Promise<number>;
+}
+
 export interface Repos {
   usuarios: UsuariosRepo;
   roles: RolesRepo;
   dependencias: DependenciasRepo;
   sesiones: SesionesRepo;
   auditoria: AuditoriaRepo;
+  expedientes: ExpedientesRepo;
+  secuencia: SecuenciaRepo;
 }

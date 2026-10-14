@@ -22,6 +22,8 @@ export const sections: Section[] = [
     description: 'Registro, consulta, búsqueda y seguimiento de expedientes con sus documentos y actuaciones.',
     sprint: 3,
     requisitos: 'RF-04 a RF-11',
+    permiso: 'expedientes.consultar',
+    implementada: true,
   },
   {
     path: '/tareas',

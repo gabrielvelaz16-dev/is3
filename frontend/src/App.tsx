@@ -1,6 +1,9 @@
 import { Route, Routes } from 'react-router';
 import { RequierePermiso, RequiereSesion } from './auth/guards';
 import { MainLayout } from './layouts/MainLayout';
+import { ExpedienteDetallePage } from './pages/ExpedienteDetallePage';
+import { ExpedienteFormPage } from './pages/ExpedienteFormPage';
+import { ExpedientesPage } from './pages/ExpedientesPage';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -29,6 +32,38 @@ export function App() {
           .map((s) => (
             <Route key={s.path} path={s.path} element={<SectionPage section={s} />} />
           ))}
+        <Route
+          path="/expedientes"
+          element={
+            <RequierePermiso permiso="expedientes.consultar">
+              <ExpedientesPage />
+            </RequierePermiso>
+          }
+        />
+        <Route
+          path="/expedientes/nuevo"
+          element={
+            <RequierePermiso permiso="expedientes.crear">
+              <ExpedienteFormPage />
+            </RequierePermiso>
+          }
+        />
+        <Route
+          path="/expedientes/:id"
+          element={
+            <RequierePermiso permiso="expedientes.consultar">
+              <ExpedienteDetallePage />
+            </RequierePermiso>
+          }
+        />
+        <Route
+          path="/expedientes/:id/editar"
+          element={
+            <RequierePermiso permiso="expedientes.modificar">
+              <ExpedienteFormPage />
+            </RequierePermiso>
+          }
+        />
         <Route
           path="/administracion"
           element={
