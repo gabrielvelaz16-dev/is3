@@ -12,11 +12,11 @@ Que solo usuarios identificados puedan usar el sistema y que cada uno vea y haga
 | ID | Tarea | SP | Criterios de aceptación | Estado |
 |---|---|---|---|---|
 | S2-01 | Modelo de datos y migraciones con Prisma | — | Esquema de dependencias, roles, permisos, usuarios, sesiones y auditoría; migración inicial aplicada | Código listo; falta generar y aplicar la migración en la PC |
-| S2-02 | Iniciar y cerrar sesión | 2 | Login con correo y contraseña; logout invalida la sesión en el servidor; mensaje único para credenciales incorrectas | Código y pruebas escritos |
+| S2-02 | Iniciar y cerrar sesión | 2 | Login con nombre de usuario (o correo) y contraseña; logout invalida la sesión en el servidor; mensaje único para credenciales incorrectas | Código y pruebas escritos |
 | S2-03 | Roles y autorización en el servidor | 5 | 5 roles con permisos; toda ruta protegida responde 401 sin sesión y 403 sin permiso | Código y pruebas escritos |
 | S2-04 | Adaptador de identidad simulado (R01) | — | Interfaz `IdentityProvider` con implementación local; el login no depende de la implementación | Código escrito |
 | S2-05 | Gestionar usuarios | 5 | Crear, listar, buscar, editar, cambiar rol y dependencia, desactivar, cambiar contraseña; siempre queda un administrador activo | Código y pruebas escritos |
-| S2-06 | Usuarios ficticios de prueba (seed) | — | Seed idempotente con dependencias, permisos, roles y administrador | Parcial: falta un usuario de prueba por rol |
+| S2-06 | Usuarios ficticios de prueba (seed) | — | Seed idempotente con dependencias, permisos, roles, administrador `admin`/`12345` y un usuario de prueba por rol | Código escrito; falta ejecutar el seed en la PC |
 | S2-07 | Auditoría base (solo inserción) | — | Se registran login, logout y cambios de usuarios; la base impide `UPDATE`/`DELETE` | Parcial: falta el trigger de la base (se agrega después de la migración inicial) |
 
 ## 3. Decisiones

@@ -7,7 +7,7 @@ import { crearReposEnMemoria } from '../support/memoria.js';
 describe('Regla: siempre debe quedar un administrador activo', () => {
   it('impide desactivar o cambiar de rol al último administrador activo, aunque lo pida otro usuario', async () => {
     const mem = crearReposEnMemoria();
-    const admin = await mem.agregarUsuario('unico@institucion.test', 'Admin12345', 'ADMINISTRADOR');
+    const admin = await mem.agregarUsuario('unico@institucion.test', '12345', 'ADMINISTRADOR');
     const service = new UsuariosService(mem.repos, new AuditoriaService(mem.repos.auditoria));
     const otroActor = { usuarioId: 999 };
 
@@ -18,8 +18,8 @@ describe('Regla: siempre debe quedar un administrador activo', () => {
 
   it('con dos administradores activos sí permite desactivar uno', async () => {
     const mem = crearReposEnMemoria();
-    const a = await mem.agregarUsuario('a@institucion.test', 'Admin12345', 'ADMINISTRADOR');
-    await mem.agregarUsuario('b@institucion.test', 'Admin12345', 'ADMINISTRADOR');
+    const a = await mem.agregarUsuario('a@institucion.test', '12345', 'ADMINISTRADOR');
+    await mem.agregarUsuario('b@institucion.test', '12345', 'ADMINISTRADOR');
     const service = new UsuariosService(mem.repos, new AuditoriaService(mem.repos.auditoria));
 
     const res = await service.modificar(a.id, { activo: false }, { usuarioId: 999 });

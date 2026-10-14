@@ -15,8 +15,8 @@ export function authRouter(auth: AuthService, cookie: CookieConfig): Router {
   const base: CookieOptions = { httpOnly: true, sameSite: 'strict', secure: cookie.secure, path: '/api' };
 
   router.post('/login', async (req, res) => {
-    const { email, password } = loginSchema.parse(req.body);
-    const { usuario, token, expiraEn } = await auth.login(email, password, {
+    const { usuario: identificador, password } = loginSchema.parse(req.body);
+    const { usuario, token, expiraEn } = await auth.login(identificador, password, {
       ...contexto(req, res),
       userAgent: req.get('user-agent'),
     });

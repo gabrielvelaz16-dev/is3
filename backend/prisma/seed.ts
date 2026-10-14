@@ -1,9 +1,10 @@
 /**
- * Datos iniciales (S2-06): dependencias ficticias, permisos, roles y el usuario
- * administrador. Es idempotente: se puede ejecutar varias veces sin duplicar.
+ * Datos iniciales (S2-06): dependencias ficticias, permisos, roles, el usuario
+ * administrador y un usuario de prueba por rol. Es idempotente: se puede
+ * ejecutar varias veces sin duplicar ni cambiar contraseñas existentes.
  *
- * La contraseña del administrador NO está en el código: se lee de ADMIN_PASSWORD
- * en el .env. Si el administrador ya existe, su contraseña no se modifica.
+ * Por decisión del PO (prototipo académico local) el administrador por defecto
+ * es admin / 12345; se puede cambiar con ADMIN_USERNAME y ADMIN_PASSWORD en .env.
  */
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -13,6 +14,9 @@ import { PERMISOS, ROL_ADMINISTRADOR, ROLES } from '../src/security/permissions.
 
 const rootEnvFile = resolve(import.meta.dirname, '../../.env');
 if (existsSync(rootEnvFile)) process.loadEnvFile(rootEnvFile);
+
+/** Contraseña de los usuarios de prueba (solo datos ficticios en un equipo local). */
+const PASSWORD_DEMO = '12345';
 
 const DEPENDENCIAS = [
   { codigo: 'ADM', nombre: 'Administración General' },
@@ -29,8 +33,6 @@ function requerida(nombre: string): string {
 
 async function main() {
   const databaseUrl = requerida('DATABASE_URL');
-  const adminEmail = requerida('ADMIN_EMAIL').trim().toLowerCase();
-  const adminNombre = process.env.ADMIN_NOMBRE?.trim() || 'Administrador del sistema';
   const prisma = createPrismaClient(databaseUrl);
 
   try {
@@ -56,28 +58,51 @@ async function main() {
       ]);
     }
 
-    const existente = await prisma.usuario.findUnique({ where: { email: adminEmail } });
-    if (existente) {
-      console.log(`El administrador ${adminEmail} ya existe; no se modifica su contraseña.`);
-    } else {
-      const password = requerida('ADMIN_PASSWORD');
-      const problema = validarPoliticaPassword(password);
-      if (problema) throw new Error(`ADMIN_PASSWORD no cumple la política: ${problema}`);
-      const rolAdmin = await prisma.rol.findUniqueOrThrow({ where: { clave: ROL_ADMINISTRADOR } });
-      const depAdm = await prisma.dependencia.findUniqueOrThrow({ where: { codigo: 'ADM' } });
+    const rolId = async (clave: string) => (await prisma.rol.findUniqueOrThrow({ where: { clave } })).id;
+    const depId = async (codigo: string) => (await prisma.dependencia.findUniqueOrThrow({ where: { codigo } })).id;
+
+    const usuarios = [
+      {
+        username: (process.env.ADMIN_USERNAME?.trim() || 'admin').toLowerCase(),
+        email: (process.env.ADMIN_EMAIL?.trim() || 'admin@institucion.test').toLowerCase(),
+        nombre: process.env.ADMIN_NOMBRE?.trim() || 'Administrador del sistema',
+        password: process.env.ADMIN_PASSWORD || PASSWORD_DEMO,
+        rol: ROL_ADMINISTRADOR,
+        dependencia: 'ADM',
+      },
+      // Usuarios ficticios de prueba, uno por rol (S2-06).
+      ...(process.env.SEED_USUARIOS_DEMO === 'false'
+        ? []
+        : [
+            { username: 'mesa', email: 'mesa@institucion.test', nombre: 'Marta Mesa (prueba)', password: PASSWORD_DEMO, rol: 'MESA_ENTRADAS', dependencia: 'MESA' },
+            { username: 'funcionario', email: 'funcionario@institucion.test', nombre: 'Fabián Funcionario (prueba)', password: PASSWORD_DEMO, rol: 'FUNCIONARIO', dependencia: 'AJUR' },
+            { username: 'jefe', email: 'jefe@institucion.test', nombre: 'Julia Jefa (prueba)', password: PASSWORD_DEMO, rol: 'JEFE_DEPENDENCIA', dependencia: 'AJUR' },
+            { username: 'auditor', email: 'auditor@institucion.test', nombre: 'Andrés Auditor (prueba)', password: PASSWORD_DEMO, rol: 'AUDITOR', dependencia: 'ADM' },
+          ]),
+    ];
+
+    for (const u of usuarios) {
+      const existente = await prisma.usuario.findUnique({ where: { username: u.username } });
+      if (existente) {
+        console.log(`Usuario "${u.username}" ya existe; no se modifica.`);
+        continue;
+      }
+      const problema = validarPoliticaPassword(u.password);
+      if (problema) throw new Error(`Contraseña de "${u.username}" inválida: ${problema}`);
       await prisma.usuario.create({
         data: {
-          email: adminEmail,
-          nombre: adminNombre,
-          passwordHash: await hashPassword(password),
-          rolId: rolAdmin.id,
-          dependenciaId: depAdm.id,
+          username: u.username,
+          email: u.email,
+          nombre: u.nombre,
+          passwordHash: await hashPassword(u.password),
+          rolId: await rolId(u.rol),
+          dependenciaId: await depId(u.dependencia),
         },
       });
       await prisma.auditoria.create({
-        data: { accion: 'SEED_ADMIN_CREADO', resultado: 'EXITO', entidad: 'Usuario', detalle: { email: adminEmail } },
+        data: { accion: 'SEED_USUARIO_CREADO', resultado: 'EXITO', entidad: 'Usuario', detalle: { username: u.username, rol: u.rol } },
       });
-      console.log(`Administrador creado: ${adminEmail}`);
+      console.log(`Usuario creado: ${u.username} (${u.rol})`);
     }
 
     console.log(`Seed completo: ${DEPENDENCIAS.length} dependencias, ${permisos.size} permisos, ${Object.keys(ROLES).length} roles.`);

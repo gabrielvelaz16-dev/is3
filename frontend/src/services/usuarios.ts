@@ -3,12 +3,13 @@ import type { Dependencia, Rol, Usuario, UsuarioSesion } from './tipos';
 
 export const authApi = {
   me: () => api<{ usuario: UsuarioSesion }>('/auth/me').then((r) => r.usuario),
-  login: (email: string, password: string) =>
-    api<{ usuario: UsuarioSesion }>('/auth/login', { method: 'POST', body: { email, password } }).then((r) => r.usuario),
+  login: (usuario: string, password: string) =>
+    api<{ usuario: UsuarioSesion }>('/auth/login', { method: 'POST', body: { usuario, password } }).then((r) => r.usuario),
   logout: () => api<{ ok: boolean }>('/auth/logout', { method: 'POST' }),
 };
 
 export interface CrearUsuario {
+  username: string;
   email: string;
   nombre: string;
   password: string;
@@ -16,7 +17,7 @@ export interface CrearUsuario {
   dependenciaId: number;
 }
 
-export type ModificarUsuario = Partial<Omit<CrearUsuario, 'email'> & { activo: boolean }>;
+export type ModificarUsuario = Partial<Omit<CrearUsuario, 'email' | 'username'> & { activo: boolean }>;
 
 export const usuariosApi = {
   listar: async (params: { q?: string; page: number; pageSize: number }) => {

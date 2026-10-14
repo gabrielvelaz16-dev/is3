@@ -7,6 +7,7 @@ export interface Referencia {
 
 export interface Usuario {
   id: number;
+  username: string;
   email: string;
   nombre: string;
   activo: boolean;

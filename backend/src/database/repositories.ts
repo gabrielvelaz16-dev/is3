@@ -21,6 +21,7 @@ export interface RolRecord {
 
 export interface UsuarioRecord {
   id: number;
+  username: string;
   email: string;
   nombre: string;
   passwordHash: string;
@@ -32,6 +33,7 @@ export interface UsuarioRecord {
 }
 
 export interface NuevoUsuario {
+  username: string;
   email: string;
   nombre: string;
   passwordHash: string;
@@ -49,6 +51,7 @@ export type CambiosUsuario = Partial<{
 }>;
 
 export interface UsuariosRepo {
+  findByUsername(username: string): Promise<UsuarioRecord | null>;
   findByEmail(email: string): Promise<UsuarioRecord | null>;
   findById(id: number): Promise<UsuarioRecord | null>;
   list(params: { q?: string; skip: number; take: number }): Promise<{ items: UsuarioRecord[]; total: number }>;

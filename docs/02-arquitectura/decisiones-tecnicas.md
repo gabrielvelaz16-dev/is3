@@ -94,7 +94,9 @@ Registro breve de decisiones de arquitectura (*Architecture Decision Records*). 
 - **Estado:** Aceptada (Sprint 2, 14/10/2026)
 - **Contexto:** RNF-01 exige un algoritmo de hash seguro. bcrypt y argon2 requieren módulos nativos que suelen fallar al instalarse en Windows.
 - **Decisión:** `scrypt` del módulo `crypto` de Node (N = 2^15, r = 8, p = 1, sal aleatoria de 16 bytes, clave de 64 bytes). Formato guardado: `scrypt$N$r$p$sal$hash`, que permite subir los parámetros más adelante sin invalidar contraseñas existentes. Comparación en tiempo constante (`timingSafeEqual`).
-- **Política de contraseñas:** mínimo 10 caracteres, con letras y números.
+- **Política de contraseñas (decisión del PO, 14/10/2026):** mínimo 5 caracteres. El prototipo es académico, local y con datos ficticios, y se necesitan credenciales fáciles para la demostración (`admin` / `12345` y un usuario de prueba por rol con `12345`). El hash con scrypt se mantiene, así que RNF-01 se cumple igual: ninguna contraseña queda en texto plano.
+- **Inicio de sesión con nombre de usuario:** se agrega el campo `username` (único, 3 a 30 caracteres: letras, números, `.`, `-`, `_`). El login acepta el nombre de usuario o el correo.
+- **Riesgo aceptado:** contraseñas débiles y conocidas. Es aceptable porque el sistema no se publica ni maneja datos reales; si algún día se usara fuera del aula, habría que volver a una política fuerte (es un cambio de una constante, `PASSWORD_MIN`).
 - **Alternativas:** argon2id (recomendado por OWASP, pero dependencia nativa); bcrypt (límite de 72 bytes, dependencia nativa o versión JS lenta).
 - **Consecuencias:** sin dependencias externas. scrypt está entre los algoritmos recomendados por OWASP para contraseñas.
 

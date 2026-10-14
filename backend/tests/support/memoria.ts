@@ -41,6 +41,10 @@ export function crearReposEnMemoria() {
 
   const repos: Repos = {
     usuarios: {
+      findByUsername: async (username) => {
+        const f = usuarios.find((u) => u.username === username);
+        return f ? completar(f) : null;
+      },
       findByEmail: async (email) => {
         const f = usuarios.find((u) => u.email === email);
         return f ? completar(f) : null;
@@ -51,7 +55,7 @@ export function crearReposEnMemoria() {
       },
       list: async ({ q, skip, take }) => {
         const filtrados = usuarios
-          .filter((u) => !q || `${u.nombre} ${u.email}`.toLowerCase().includes(q.toLowerCase()))
+          .filter((u) => !q || `${u.nombre} ${u.username} ${u.email}`.toLowerCase().includes(q.toLowerCase()))
           .sort((a, b) => a.nombre.localeCompare(b.nombre));
         return { items: filtrados.slice(skip, skip + take).map(completar), total: filtrados.length };
       },
@@ -99,14 +103,16 @@ export function crearReposEnMemoria() {
   const rolId = (clave: string) => roles.find((r) => r.clave === clave)!.id;
 
   async function agregarUsuario(email: string, password: string, rolClave: string, extra: Partial<Fila> = {}) {
-    return repos.usuarios.create({ email, nombre: email.split('@')[0]!, passwordHash: await hashPassword(password), rolId: rolId(rolClave), dependenciaId: 1, ...extra });
+    // El nombre de usuario es la parte del correo antes de la arroba (admin, funcionario...).
+    const username = email.split('@')[0]!;
+    return repos.usuarios.create({ username, email, nombre: username, passwordHash: await hashPassword(password), rolId: rolId(rolClave), dependenciaId: 1, ...extra });
   }
 
   return { repos, auditoria, sesiones, rolId, agregarUsuario };
 }
 
-export const PASSWORD_ADMIN = 'Admin12345';
-export const PASSWORD_USUARIO = 'Usuario12345';
+export const PASSWORD_ADMIN = '12345';
+export const PASSWORD_USUARIO = 'clave1';
 
 /** App de prueba con repos en memoria, un administrador y un funcionario. */
 export async function crearEntorno(overrides: Partial<ApiDeps> = {}) {

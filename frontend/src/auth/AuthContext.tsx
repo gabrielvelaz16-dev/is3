@@ -7,7 +7,7 @@ type Estado = 'cargando' | 'anonimo' | 'autenticado';
 interface AuthValue {
   estado: Estado;
   usuario: UsuarioSesion | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (usuario: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   /** Solo para mostrar u ocultar opciones; el servidor vuelve a verificar cada permiso. */
   puede: (permiso: string) => boolean;
@@ -40,8 +40,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const u = await authApi.login(email, password);
+  const login = useCallback(async (identificador: string, password: string) => {
+    const u = await authApi.login(identificador, password);
     setUsuario(u);
     setEstado('autenticado');
   }, []);

@@ -38,7 +38,7 @@ El motivo de cada versión está en [ADR-01](docs/02-arquitectura/decisiones-tec
 git clone https://github.com/gabrielvelaz16-dev/is3.git
 cd is3
 Copy-Item .env.example .env        # Linux/macOS: cp .env.example .env
-# Editar .env: POSTGRES_PASSWORD (y la misma clave en DATABASE_URL y DATABASE_URL_TEST) y ADMIN_PASSWORD
+# Editar .env: POSTGRES_PASSWORD (y la misma clave en DATABASE_URL y DATABASE_URL_TEST)
 
 # 1. Base de datos (Docker Desktop abierto)
 docker compose --env-file .env -f infra/docker/docker-compose.yml up -d
@@ -56,7 +56,7 @@ npm install
 npm run dev
 ```
 
-Ingresar en http://localhost:5173 con `ADMIN_EMAIL` y `ADMIN_PASSWORD` del `.env`. El administrador puede crear usuarios y asignarles rol y dependencia desde **Administración**.
+Ingresar en http://localhost:5173 con usuario **`admin`** y contraseña **`12345`**. El administrador puede crear usuarios y asignarles rol y dependencia desde **Administración**. El seed también crea un usuario de prueba por rol (`mesa`, `funcionario`, `jefe`, `auditor`, todos con `12345`).
 
 La guía completa y los problemas frecuentes están en [instalación y ejecución](docs/06-configuracion-devops/instalacion-ejecucion.md).
 

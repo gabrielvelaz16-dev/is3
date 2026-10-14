@@ -21,11 +21,10 @@ describe('Contraseñas con hash seguro (RNF-01)', () => {
     expect(await verifyPassword('cualquiera', HASH_FICTICIO)).toBe(false);
   });
 
-  it('aplica la política mínima', () => {
-    expect(validarPoliticaPassword('Corta1')).toMatch(/10 caracteres/);
-    expect(validarPoliticaPassword('soloLetrasLargas')).toMatch(/letras y números/);
-    expect(validarPoliticaPassword('1234567890123')).toMatch(/letras y números/);
-    expect(validarPoliticaPassword('Valida12345')).toBeNull();
+  it('aplica la política simple del prototipo: al menos 5 caracteres (ADR-10)', () => {
+    expect(validarPoliticaPassword('1234')).toMatch(/5 caracteres/);
+    expect(validarPoliticaPassword('12345')).toBeNull();
+    expect(validarPoliticaPassword('x'.repeat(129))).toMatch(/128/);
   });
 });
 

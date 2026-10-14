@@ -97,3 +97,4 @@ Artefactos actualizados:
 - **Impacto en riesgos:** aumenta levemente R13 (sobrecarga de alcance); mitigación: la CI (S1-06) se completa antes de cerrar el Release 1.
 - **Decisión:** aprobado por el PO el 14/10/2026 (pedido directo en la sesión de trabajo).
 - **Artefactos actualizados:** [sprint-02.md](sprints/sprint-02.md), [decisiones-tecnicas.md](../02-arquitectura/decisiones-tecnicas.md) (ADR-05, ADR-10, ADR-11), [requisitos.md](../01-alcance-requisitos/requisitos.md), tablero Trello.
+- **Ampliación (14/10/2026, decisión del PO):** el login usa **nombre de usuario** (campo `username`) en lugar del correo, y la política de contraseñas se simplifica a mínimo 5 caracteres para facilitar la demostración (`admin` / `12345`). Se mantiene el hash scrypt (RNF-01 sigue cumpliéndose). Riesgo aceptado y documentado en ADR-10.

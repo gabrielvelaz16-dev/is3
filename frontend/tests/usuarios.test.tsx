@@ -28,6 +28,7 @@ describe('Administración de usuarios (RF-03, S2-05)', () => {
 
     const filas = await within(tabla).findAllByRole('row');
     expect(filas).toHaveLength(3);
+    expect(within(filas[1]!).getByText('admin')).toBeInTheDocument();
     expect(within(filas[1]!).getByText('(usted)')).toBeInTheDocument();
     expect(within(filas[2]!).getByText('Funcionario / Responsable')).toBeInTheDocument();
     expect(within(filas[2]!).getByText('Inactivo')).toBeInTheDocument();
@@ -50,16 +51,17 @@ describe('Administración de usuarios (RF-03, S2-05)', () => {
     await user.click(await screen.findByRole('button', { name: 'Nuevo usuario' }));
     const dialogo = screen.getByRole('dialog', { name: 'Nuevo usuario' });
     await user.type(within(dialogo).getByLabelText('Nombre completo'), 'Ana Pérez');
+    await user.type(within(dialogo).getByLabelText('Nombre de usuario'), 'ana.perez');
     await user.type(within(dialogo).getByLabelText('Correo'), 'ana@institucion.test');
     await within(dialogo).findByRole('option', { name: 'Mesa de entradas' });
     await user.selectOptions(within(dialogo).getByLabelText('Rol'), 'Mesa de entradas');
     await user.selectOptions(within(dialogo).getByLabelText('Dependencia'), 'Mesa de Entradas');
-    await user.type(within(dialogo).getByLabelText('Contraseña inicial'), 'Segura12345');
+    await user.type(within(dialogo).getByLabelText('Contraseña inicial'), '12345');
     await user.click(within(dialogo).getByRole('button', { name: 'Guardar' }));
 
-    expect(await screen.findByRole('status')).toHaveTextContent('Usuario ana@institucion.test creado.');
+    expect(await screen.findByRole('status')).toHaveTextContent('Usuario ana.perez creado.');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(enviado).toEqual({ email: 'ana@institucion.test', nombre: 'Ana Pérez', password: 'Segura12345', rolId: 2, dependenciaId: 2 });
+    expect(enviado).toEqual({ username: 'ana.perez', email: 'ana@institucion.test', nombre: 'Ana Pérez', password: '12345', rolId: 2, dependenciaId: 2 });
   });
 
   it('muestra los errores de validación del servidor junto a cada campo', async () => {
@@ -74,7 +76,7 @@ describe('Administración de usuarios (RF-03, S2-05)', () => {
               code: 'VALIDATION_ERROR',
               message: 'Los datos enviados no son válidos',
               requestId: 'r',
-              details: [{ field: 'password', message: 'La contraseña debe combinar letras y números' }],
+              details: [{ field: 'password', message: 'La contraseña debe tener al menos 5 caracteres' }],
             },
           },
         }),
@@ -84,7 +86,7 @@ describe('Administración de usuarios (RF-03, S2-05)', () => {
     await user.click(await screen.findByRole('button', { name: 'Nuevo usuario' }));
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Guardar' }));
 
-    expect(await screen.findByText('La contraseña debe combinar letras y números')).toBeInTheDocument();
+    expect(await screen.findByText('La contraseña debe tener al menos 5 caracteres')).toBeInTheDocument();
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
@@ -98,6 +100,7 @@ describe('Administración de usuarios (RF-03, S2-05)', () => {
     expect(within(dialogo).getByLabelText('Rol')).toBeDisabled();
     expect(within(dialogo).getByLabelText('Usuario activo')).toBeDisabled();
     expect(within(dialogo).getByLabelText('Correo')).toBeDisabled();
+    expect(within(dialogo).getByLabelText('Nombre de usuario')).toBeDisabled();
   });
 
   it('al desactivar a otro usuario envía solo el cambio realizado', async () => {
@@ -118,7 +121,7 @@ describe('Administración de usuarios (RF-03, S2-05)', () => {
     await user.click(within(dialogo).getByLabelText('Usuario activo'));
     await user.click(within(dialogo).getByRole('button', { name: 'Guardar' }));
 
-    expect(await screen.findByRole('status')).toHaveTextContent(`Usuario ${FUNCIONARIO.email} actualizado.`);
+    expect(await screen.findByRole('status')).toHaveTextContent(`Usuario ${FUNCIONARIO.username} actualizado.`);
     expect(enviado).toEqual({ activo: false });
   });
 });

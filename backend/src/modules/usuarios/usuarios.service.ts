@@ -6,6 +6,7 @@ import type { AuditoriaService, Contexto } from '../auditoria/auditoria.service.
 import { aPublico, type UsuarioPublico } from './usuario.dto.js';
 
 export interface CrearUsuarioInput {
+  username: string;
   email: string;
   nombre: string;
   password: string;
@@ -55,13 +56,16 @@ export class UsuariosService {
   }
 
   async crear(input: CrearUsuarioInput, ctx: Contexto): Promise<UsuarioPublico> {
+    const username = input.username.trim().toLowerCase();
     const email = input.email.trim().toLowerCase();
     this.validarPassword(input.password);
+    if (await this.usuarios.findByUsername(username)) throw new ConflictError('Ya existe un usuario con ese nombre de usuario');
     if (await this.usuarios.findByEmail(email)) throw new ConflictError('Ya existe un usuario con ese correo');
     const rol = await this.rolExistente(input.rolId);
     await this.dependenciaExistente(input.dependenciaId);
 
     const creado = await this.usuarios.create({
+      username,
       email,
       nombre: input.nombre.trim(),
       passwordHash: await hashPassword(input.password),
@@ -73,7 +77,7 @@ export class UsuariosService {
       resultado: 'EXITO',
       entidad: 'Usuario',
       entidadId: String(creado.id),
-      detalle: { email, rol: rol.clave, dependenciaId: input.dependenciaId },
+      detalle: { username, email, rol: rol.clave, dependenciaId: input.dependenciaId },
     });
     return aPublico(creado);
   }

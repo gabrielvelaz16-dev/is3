@@ -18,13 +18,13 @@ describe('Inicio y cierre de sesión (RF-01, S2-02)', () => {
       handlers: { 'POST /api/auth/login': () => ({ body: { data: { usuario: ADMIN } } }) },
     });
 
-    await user.type(await screen.findByLabelText('Correo'), 'admin@institucion.test');
-    await user.type(screen.getByLabelText('Contraseña'), 'Admin12345');
+    await user.type(await screen.findByLabelText('Usuario'), 'admin');
+    await user.type(screen.getByLabelText('Contraseña'), '12345');
     await user.click(screen.getByRole('button', { name: 'Ingresar' }));
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Expedientes' })).toBeInTheDocument();
     const login = fetchMock.mock.calls.find(([url]) => url === '/api/auth/login');
-    expect(JSON.parse(String(login?.[1]?.body))).toEqual({ email: 'admin@institucion.test', password: 'Admin12345' });
+    expect(JSON.parse(String(login?.[1]?.body))).toEqual({ usuario: 'admin', password: '12345' });
   });
 
   it('con credenciales incorrectas muestra el mensaje del servidor y limpia la contraseña', async () => {
@@ -32,15 +32,15 @@ describe('Inicio y cierre de sesión (RF-01, S2-02)', () => {
     renderApp('/', {
       usuario: null,
       handlers: {
-        'POST /api/auth/login': () => ({ status: 401, body: { error: { code: 'UNAUTHORIZED', message: 'Correo o contraseña incorrectos', requestId: 'r1' } } }),
+        'POST /api/auth/login': () => ({ status: 401, body: { error: { code: 'UNAUTHORIZED', message: 'Usuario o contraseña incorrectos', requestId: 'r1' } } }),
       },
     });
 
-    await user.type(await screen.findByLabelText('Correo'), 'admin@institucion.test');
+    await user.type(await screen.findByLabelText('Usuario'), 'admin');
     await user.type(screen.getByLabelText('Contraseña'), 'mala');
     await user.click(screen.getByRole('button', { name: 'Ingresar' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Correo o contraseña incorrectos');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Usuario o contraseña incorrectos');
     expect(screen.getByLabelText('Contraseña')).toHaveValue('');
   });
 
@@ -52,8 +52,8 @@ describe('Inicio y cierre de sesión (RF-01, S2-02)', () => {
       throw new TypeError('Failed to fetch');
     }) as typeof fetch;
 
-    await user.type(await screen.findByLabelText('Correo'), 'admin@institucion.test');
-    await user.type(screen.getByLabelText('Contraseña'), 'Admin12345');
+    await user.type(await screen.findByLabelText('Usuario'), 'admin');
+    await user.type(screen.getByLabelText('Contraseña'), '12345');
     await user.click(screen.getByRole('button', { name: 'Ingresar' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo conectar con el servidor');

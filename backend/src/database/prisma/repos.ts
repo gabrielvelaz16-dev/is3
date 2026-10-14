@@ -27,6 +27,7 @@ function aRol(rol: RolConPermisos): RolRecord {
 function aUsuario(u: UsuarioCompleto): UsuarioRecord {
   return {
     id: u.id,
+    username: u.username,
     email: u.email,
     nombre: u.nombre,
     passwordHash: u.passwordHash,
@@ -42,6 +43,10 @@ function aUsuario(u: UsuarioCompleto): UsuarioRecord {
 export function createPrismaRepos(prisma: PrismaClient): Repos {
   return {
     usuarios: {
+      async findByUsername(username) {
+        const u = await prisma.usuario.findUnique({ where: { username }, include: incluirUsuario });
+        return u ? aUsuario(u) : null;
+      },
       async findByEmail(email) {
         const u = await prisma.usuario.findUnique({ where: { email }, include: incluirUsuario });
         return u ? aUsuario(u) : null;
@@ -52,7 +57,13 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
       },
       async list({ q, skip, take }) {
         const where: Prisma.UsuarioWhereInput = q
-          ? { OR: [{ nombre: { contains: q, mode: 'insensitive' } }, { email: { contains: q, mode: 'insensitive' } }] }
+          ? {
+              OR: [
+                { nombre: { contains: q, mode: 'insensitive' } },
+                { username: { contains: q, mode: 'insensitive' } },
+                { email: { contains: q, mode: 'insensitive' } },
+              ],
+            }
           : {};
         const [items, total] = await prisma.$transaction([
           prisma.usuario.findMany({ where, include: incluirUsuario, orderBy: { nombre: 'asc' }, skip, take }),

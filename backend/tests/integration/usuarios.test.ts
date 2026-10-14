@@ -6,7 +6,7 @@ type Entorno = Awaited<ReturnType<typeof crearEntorno>>;
 
 async function comoAdmin(e: Entorno) {
   const agente = request.agent(e.app);
-  await agente.post('/api/auth/login').send({ email: 'admin@institucion.test', password: PASSWORD_ADMIN });
+  await agente.post('/api/auth/login').send({ usuario: 'admin', password: PASSWORD_ADMIN });
   return agente;
 }
 
@@ -25,7 +25,7 @@ describe('Gestión de usuarios y roles (RF-02, RF-03, S2-03, S2-05)', () => {
 
     it('un funcionario (sin permiso usuarios.gestionar) recibe 403 en todas las rutas de usuarios', async () => {
       const agente = request.agent(e.app);
-      await agente.post('/api/auth/login').send({ email: 'funcionario@institucion.test', password: PASSWORD_USUARIO });
+      await agente.post('/api/auth/login').send({ usuario: 'funcionario', password: PASSWORD_USUARIO });
 
       for (const [metodo, ruta] of [['get', '/api/usuarios'], ['post', '/api/usuarios'], ['patch', '/api/usuarios/1'], ['get', '/api/roles']] as const) {
         const res = await agente[metodo](ruta).send({});
@@ -49,6 +49,7 @@ describe('Gestión de usuarios y roles (RF-02, RF-03, S2-03, S2-05)', () => {
     it('el administrador crea un usuario con rol y dependencia, y queda auditado', async () => {
       const admin = await comoAdmin(e);
       const res = await admin.post('/api/usuarios').send({
+        username: 'Ana.Perez',
         email: 'Nuevo@Institucion.test',
         nombre: 'Ana Pérez',
         password: 'Segura12345',
@@ -57,31 +58,36 @@ describe('Gestión de usuarios y roles (RF-02, RF-03, S2-03, S2-05)', () => {
       });
 
       expect(res.status).toBe(201);
-      expect(res.body.data).toMatchObject({ email: 'nuevo@institucion.test', rol: { clave: 'MESA_ENTRADAS' }, dependencia: { codigo: 'MESA' }, activo: true });
+      expect(res.body.data).toMatchObject({ username: 'ana.perez', email: 'nuevo@institucion.test', rol: { clave: 'MESA_ENTRADAS' }, dependencia: { codigo: 'MESA' }, activo: true });
       expect(res.body.data.passwordHash).toBeUndefined();
       expect(e.auditoria.at(-1)).toMatchObject({ accion: 'USUARIO_CREADO', usuarioId: e.admin.id, entidadId: String(res.body.data.id) });
       expect(JSON.stringify(e.auditoria)).not.toContain('Segura12345');
 
       // El usuario nuevo puede iniciar sesión con su rol.
-      const login = await request(e.app).post('/api/auth/login').send({ email: 'nuevo@institucion.test', password: 'Segura12345' });
+      const login = await request(e.app).post('/api/auth/login').send({ usuario: 'ana.perez', password: 'Segura12345' });
       expect(login.body.data.usuario.permisos).toContain('expedientes.crear');
       expect(login.body.data.usuario.permisos).not.toContain('usuarios.gestionar');
     });
 
-    it('rechaza un correo repetido (409)', async () => {
+    it('rechaza un nombre de usuario o un correo repetido (409)', async () => {
       const admin = await comoAdmin(e);
-      const res = await admin.post('/api/usuarios').send({ email: 'funcionario@institucion.test', nombre: 'Otro', password: 'Segura12345', rolId: 1, dependenciaId: 1 });
+      const base = { nombre: 'Otro Usuario', password: '12345', rolId: 1, dependenciaId: 1 };
+      const usuarioRepetido = await admin.post('/api/usuarios').send({ ...base, username: 'funcionario', email: 'otro@institucion.test' });
+      const correoRepetido = await admin.post('/api/usuarios').send({ ...base, username: 'otro', email: 'funcionario@institucion.test' });
 
-      expect(res.status).toBe(409);
+      expect(usuarioRepetido.status).toBe(409);
+      expect(usuarioRepetido.body.error.message).toMatch(/nombre de usuario/);
+      expect(correoRepetido.status).toBe(409);
     });
 
-    it('valida datos: correo, contraseña débil, rol o dependencia inexistente o inactiva (400)', async () => {
+    it('valida datos: usuario, correo, contraseña corta, rol o dependencia inexistente o inactiva (400)', async () => {
       const admin = await comoAdmin(e);
-      const base = { email: 'x@institucion.test', nombre: 'Usuario X', password: 'Segura12345', rolId: 1, dependenciaId: 1 };
+      const base = { username: 'usuariox', email: 'x@institucion.test', nombre: 'Usuario X', password: '12345', rolId: 1, dependenciaId: 1 };
       const casos: [Record<string, unknown>, string][] = [
+        [{ ...base, username: 'ab' }, 'username'],
+        [{ ...base, username: 'con espacios' }, 'username'],
         [{ ...base, email: 'no-es-correo' }, 'email'],
-        [{ ...base, password: 'corta1' }, 'password'],
-        [{ ...base, password: 'sololetrasmuchas' }, 'password'],
+        [{ ...base, password: '1234' }, 'password'],
         [{ ...base, rolId: 999 }, 'rolId'],
         [{ ...base, dependenciaId: 3 }, 'dependenciaId'],
         [{ ...base, nombre: 'A' }, 'nombre'],
@@ -109,7 +115,7 @@ describe('Gestión de usuarios y roles (RF-02, RF-03, S2-03, S2-05)', () => {
     it('cambia el rol de un usuario y el cambio se aplica en su próxima petición', async () => {
       const admin = await comoAdmin(e);
       const funcionario = request.agent(e.app);
-      await funcionario.post('/api/auth/login').send({ email: 'funcionario@institucion.test', password: PASSWORD_USUARIO });
+      await funcionario.post('/api/auth/login').send({ usuario: 'funcionario', password: PASSWORD_USUARIO });
       expect((await funcionario.get('/api/usuarios')).status).toBe(403);
 
       const res = await admin.patch(`/api/usuarios/${e.funcionario.id}`).send({ rolId: e.rolId('ADMINISTRADOR') });
@@ -122,7 +128,7 @@ describe('Gestión de usuarios y roles (RF-02, RF-03, S2-03, S2-05)', () => {
     it('al desactivar un usuario se cierran sus sesiones', async () => {
       const admin = await comoAdmin(e);
       const funcionario = request.agent(e.app);
-      await funcionario.post('/api/auth/login').send({ email: 'funcionario@institucion.test', password: PASSWORD_USUARIO });
+      await funcionario.post('/api/auth/login').send({ usuario: 'funcionario', password: PASSWORD_USUARIO });
 
       await admin.patch(`/api/usuarios/${e.funcionario.id}`).send({ activo: false });
 
@@ -131,10 +137,10 @@ describe('Gestión de usuarios y roles (RF-02, RF-03, S2-03, S2-05)', () => {
 
     it('al cambiar la contraseña se cierran las sesiones y la nueva contraseña funciona', async () => {
       const admin = await comoAdmin(e);
-      await admin.patch(`/api/usuarios/${e.funcionario.id}`).send({ password: 'NuevaClave2026' });
+      await admin.patch(`/api/usuarios/${e.funcionario.id}`).send({ password: '54321' });
 
-      const vieja = await request(e.app).post('/api/auth/login').send({ email: 'funcionario@institucion.test', password: PASSWORD_USUARIO });
-      const nueva = await request(e.app).post('/api/auth/login').send({ email: 'funcionario@institucion.test', password: 'NuevaClave2026' });
+      const vieja = await request(e.app).post('/api/auth/login').send({ usuario: 'funcionario', password: PASSWORD_USUARIO });
+      const nueva = await request(e.app).post('/api/auth/login').send({ usuario: 'funcionario', password: '54321' });
       expect(vieja.status).toBe(401);
       expect(nueva.status).toBe(200);
       expect(e.auditoria.find((a) => a.accion === 'USUARIO_MODIFICADO')?.detalle).toEqual({ passwordCambiada: true });
@@ -150,7 +156,7 @@ describe('Gestión de usuarios y roles (RF-02, RF-03, S2-03, S2-05)', () => {
     it('un administrador puede desactivar a otro, pero no quitarse su propio rol', async () => {
       const otroAdmin = await e.agregarUsuario('admin2@institucion.test', 'Admin2Clave99', 'ADMINISTRADOR');
       const agente = request.agent(e.app);
-      await agente.post('/api/auth/login').send({ email: 'admin2@institucion.test', password: 'Admin2Clave99' });
+      await agente.post('/api/auth/login').send({ usuario: 'admin2', password: 'Admin2Clave99' });
 
       // admin2 desactiva al admin original: queda admin2 activo, se permite.
       expect((await agente.patch(`/api/usuarios/${e.admin.id}`).send({ activo: false })).status).toBe(200);

@@ -6,11 +6,16 @@ const nombre = z.string().trim().min(3, 'Ingrese al menos 3 caracteres').max(120
 const id = z.coerce.number().int().positive();
 
 export const loginSchema = z.object({
-  email: z.string().trim().min(1, 'Ingrese su correo').max(160),
+  usuario: z.string().trim().min(1, 'Ingrese su usuario').max(160),
   password: z.string().min(1, 'Ingrese su contraseña').max(128),
 });
 
 export const crearUsuarioSchema = z.object({
+  username: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(/^[a-z0-9._-]{3,30}$/, 'De 3 a 30 caracteres: letras, números, punto, guion o guion bajo'),
   email: z.email('Correo inválido').max(160),
   nombre,
   password: z.string().max(128),

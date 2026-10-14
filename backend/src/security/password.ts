@@ -41,12 +41,14 @@ export async function verifyPassword(password: string, stored: string): Promise<
 /** Hash válido que no corresponde a ninguna contraseña: iguala el tiempo de respuesta cuando el usuario no existe. */
 export const HASH_FICTICIO = 'scrypt$32768$8$1$AAAAAAAAAAAAAAAAAAAAAA==$' + Buffer.alloc(64).toString('base64');
 
-/** Política mínima: 10 caracteres, al menos una letra y un número. */
+/**
+ * Política simple por decisión del PO (prototipo académico local, ADR-10):
+ * mínimo 5 caracteres. El hash sigue siendo seguro (scrypt).
+ */
+export const PASSWORD_MIN = 5;
+
 export function validarPoliticaPassword(password: string): string | null {
-  if (password.length < 10) return 'La contraseña debe tener al menos 10 caracteres';
+  if (password.length < PASSWORD_MIN) return `La contraseña debe tener al menos ${PASSWORD_MIN} caracteres`;
   if (password.length > 128) return 'La contraseña no puede superar 128 caracteres';
-  if (!/[A-Za-zÁÉÍÓÚáéíóúÑñ]/.test(password) || !/\d/.test(password)) {
-    return 'La contraseña debe combinar letras y números';
-  }
   return null;
 }

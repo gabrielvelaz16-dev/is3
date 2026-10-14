@@ -3,6 +3,7 @@ import type { UsuarioRecord } from '../../database/repositories.js';
 /** Datos de usuario que salen de la API: nunca incluyen el hash de la contraseña. */
 export interface UsuarioPublico {
   id: number;
+  username: string;
   email: string;
   nombre: string;
   activo: boolean;
@@ -19,6 +20,7 @@ export interface UsuarioSesion extends UsuarioPublico {
 export function aPublico(u: UsuarioRecord): UsuarioPublico {
   return {
     id: u.id,
+    username: u.username,
     email: u.email,
     nombre: u.nombre,
     activo: u.activo,

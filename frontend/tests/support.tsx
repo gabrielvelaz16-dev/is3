@@ -36,6 +36,7 @@ const base = {
 export const ADMIN: UsuarioSesion = {
   ...base,
   id: 1,
+  username: 'admin',
   email: 'admin@institucion.test',
   nombre: 'Administrador del sistema',
   rol: { id: 1, clave: 'ADMINISTRADOR', nombre: 'Administrador' },
@@ -45,6 +46,7 @@ export const ADMIN: UsuarioSesion = {
 export const FUNCIONARIO: UsuarioSesion = {
   ...base,
   id: 2,
+  username: 'funcionario',
   email: 'funcionario@institucion.test',
   nombre: 'Funcionaria Prueba',
   rol: { id: 3, clave: 'FUNCIONARIO', nombre: 'Funcionario / Responsable' },

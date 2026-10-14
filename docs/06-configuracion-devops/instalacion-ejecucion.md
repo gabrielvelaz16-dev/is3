@@ -90,15 +90,19 @@ npm install
 npm run dev
 ```
 
-Verificación esperada: `GET /api/health` responde 200 y el frontend muestra el estado de la API (criterio de S1-03). Abrir http://localhost:5173 e iniciar sesión con `ADMIN_EMAIL` y `ADMIN_PASSWORD` del `.env`.
+Verificación esperada: `GET /api/health` responde 200 y el frontend muestra el estado de la API (criterio de S1-03). Abrir http://localhost:5173 e iniciar sesión con usuario `admin` y contraseña `12345`.
 
-**Administrador inicial (Sprint 2):** el seed crea el usuario de `ADMIN_EMAIL` con la contraseña de `ADMIN_PASSWORD` solo si no existe. Para generar una contraseña aleatoria y agregarla al `.env` en Windows:
+**Usuarios iniciales (Sprint 2):** `npm run db:seed` crea estos usuarios si no existen (prototipo académico, contraseñas simples por decisión del PO, ADR-10):
 
-```powershell
-$pw = -join ((48..57)+(65..90)+(97..122) | Get-Random -Count 16 | ForEach-Object {[char]$_}) + '7a'
-Add-Content .env "`nADMIN_EMAIL=admin@institucion.test`nADMIN_NOMBRE=Administrador del sistema`nADMIN_PASSWORD=$pw`nSESSION_HOURS=8`nCOOKIE_SECURE=false"
-Write-Host "Contraseña del administrador: $pw  (guárdela; no se vuelve a mostrar)"
-``` Formato de respuestas y errores: [contrato de la API](../02-arquitectura/contrato-api.md).
+| Usuario | Contraseña | Rol | Dependencia |
+|---|---|---|---|
+| `admin` | `12345` | Administrador (todos los permisos) | Administración General |
+| `mesa` | `12345` | Mesa de entradas | Mesa de Entradas |
+| `funcionario` | `12345` | Funcionario / Responsable | Asesoría Jurídica |
+| `jefe` | `12345` | Jefe de dependencia | Asesoría Jurídica |
+| `auditor` | `12345` | Auditor | Administración General |
+
+El usuario y la contraseña del administrador se pueden cambiar con `ADMIN_USERNAME` y `ADMIN_PASSWORD` en el `.env` antes del primer seed. Los de prueba se omiten con `SEED_USUARIOS_DEMO=false`. Formato de respuestas y errores: [contrato de la API](../02-arquitectura/contrato-api.md).
 
 Scripts del backend:
 

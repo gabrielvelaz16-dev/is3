@@ -87,7 +87,7 @@ export function UsuariosPage() {
         <input
           id="buscar"
           type="search"
-          placeholder="Buscar por nombre o correo"
+          placeholder="Buscar por nombre, usuario o correo"
           value={busqueda}
           onChange={(e) => {
             setBusqueda(e.target.value);
@@ -103,6 +103,7 @@ export function UsuariosPage() {
           <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
             <tr>
               <th scope="col" className="px-4 py-3">Nombre</th>
+              <th scope="col" className="px-4 py-3">Usuario</th>
               <th scope="col" className="px-4 py-3">Correo</th>
               <th scope="col" className="px-4 py-3">Rol</th>
               <th scope="col" className="px-4 py-3">Dependencia</th>
@@ -118,6 +119,7 @@ export function UsuariosPage() {
                   {u.nombre}
                   {u.id === yo?.id && <span className="ml-2 text-xs text-slate-500">(usted)</span>}
                 </td>
+                <td className="px-4 py-3 font-mono text-slate-700">{u.username}</td>
                 <td className="px-4 py-3 text-slate-600">{u.email}</td>
                 <td className="px-4 py-3">{u.rol.nombre}</td>
                 <td className="px-4 py-3">{u.dependencia.nombre}</td>
@@ -144,7 +146,7 @@ export function UsuariosPage() {
             ))}
             {usuarios.length === 0 && !error && (
               <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-slate-500">
+                <td colSpan={8} className="px-4 py-6 text-center text-slate-500">
                   No hay usuarios que coincidan con la búsqueda.
                 </td>
               </tr>
@@ -193,6 +195,7 @@ interface FormProps {
 function FormularioUsuario({ usuario, esUnoMismo, roles, dependencias, onCancelar, onGuardado }: FormProps) {
   const nuevo = usuario === null;
   const [nombre, setNombre] = useState(usuario?.nombre ?? '');
+  const [username, setUsername] = useState(usuario?.username ?? '');
   const [email, setEmail] = useState(usuario?.email ?? '');
   const [rolId, setRolId] = useState(usuario?.rol.id ?? 0);
   const [dependenciaId, setDependenciaId] = useState(usuario?.dependencia.id ?? 0);
@@ -208,8 +211,8 @@ function FormularioUsuario({ usuario, esUnoMismo, roles, dependencias, onCancela
     setGuardando(true);
     try {
       if (nuevo) {
-        await usuariosApi.crear({ email, nombre, password, rolId, dependenciaId });
-        onGuardado(`Usuario ${email.trim().toLowerCase()} creado.`);
+        await usuariosApi.crear({ username, email, nombre, password, rolId, dependenciaId });
+        onGuardado(`Usuario ${username.trim().toLowerCase()} creado.`);
       } else {
         const cambios = {
           ...(nombre !== usuario.nombre && { nombre }),
@@ -223,7 +226,7 @@ function FormularioUsuario({ usuario, esUnoMismo, roles, dependencias, onCancela
           return;
         }
         await usuariosApi.modificar(usuario.id, cambios);
-        onGuardado(`Usuario ${usuario.email} actualizado.`);
+        onGuardado(`Usuario ${usuario.username} actualizado.`);
       }
     } catch (err) {
       setError(err instanceof ApiError ? err : new ApiError(0, 'ERROR', 'No se pudo guardar'));
@@ -259,10 +262,17 @@ function FormularioUsuario({ usuario, esUnoMismo, roles, dependencias, onCancela
             {errorCampo('nombre')}
           </div>
 
-          <div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="f-username" className="block text-sm font-medium text-slate-700">Nombre de usuario</label>
+              <input id="f-username" value={username} onChange={(e) => setUsername(e.target.value)} className={inputClass} disabled={!nuevo} autoCapitalize="none" spellCheck={false} required />
+              {errorCampo('username')}
+            </div>
+            <div>
             <label htmlFor="f-email" className="block text-sm font-medium text-slate-700">Correo</label>
             <input id="f-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} disabled={!nuevo} required />
             {errorCampo('email')}
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -302,7 +312,7 @@ function FormularioUsuario({ usuario, esUnoMismo, roles, dependencias, onCancela
               className={inputClass}
               aria-describedby="ayuda-password"
             />
-            <p id="ayuda-password" className="mt-1 text-xs text-slate-500">Mínimo 10 caracteres, con letras y números.</p>
+            <p id="ayuda-password" className="mt-1 text-xs text-slate-500">Mínimo 5 caracteres.</p>
             {errorCampo('password')}
           </div>
 

@@ -32,7 +32,7 @@ erDiagram
 | **Rol** | id, clave, nombre, descripcion | `clave` única (p. ej. `ADMINISTRADOR`) |
 | **Permiso** | id, clave (p. ej. `expediente.crear`), descripcion | `clave` única |
 | **RolPermiso** | rolId, permisoId | PK compuesta |
-| **Usuario** | id, email, nombre, passwordHash, rolId, dependenciaId, activo, creadoEn | `email` único; FK a Rol y Dependencia; baja lógica con `activo` |
+| **Usuario** | id, username, email, nombre, passwordHash, rolId, dependenciaId, activo, ultimoAcceso, creadoEn | `username` y `email` únicos; FK a Rol y Dependencia; baja lógica con `activo` |
 | **Expediente** | id, numero, caratula, asunto, tipo, iniciador, estado, prioridad, dependenciaActualId, responsableId, creadoPorId, fechaVencimiento, creadoEn, actualizadoEn | `numero` único con formato `EXP-AAAA-NNNNNN`; `estado` enum |
 | **Documento** | id, expedienteId, nombreOriginal, nombreAlmacenado, tipoMime, tamanoBytes, hashSha256, subidoPorId, subidoEn | FK a Expediente; `tamanoBytes` ≤ límite; tipo en lista permitida |
 | **Actuacion** | id, expedienteId, tipo (actuación / observación), texto, autorId, fecha | FK; no se edita, se agrega otra |

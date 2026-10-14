@@ -10,7 +10,7 @@ export function LoginPage() {
   const location = useLocation();
   const destino = (location.state as { desde?: string } | null)?.desde ?? '/';
 
-  const [email, setEmail] = useState('');
+  const [usuario, setUsuario] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -22,7 +22,7 @@ export function LoginPage() {
     setError(null);
     setEnviando(true);
     try {
-      await login(email, password);
+      await login(usuario, password);
       navigate(destino, { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'No se pudo iniciar sesión');
@@ -53,16 +53,18 @@ export function LoginPage() {
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-              Correo
+            <label htmlFor="usuario" className="block text-sm font-medium text-slate-700">
+              Usuario
             </label>
             <input
-              id="email"
-              type="email"
+              id="usuario"
+              type="text"
               autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={usuario}
+              onChange={(e) => setUsuario(e.target.value)}
               className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-marca-500"
             />
           </div>
@@ -84,7 +86,7 @@ export function LoginPage() {
 
           <button
             type="submit"
-            disabled={enviando || !email || !password}
+            disabled={enviando || !usuario || !password}
             className="w-full rounded-md bg-marca-700 px-4 py-2 text-sm font-medium text-white hover:bg-marca-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {enviando ? 'Ingresando…' : 'Ingresar'}

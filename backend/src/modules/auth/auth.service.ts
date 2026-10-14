@@ -5,7 +5,7 @@ import { AppError, UnauthorizedError } from '../../shared/errors.js';
 import type { AuditoriaService, Contexto } from '../auditoria/auditoria.service.js';
 import { aSesion, type UsuarioSesion } from '../usuarios/usuario.dto.js';
 
-const MENSAJE_CREDENCIALES = 'Correo o contraseña incorrectos';
+const MENSAJE_CREDENCIALES = 'Usuario o contraseña incorrectos';
 const MAX_INTENTOS = 5;
 const BLOQUEO_MS = 15 * 60 * 1000;
 
@@ -32,27 +32,28 @@ export class AuthService {
     this.now = opciones.now ?? (() => new Date());
   }
 
+  /** `identificador` es el nombre de usuario (o el correo). */
   async login(
-    emailIngresado: string,
+    identificadorIngresado: string,
     password: string,
     ctx: Contexto & { userAgent?: string },
   ): Promise<{ usuario: UsuarioSesion; token: string; expiraEn: Date }> {
-    const email = emailIngresado.trim().toLowerCase();
-    this.verificarBloqueo(email);
+    const identificador = identificadorIngresado.trim().toLowerCase();
+    this.verificarBloqueo(identificador);
 
-    const usuario = await this.identity.authenticate(email, password);
+    const usuario = await this.identity.authenticate(identificador, password);
     if (!usuario || !usuario.activo) {
-      this.registrarFallo(email);
+      this.registrarFallo(identificador);
       await this.auditoria.registrar(ctx, {
         usuarioId: usuario?.id ?? null,
         accion: 'LOGIN',
         resultado: 'FALLO',
-        detalle: { email, motivo: usuario ? 'usuario inactivo' : 'credenciales inválidas', proveedor: this.identity.nombre },
+        detalle: { usuario: identificador, motivo: usuario ? 'usuario inactivo' : 'credenciales inválidas', proveedor: this.identity.nombre },
       });
       throw new UnauthorizedError(MENSAJE_CREDENCIALES);
     }
 
-    this.intentos.delete(email);
+    this.intentos.delete(identificador);
     const token = nuevoToken();
     const expiraEn = new Date(this.now().getTime() + this.opciones.sesionHoras * 3600_000);
     await this.sesiones.create({ id: hashToken(token), usuarioId: usuario.id, expiraEn, ip: ctx.ip, userAgent: ctx.userAgent });
