@@ -2,6 +2,7 @@ import type { SesionesRepo, UsuariosRepo } from '../../database/repositories.js'
 import type { IdentityProvider } from '../../integrations/identity/identity-provider.js';
 import { hashToken, nuevoToken } from '../../security/session-token.js';
 import { AppError, UnauthorizedError } from '../../shared/errors.js';
+import { logger } from '../../shared/logger.js';
 import type { AuditoriaService, Contexto } from '../auditoria/auditoria.service.js';
 import { aSesion, type UsuarioSesion } from '../usuarios/usuario.dto.js';
 
@@ -44,11 +45,14 @@ export class AuthService {
     const usuario = await this.identity.authenticate(identificador, password);
     if (!usuario || !usuario.activo) {
       this.registrarFallo(identificador);
+      // El motivo real va a la auditoría y al log del servidor; al usuario siempre el mismo mensaje.
+      const motivo = usuario ? 'usuario inactivo' : (await this.existe(identificador)) ? 'contraseña incorrecta' : 'usuario inexistente';
+      logger.warn('login fallido', { usuario: identificador, motivo, requestId: ctx.requestId });
       await this.auditoria.registrar(ctx, {
         usuarioId: usuario?.id ?? null,
         accion: 'LOGIN',
         resultado: 'FALLO',
-        detalle: { usuario: identificador, motivo: usuario ? 'usuario inactivo' : 'credenciales inválidas', proveedor: this.identity.nombre },
+        detalle: { usuario: identificador, motivo, proveedor: this.identity.nombre },
       });
       throw new UnauthorizedError(MENSAJE_CREDENCIALES);
     }
@@ -88,6 +92,11 @@ export class AuthService {
     if (ctx.usuarioId) {
       await this.auditoria.registrar(ctx, { accion: 'LOGOUT', resultado: 'EXITO' });
     }
+  }
+
+  private async existe(identificador: string): Promise<boolean> {
+    const u = identificador.includes('@') ? await this.usuarios.findByEmail(identificador) : await this.usuarios.findByUsername(identificador);
+    return u !== null;
   }
 
   private verificarBloqueo(email: string): void {

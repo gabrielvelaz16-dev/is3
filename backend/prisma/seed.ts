@@ -1,7 +1,8 @@
 /**
  * Datos iniciales (S2-06): dependencias ficticias, permisos, roles, el usuario
  * administrador y un usuario de prueba por rol. Es idempotente: se puede
- * ejecutar varias veces sin duplicar ni cambiar contraseñas existentes.
+ * ejecutar varias veces sin duplicar. Los usuarios iniciales se restablecen
+ * (contraseña, rol y estado) en cada ejecución.
  *
  * Por decisión del PO (prototipo académico local) el administrador por defecto
  * es admin / 12345; se puede cambiar con ADMIN_USERNAME y ADMIN_PASSWORD en .env.
@@ -81,28 +82,35 @@ async function main() {
           ]),
     ];
 
+    // Usuarios iniciales: si no existen se crean; si ya existen se RESTABLECEN
+    // (contraseña, rol, dependencia y estado activo). Así "npm run db:seed"
+    // siempre deja admin / 12345 funcionando, aunque se haya cambiado antes.
     for (const u of usuarios) {
-      const existente = await prisma.usuario.findUnique({ where: { username: u.username } });
-      if (existente) {
-        console.log(`Usuario "${u.username}" ya existe; no se modifica.`);
-        continue;
-      }
       const problema = validarPoliticaPassword(u.password);
       if (problema) throw new Error(`Contraseña de "${u.username}" inválida: ${problema}`);
-      await prisma.usuario.create({
+      const datos = {
+        nombre: u.nombre,
+        passwordHash: await hashPassword(u.password),
+        rolId: await rolId(u.rol),
+        dependenciaId: await depId(u.dependencia),
+        activo: true,
+      };
+      const existente = await prisma.usuario.findFirst({ where: { OR: [{ username: u.username }, { email: u.email }] } });
+      if (existente) {
+        await prisma.usuario.update({ where: { id: existente.id }, data: { ...datos, username: u.username, email: u.email } });
+        await prisma.sesion.deleteMany({ where: { usuarioId: existente.id } });
+      } else {
+        await prisma.usuario.create({ data: { ...datos, username: u.username, email: u.email } });
+      }
+      await prisma.auditoria.create({
         data: {
-          username: u.username,
-          email: u.email,
-          nombre: u.nombre,
-          passwordHash: await hashPassword(u.password),
-          rolId: await rolId(u.rol),
-          dependenciaId: await depId(u.dependencia),
+          accion: existente ? 'SEED_USUARIO_RESTABLECIDO' : 'SEED_USUARIO_CREADO',
+          resultado: 'EXITO',
+          entidad: 'Usuario',
+          detalle: { username: u.username, rol: u.rol },
         },
       });
-      await prisma.auditoria.create({
-        data: { accion: 'SEED_USUARIO_CREADO', resultado: 'EXITO', entidad: 'Usuario', detalle: { username: u.username, rol: u.rol } },
-      });
-      console.log(`Usuario creado: ${u.username} (${u.rol})`);
+      console.log(`${existente ? 'Usuario restablecido' : 'Usuario creado'}: ${u.username} / ${u.password === PASSWORD_DEMO ? PASSWORD_DEMO : '(contraseña del .env)'} (${u.rol})`);
     }
 
     console.log(`Seed completo: ${DEPENDENCIAS.length} dependencias, ${permisos.size} permisos, ${Object.keys(ROLES).length} roles.`);

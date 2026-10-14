@@ -102,7 +102,7 @@ Verificación esperada: `GET /api/health` responde 200 y el frontend muestra el 
 | `jefe` | `12345` | Jefe de dependencia | Asesoría Jurídica |
 | `auditor` | `12345` | Auditor | Administración General |
 
-El usuario y la contraseña del administrador se pueden cambiar con `ADMIN_USERNAME` y `ADMIN_PASSWORD` en el `.env` antes del primer seed. Los de prueba se omiten con `SEED_USUARIOS_DEMO=false`. Formato de respuestas y errores: [contrato de la API](../02-arquitectura/contrato-api.md).
+Cada ejecución del seed **restablece** estos usuarios (contraseña, rol, dependencia y estado activo), así que `npm run db:seed` sirve también para recuperar el acceso. El usuario y la contraseña del administrador se pueden cambiar con `ADMIN_USERNAME` y `ADMIN_PASSWORD` en el `.env`. Los de prueba se omiten con `SEED_USUARIOS_DEMO=false`. Formato de respuestas y errores: [contrato de la API](../02-arquitectura/contrato-api.md).
 
 Scripts del backend:
 
@@ -140,5 +140,8 @@ Se documentará con el script de `scripts/backup/` (S7-04).
 | `Falta POSTGRES_USER en .env` al levantar Docker | No se creó `.env` o no se pasó `--env-file .env`; ejecutar desde la raíz del repositorio. |
 | Se cambió la clave en `.env` y ya no conecta | La clave solo se aplica al crear el volumen. En desarrollo: `down -v` y volver a levantar (borra los datos). |
 | `npm` bloqueado en PowerShell | Ver la nota de la sección 1 (`Set-ExecutionPolicy`). |
+| "Usuario o contraseña incorrectos" con `admin` / `12345` | Ejecutar `npm run db:seed` en `backend`: restablece la contraseña de `admin` y de los usuarios de prueba a `12345`. La consola del backend muestra el motivo real (`usuario inexistente`, `contraseña incorrecta` o `usuario inactivo`). |
+| "Demasiados intentos fallidos" | El bloqueo dura 15 minutos y se guarda en memoria: reiniciar el backend (`Ctrl+C` y `npm run dev`) lo borra. |
+| Comando ejecutado en `C:\WINDOWS\system32` | Abrir PowerShell y hacer primero `cd "C:\Users\<usuario>\Documents\IS3"`. |
 | `failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine` | Docker Desktop no está abierto. Abrirlo, esperar *Engine running* y comprobar con `docker info`. |
 | `.env` editado con `Set-Content -Encoding utf8` en Windows PowerShell | Ese comando agrega una marca BOM al inicio. Quitarla con `[IO.File]::WriteAllLines("$PWD\.env", (Get-Content .env), (New-Object Text.UTF8Encoding $false))`. |
