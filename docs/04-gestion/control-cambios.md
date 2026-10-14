@@ -54,7 +54,7 @@ Artefactos actualizados:
 
 | ID | Título | Fecha | Estado | Decide |
 |---|---|---|---|---|
-| CR-00 | Unificación del backlog del TP con el alcance del prototipo | 13/10/2026 | Propuesto — pendiente de aprobación | Gerente / Comité |
+| CR-00 | Unificación del backlog del TP con el alcance del prototipo | 13/10/2026 | **Aprobado** 14/10/2026 | Gerente / Comité |
 | CR-01 | Evento de cambio: nuevo control documental + retraso del proveedor de identidad | — | Planificado para el piloto (R3) | Comité |
 
 ### CR-00 · Unificación del backlog del TP con el alcance del prototipo
@@ -71,7 +71,7 @@ Artefactos actualizados:
 - **Impacto en riesgos:** aumenta R09/R13 (estimación optimista). Mitigación: priorización MoSCoW y propuesta de mover S5-06 al Sprint 6.
 - **Releases:** usuarios y permisos pasan de R3 a R1 (prerequisito técnico); pases y notificaciones pasan de R2 a R3.
 - **Artefactos actualizados:** [backlog.md](backlog.md), [planificacion.md](planificacion.md), [estimacion-calendario.md](estimacion-calendario.md), [requisitos.md](../01-alcance-requisitos/requisitos.md), tablero Trello.
-- **Decisión:** pendiente.
+- **Decisión:** **aprobado** por el Gerente de Proyecto el 14/10/2026, en la revisión de la puerta G1 ([acta](../07-evidencias/fase0/acta-puerta-g1.md)). La propuesta de mover S5-06 al Sprint 6 se decide en la planificación del Sprint 5.
 
 ### CR-01 · Evento de cambio obligatorio del TP
 

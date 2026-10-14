@@ -6,7 +6,7 @@ Registro de evidencias verificables para la evaluación y la defensa. Cada evide
 
 ## Fase 0 — Preparación
 
-**Fecha de inicio:** 13/10/2026 · **Estado:** en curso
+**Fecha de inicio:** 13/10/2026 · **Fecha de cierre:** 14/10/2026 · **Estado:** cerrada (puerta G1 aprobada)
 
 | Evidencia | Unidad | Artefacto | Estado |
 |---|---|---|---|
@@ -16,11 +16,12 @@ Registro de evidencias verificables para la evaluación y la defensa. Cada evide
 | Documentación inicial (`docs/`) | 2–9 | Rama `feature/F0-documentacion-inicial` | Publicado en GitHub (14/10/2026) |
 | Configuración base: `README.md`, `.gitignore`, `.gitattributes`, `.env.example`, `.node-version` | 8 | Rama `feature/F0-05-07-entorno-y-base-de-datos` | Hecho |
 | Versiones de herramientas y librerías fijadas | 8 | [ADR-01](../02-arquitectura/decisiones-tecnicas.md#adr-01--stack-tecnológico) | Hecho |
-| Solicitud de cambio CR-00 | 2, 3 | [control-cambios.md](../04-gestion/control-cambios.md) | Pendiente de decisión |
+| Solicitud de cambio CR-00 | 2, 3 | [control-cambios.md](../04-gestion/control-cambios.md) | Aprobada 14/10/2026 |
 | Bitácora de IA iniciada | Transversal | [bitacora-ia.md](../bitacora-ia/bitacora-ia.md) | Hecho |
 | Verificación del entorno (F0-05): Git 2.55.0, Node 24.20.0, npm 11.19.0, Docker 29.8.2, Compose v5.6.0 | 8 | [instalacion-ejecucion.md](../06-configuracion-devops/instalacion-ejecucion.md) · salida de consola del 14/10/2026 | Hecho |
 | PostgreSQL en Docker (F0-07): contenedor `is3-postgres` iniciado y bases `expediente` y `expediente_test` creadas | 8 | `infra/docker/docker-compose.yml` · salida de `docker compose up/ps` y `psql \l` del 14/10/2026 | Hecho |
-| Puerta G1 aprobada | 7 | Acta de aprobación | Pendiente |
+| Pull requests de la Fase 0 hacia `develop` (#1 estructura, #2 documentación, #3 entorno y base de datos, #4 cierre) | 8 | https://github.com/gabrielvelaz16-dev/is3/pulls | Abiertos; integración por el revisor |
+| Puerta G1 aprobada | 7 | [Acta de la puerta G1](fase0/acta-puerta-g1.md) | Hecho 14/10/2026 |
 
 **Observaciones de la Fase 0:**
 - El repositorio es público y contiene PDFs con datos personales (riesgo R16). Pendiente de decisión del responsable.

@@ -24,12 +24,14 @@ Esta carpeta reúne los artefactos de gestión y técnicos del proyecto. Cada do
 | 04-gestion | [trazabilidad.md](04-gestion/trazabilidad.md) | 2–9 (Anexo A) | Vivo |
 | 04-gestion | [monitoreo-metricas.md](04-gestion/monitoreo-metricas.md) | 9 | Plan inicial |
 | 04-gestion | [historial-cambios.md](04-gestion/historial-cambios.md) | 8 | Vivo |
+| 04-gestion/sprints | [sprint-01.md](04-gestion/sprints/sprint-01.md) | 3 · 9 | Planificado |
 | 05-calidad-pruebas | [plan-calidad.md](05-calidad-pruebas/plan-calidad.md) | 7 | Plan inicial |
 | 05-calidad-pruebas | [plan-pruebas.md](05-calidad-pruebas/plan-pruebas.md) | 7 | Plan inicial |
 | 05-calidad-pruebas | [resultados-pruebas.md](05-calidad-pruebas/resultados-pruebas.md) | 7 | Sin ejecuciones todavía |
 | 06-configuracion-devops | [plan-configuracion.md](06-configuracion-devops/plan-configuracion.md) | 8 | Plan inicial |
 | 06-configuracion-devops | [instalacion-ejecucion.md](06-configuracion-devops/instalacion-ejecucion.md) | 8 | Se verifica en Sprint 1 |
 | 07-evidencias | [evidencias.md](07-evidencias/evidencias.md) | 2–9 | Vivo |
+| 07-evidencias/fase0 | [acta-puerta-g1.md](07-evidencias/fase0/acta-puerta-g1.md) | 7 | Aprobada |
 | bitacora-ia | [bitacora-ia.md](bitacora-ia/bitacora-ia.md) | Transversal (Anexo D) | Vivo |
 
 ## Convenciones
