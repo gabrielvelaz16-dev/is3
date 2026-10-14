@@ -30,6 +30,21 @@ Registro de evidencias verificables para la evaluación y la defensa. Cada evide
 - 14/10/2026: los commits de la Fase 0 hechos el 13/10 no llegaron a publicarse; se recuperaron del registro de la conversación anterior y se publicaron sin cambios de contenido.
 - Decisiones de versiones: TypeScript 6.0.3 en lugar de 7.0.2 (compatibilidad con `typescript-eslint`) y Prisma 7.10.0 en lugar de 8.0.0-rc.22 (versión candidata, no estable).
 
+## Sprints 1 y 2 — Estructura inicial · Base de datos y usuarios
+
+Fechas: 14/10/2026 · Release: R1 · Sprint 2 adelantado por CR-02
+
+| Evidencia | Unidad | Artefacto | Estado |
+|---|---|---|---|
+| Backend Express con `/api/health`, contrato de errores y logs | 8 | Rama `feature/S1-01-05-backend-base` | Hecho |
+| Frontend React con navegación responsive | 8 | Rama `feature/S1-02-04-frontend-base` | Hecho |
+| Login, roles, permisos, usuarios y auditoría | 3, 7 | Rama `feature/S2-login-usuarios` | Hecho |
+| Pipeline CI en verde (tipos, lint, pruebas, migraciones, seed, auditoría inmutable, build, `npm audit`) | 8 | [Ejecución de CI](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38596214215) | Hecho |
+| Resultados reales de pruebas: 70/70, cobertura backend 92,99 % | 7 | [resultados-pruebas.md](../05-calidad-pruebas/resultados-pruebas.md) | Hecho |
+| Control de cambios CR-02 | 2, 3 | [control-cambios.md](../04-gestion/control-cambios.md) | Aprobado |
+| Deuda técnica DT-05 (vulnerabilidades en la CLI de Prisma) | 7, 8 | [plan-calidad.md](../05-calidad-pruebas/plan-calidad.md) | Registrada |
+| Pull requests hacia `develop` | 8 | https://github.com/gabrielvelaz16-dev/is3/pulls | Pendiente de integración |
+
 ## Plantilla por sprint
 
 ```

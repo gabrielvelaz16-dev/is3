@@ -1,6 +1,6 @@
 # Sprint 1 — Estructura inicial
 
-**Release:** R1 · **Estado:** Planificado (14/10/2026) · **Inicio:** 14/10/2026 · **Fin:** a definir con la fecha de entrega
+**Release:** R1 · **Estado:** Terminado (14/10/2026) — pendiente la integración de los PR en `develop` · **Inicio:** 14/10/2026 · **Fin:** a definir con la fecha de entrega
 **Compromiso:** 6 ítems (3 SP de historia + 5 tareas técnicas sin SP) · **Velocidad de referencia:** 20 SP (se medirá la real)
 
 ## 1. Objetivo del sprint
@@ -93,4 +93,21 @@ Ver [DoD](../../05-calidad-pruebas/plan-calidad.md#4-definition-of-done-dod). En
 
 ## 8. Resultado del sprint
 
-*(Se completa al cerrar el sprint: implementado, resultados reales de pruebas, defectos, criterios cumplidos, retrospectiva y velocidad.)*
+**Cierre:** 14/10/2026.
+
+| Tarea | Criterios de aceptación | Resultado | Evidencia |
+|---|---|---|---|
+| S1-01 | Servidor arranca; `/api/health` 200 | ✅ | Ejecución manual en la PC (`status: ok`, base conectada) y pruebas de CI |
+| S1-02 | Frontend arranca; Tailwind aplicado | ✅ | `npm run dev` en la PC; build de CI |
+| S1-03 | Frontend muestra `/api/health`; contrato definido | ✅ | Tarjeta "Estado del sistema" en Inicio; [contrato-api.md](../../02-arquitectura/contrato-api.md) |
+| S1-04 | Menú y rutas; responsive | ✅ | Pruebas de navegación (frontend) |
+| S1-05 | Middleware de errores; sin detalles internos | ✅ | `errors.test.ts` (500 sin trazas ni credenciales) |
+| S1-06 | Workflow ejecutándose; badge en README | ✅ | [CI en verde](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38596214215); badge en el README |
+
+- **Pruebas (reales, CI):** backend 50/50, frontend 20/20; cobertura backend 92,99 % de líneas. Ver [resultados-pruebas.md](../../05-calidad-pruebas/resultados-pruebas.md).
+- **Defectos:** D-01 y D-02, detectados por la propia CI y corregidos el mismo día.
+- **Velocidad:** 3 SP de historias (S1-04) + 5 tareas técnicas. Se mide junto con el Sprint 2 por el solapamiento de CR-02.
+- **Retrospectiva:**
+  - *Funcionó:* la CI detectó problemas que no se veían en la PC; trabajar por ramas con el código de la tarjeta mantuvo la trazabilidad.
+  - *A mejorar:* las versiones nuevas (React Router 8, jest-dom 7) obligaron a verificar importaciones; los resultados de pruebas locales no siempre se registraron.
+  - *Acción:* la CI es la fuente oficial de resultados de pruebas (resumen publicado en cada ejecución).

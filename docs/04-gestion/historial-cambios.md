@@ -17,3 +17,4 @@ Registro cronológico de cambios relevantes en el proyecto, su documentación y 
 | 14/10/2026 | — | Desarrollo | Sprint 1: backend Express (health, contrato de errores, logs) y frontend React (navegación responsive). Ramas `feature/S1-01-05-backend-base` y `feature/S1-02-04-frontend-base`. | S1-01 a S1-05 |
 | 14/10/2026 | — | Cambio de alcance | CR-02 aprobado: se adelanta el Sprint 2 (login y usuarios). | CR-02 |
 | 14/10/2026 | — | Desarrollo | Sprint 2: modelo Prisma, sesiones en servidor, roles y permisos, gestión de usuarios, auditoría base, pantallas de login y usuarios. Rama `feature/S2-login-usuarios`. ADR-05, ADR-10, ADR-11. | S2-01 a S2-07 |
+| 14/10/2026 | — | Configuración | Pipeline CI en GitHub Actions en verde: backend 50/50 y frontend 20/20 pruebas, cobertura backend 92,99 %, migraciones y seed sobre PostgreSQL de CI. DT-05 registrada. | S1-06 |

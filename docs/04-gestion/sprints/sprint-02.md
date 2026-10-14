@@ -59,4 +59,19 @@ Fuente única: `backend/src/security/permissions.ts` (el seed lo copia a la base
 
 ## 7. Resultado del sprint
 
-*(Se completa al cerrar el sprint.)*
+**Cierre:** 14/10/2026 (adelantado por CR-02).
+
+| Tarea | SP | Resultado | Evidencia |
+|---|---|---|---|
+| S2-01 | — | ✅ Migraciones `init` y `auditoria_solo_insercion` aplicadas en la PC y en CI | `prisma migrate deploy` en [CI](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38596214215) |
+| S2-02 | 2 | ✅ Login por usuario (o correo), logout que invalida la sesión | `auth.test.ts`; ingreso con `admin` / `12345` en la PC |
+| S2-03 | 5 | ✅ 5 roles; 401/403 verificados en el servidor | `usuarios.test.ts` |
+| S2-04 | — | ✅ `IdentityProvider` con implementación local | `auth.test.ts` (login por usuario y por correo) |
+| S2-05 | 5 | ✅ Alta, edición, roles, desactivación, cambio de contraseña | `usuarios.test.ts` y pruebas de la pantalla |
+| S2-06 | — | ✅ Seed con `admin` y un usuario por rol (todos `12345`) | Seed en CI y en la PC |
+| S2-07 | — | ✅ Auditoría de login y usuarios; la base rechaza `DELETE` | Paso "Verificar que la auditoría rechaza modificaciones" en CI |
+
+- **SP terminados:** 12 de 12.
+- **Velocidad combinada Sprint 1 + 2:** 15 SP de historias (referencia del TP: 20 SP por sprint).
+- **Defecto D-03:** el seed no restablecía usuarios existentes; corregido.
+- **Pendiente para el cierre formal:** revisión e integración de los PR en `develop`.

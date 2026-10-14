@@ -11,8 +11,8 @@ Prototipo académico del trabajo práctico integrador de **Ingeniería de Softwa
 | Fase | Estado |
 |---|---|
 | Fase 0 — Preparación | Cerrada el 14/10/2026 ([acta G1](docs/07-evidencias/fase0/acta-puerta-g1.md)) |
-| Sprint 1 — Estructura inicial | En curso: backend y frontend base listos; falta CI (S1-06) ([plan](docs/04-gestion/sprints/sprint-01.md)) |
-| Sprint 2 — Base de datos y usuarios | En curso, adelantado por CR-02 ([plan](docs/04-gestion/sprints/sprint-02.md)) |
+| Sprint 1 — Estructura inicial | Terminado; PR pendientes de integrar ([resultado](docs/04-gestion/sprints/sprint-01.md)) |
+| Sprint 2 — Base de datos y usuarios | Terminado, adelantado por CR-02; PR pendientes de integrar ([resultado](docs/04-gestion/sprints/sprint-02.md)) |
 | Sprints 3 a 8 | Pendientes ([backlog](docs/04-gestion/backlog.md)) |
 
 ## Tecnologías y versiones
