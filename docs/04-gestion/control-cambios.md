@@ -56,6 +56,7 @@ Artefactos actualizados:
 |---|---|---|---|---|
 | CR-00 | Unificación del backlog del TP con el alcance del prototipo | 13/10/2026 | **Aprobado** 14/10/2026 | Gerente / Comité |
 | CR-01 | Evento de cambio: nuevo control documental + retraso del proveedor de identidad | — | Planificado para el piloto (R3) | Comité |
+| CR-02 | Adelantar login y gestión de usuarios (Sprint 2) en paralelo al cierre del Sprint 1; aclarar RNF-01 | 14/10/2026 | **Aprobado** 14/10/2026 | Product Owner / Gerente |
 
 ### CR-00 · Unificación del backlog del TP con el alcance del prototipo
 
@@ -84,3 +85,15 @@ Artefactos actualizados:
   4. Se actualizan riesgos, cronograma, plan de pruebas y estrategia de despliegue.
 - **Evidencia esperada:** esta solicitud completada, commits con código `CR-01`, tarjetas nuevas en Trello, nueva línea base etiquetada.
 - **Estado:** se ejecuta cuando el prototipo llegue al piloto (después del Sprint 5).
+
+### CR-02 · Adelantar login y gestión de usuarios
+
+- **Solicitante:** Product Owner (Carlos G. Velázquez F.) · **Fecha:** 14/10/2026
+- **Descripción:** construir ya el inicio de sesión con un usuario administrador con todos los permisos, la creación de usuarios y la asignación de roles (S2-01 a S2-05 y parte de S2-06/S2-07), sin esperar al cierre formal del Sprint 1. S1-06 (CI) queda para después.
+- **Motivo:** usuario (prioridad del PO): sin login no se pueden probar los permisos de ninguna función posterior.
+- **Impacto en alcance:** ninguno; son historias ya aprobadas del Release 1 (mismo release). Cambia el orden, no el contenido.
+- **Impacto en plazo y SP:** el Sprint 1 y el Sprint 2 se solapan; los SP del Sprint 2 (12 SP de historias) no cambian. La velocidad se medirá sobre ambos sprints juntos.
+- **Impacto en requisitos:** RNF-01 se aclara: se admite scrypt además de bcrypt y argon2 (ADR-10). El criterio medible no cambia.
+- **Impacto en riesgos:** aumenta levemente R13 (sobrecarga de alcance); mitigación: la CI (S1-06) se completa antes de cerrar el Release 1.
+- **Decisión:** aprobado por el PO el 14/10/2026 (pedido directo en la sesión de trabajo).
+- **Artefactos actualizados:** [sprint-02.md](sprints/sprint-02.md), [decisiones-tecnicas.md](../02-arquitectura/decisiones-tecnicas.md) (ADR-05, ADR-10, ADR-11), [requisitos.md](../01-alcance-requisitos/requisitos.md), tablero Trello.

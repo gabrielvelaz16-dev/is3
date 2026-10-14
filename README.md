@@ -9,8 +9,9 @@ Prototipo académico del trabajo práctico integrador de **Ingeniería de Softwa
 | Fase | Estado |
 |---|---|
 | Fase 0 — Preparación | Cerrada el 14/10/2026 ([acta G1](docs/07-evidencias/fase0/acta-puerta-g1.md)) |
-| Sprint 1 — Estructura inicial | En planificación ([plan](docs/04-gestion/sprints/sprint-01.md)) |
-| Sprints 2 a 8 | Pendientes ([backlog](docs/04-gestion/backlog.md)) |
+| Sprint 1 — Estructura inicial | En curso: backend y frontend base listos; falta CI (S1-06) ([plan](docs/04-gestion/sprints/sprint-01.md)) |
+| Sprint 2 — Base de datos y usuarios | En curso, adelantado por CR-02 ([plan](docs/04-gestion/sprints/sprint-02.md)) |
+| Sprints 3 a 8 | Pendientes ([backlog](docs/04-gestion/backlog.md)) |
 
 ## Tecnologías y versiones
 
@@ -20,7 +21,7 @@ Prototipo académico del trabajo práctico integrador de **Ingeniería de Softwa
 | Lenguaje | TypeScript | 6.0.3 |
 | Frontend | React · Vite · Tailwind CSS | 19.3.0 · 8.3.4 · 4.3.3 |
 | Backend | Express · Zod | 5.3.0 · 4.6.7 |
-| Base de datos | PostgreSQL (Docker) · Prisma | 18 · 7.10.0 |
+| Base de datos | PostgreSQL (Docker) · Prisma | 18 · 7.10.0 (`@prisma/adapter-pg`) |
 | Pruebas | Vitest · Supertest | 5.0.4 · 7.3.1 |
 
 El motivo de cada versión está en [ADR-01](docs/02-arquitectura/decisiones-tecnicas.md#adr-01--stack-tecnológico).
@@ -31,21 +32,33 @@ El motivo de cada versión está en [ADR-01](docs/02-arquitectura/decisiones-tec
 - En Windows, si PowerShell bloquea `npm`, ejecutar una vez:
   `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`
 
-## Puesta en marcha (Fase 0: base de datos)
+## Puesta en marcha
 
 ```powershell
 git clone https://github.com/gabrielvelaz16-dev/is3.git
 cd is3
 Copy-Item .env.example .env        # Linux/macOS: cp .env.example .env
-# Editar .env y cambiar POSTGRES_PASSWORD (y la misma clave dentro de DATABASE_URL y DATABASE_URL_TEST)
+# Editar .env: POSTGRES_PASSWORD (y la misma clave en DATABASE_URL y DATABASE_URL_TEST) y ADMIN_PASSWORD
 
+# 1. Base de datos (Docker Desktop abierto)
 docker compose --env-file .env -f infra/docker/docker-compose.yml up -d
-docker compose --env-file .env -f infra/docker/docker-compose.yml ps
+
+# 2. Backend: tablas, datos iniciales y servidor (http://localhost:3000)
+cd backend
+npm install
+npm run db:migrate
+npm run db:seed
+npm run dev
+
+# 3. Frontend, en otra terminal (http://localhost:5173)
+cd frontend
+npm install
+npm run dev
 ```
 
-La columna `STATUS` debe decir `healthy`. Para detener la base: `... down` (los datos se conservan en el volumen `is3_pgdata`).
+Ingresar en http://localhost:5173 con `ADMIN_EMAIL` y `ADMIN_PASSWORD` del `.env`. El administrador puede crear usuarios y asignarles rol y dependencia desde **Administración**.
 
-Backend y frontend se agregan en el Sprint 1. La guía completa y los problemas frecuentes están en [instalación y ejecución](docs/06-configuracion-devops/instalacion-ejecucion.md).
+La guía completa y los problemas frecuentes están en [instalación y ejecución](docs/06-configuracion-devops/instalacion-ejecucion.md).
 
 ## Estructura
 

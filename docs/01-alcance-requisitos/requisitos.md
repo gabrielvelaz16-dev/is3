@@ -50,7 +50,7 @@ Asociados a las características de ISO/IEC 25010 seleccionadas en el [plan de c
 
 | ID | Característica | Requisito | Criterio medible |
 |---|---|---|---|
-| RNF-01 | Seguridad — confidencialidad | Las contraseñas se almacenan con un algoritmo de hash seguro (bcrypt o argon2). | Ninguna contraseña en texto plano en BD ni en logs. |
+| RNF-01 | Seguridad — confidencialidad | Las contraseñas se almacenan con un algoritmo de hash seguro (scrypt, bcrypt o argon2; se usa scrypt, ver ADR-10). | Ninguna contraseña en texto plano en BD ni en logs. |
 | RNF-02 | Seguridad — autorización | Toda ruta protegida verifica el permiso en el backend. | 100 % de rutas protegidas cubiertas por pruebas de acceso denegado (403). |
 | RNF-03 | Seguridad — no repudio / responsabilidad | La auditoría no se puede modificar ni borrar por operaciones ordinarias. | Prueba que intenta modificar un registro y falla. |
 | RNF-04 | Seguridad — integridad | Los documentos se guardan fuera de la carpeta pública, con nombre interno aleatorio y hash. | Verificación de hash al descargar. |

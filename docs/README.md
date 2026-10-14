@@ -26,7 +26,8 @@ Esta carpeta reúne los artefactos de gestión y técnicos del proyecto. Cada do
 | 04-gestion | [trazabilidad.md](04-gestion/trazabilidad.md) | 2–9 (Anexo A) | Vivo |
 | 04-gestion | [monitoreo-metricas.md](04-gestion/monitoreo-metricas.md) | 9 | Plan inicial |
 | 04-gestion | [historial-cambios.md](04-gestion/historial-cambios.md) | 8 | Vivo |
-| 04-gestion/sprints | [sprint-01.md](04-gestion/sprints/sprint-01.md) | 3 · 9 | Planificado |
+| 04-gestion/sprints | [sprint-01.md](04-gestion/sprints/sprint-01.md) | 3 · 9 | En curso |
+| 04-gestion/sprints | [sprint-02.md](04-gestion/sprints/sprint-02.md) | 3 · 9 | En curso (CR-02) |
 | 05-calidad-pruebas | [plan-calidad.md](05-calidad-pruebas/plan-calidad.md) | 7 | Plan inicial |
 | 05-calidad-pruebas | [plan-pruebas.md](05-calidad-pruebas/plan-pruebas.md) | 7 | Plan inicial |
 | 05-calidad-pruebas | [resultados-pruebas.md](05-calidad-pruebas/resultados-pruebas.md) | 7 | Sin ejecuciones todavía |

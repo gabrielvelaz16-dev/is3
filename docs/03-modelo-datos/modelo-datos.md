@@ -1,6 +1,6 @@
 # Modelo de datos
 
-**Estado:** Borrador (Fase 0) — se implementa y ajusta en el Sprint 2 (S2-01) · **Unidad:** 3
+**Estado:** Parcialmente implementado (Sprint 2): dependencias, roles, permisos, usuarios, sesiones y auditoría en `backend/prisma/schema.prisma`. El resto de las entidades se implementa en los Sprints 3 a 5. · **Unidad:** 3
 
 ## 1. Diagrama entidad-relación
 
@@ -29,7 +29,7 @@ erDiagram
 | Entidad | Campos principales | Restricciones |
 |---|---|---|
 | **Dependencia** | id, codigo, nombre, activa | `codigo` único |
-| **Rol** | id, nombre, descripcion | `nombre` único |
+| **Rol** | id, clave, nombre, descripcion | `clave` única (p. ej. `ADMINISTRADOR`) |
 | **Permiso** | id, clave (p. ej. `expediente.crear`), descripcion | `clave` única |
 | **RolPermiso** | rolId, permisoId | PK compuesta |
 | **Usuario** | id, email, nombre, passwordHash, rolId, dependenciaId, activo, creadoEn | `email` único; FK a Rol y Dependencia; baja lógica con `activo` |
@@ -40,7 +40,8 @@ erDiagram
 | **Pase** | id, expedienteId, origenId, destinoId, enviadoPorId, enviadoEn, recibidoPorId, recibidoEn, motivo | FK; `origenId ≠ destinoId` |
 | **CambioEstado** | id, expedienteId, estadoAnterior, estadoNuevo, usuarioId, fecha, motivo | FK; solo inserción |
 | **Notificacion** | id, usuarioId, tipo, mensaje, expedienteId, leida, creadaEn | FK |
-| **Auditoria** | id, usuarioId, accion, entidad, entidadId, detalle (JSON), ip, fecha | Solo inserción (ADR-07) |
+| **Sesion** *(Sprint 2)* | id (hash SHA-256 del token), usuarioId, creadaEn, expiraEn, ip, userAgent | FK a Usuario con borrado en cascada; índice por vencimiento (ADR-05) |
+| **Auditoria** | id, fecha, usuarioId, accion, resultado (`EXITO`/`FALLO`), entidad, entidadId, detalle (JSON), ip, requestId | Solo inserción (ADR-07); `usuarioId` opcional (login fallido de un correo inexistente) |
 | **Secuencia** | anio, ultimoNumero | Genera el número de expediente de forma atómica por año |
 
 ## 3. Enumeraciones
@@ -60,3 +61,9 @@ erDiagram
 ## 5. Datos de prueba
 
 Solo datos ficticios: dependencias como "Mesa de Entradas", "Asesoría Jurídica", "Recursos Humanos"; usuarios con correos del dominio `@institucion.test`. Se cargan con un *seed* (S2-06, S8-02).
+
+## 6. Convenciones de implementación (Sprint 2)
+
+- Tablas en plural y `snake_case` (`usuarios`, `roles_permisos`, `auditoria`) mediante `@@map`/`@map`; en el código se usan los nombres del modelo (`Usuario`, `rolId`).
+- El correo se guarda en minúsculas; la búsqueda de usuarios no distingue mayúsculas.
+- Baja lógica de usuarios con `activo = false`: un usuario nunca se borra porque la auditoría lo referencia (`ON DELETE RESTRICT`).

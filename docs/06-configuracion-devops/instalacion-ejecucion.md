@@ -74,13 +74,14 @@ Detener: `docker compose --env-file .env -f infra/docker/docker-compose.yml down
 
 Estado: **verificado el 14/10/2026** en la máquina de desarrollo (Windows, Docker Desktop 29.8.2): imagen `postgres:18-alpine` descargada, contenedor `is3-postgres` iniciado en `127.0.0.1:5432`, bases `expediente` y `expediente_test` creadas con dueño `is3_app` y codificación UTF8.
 
-## 5. Backend y frontend (Sprint 1)
+## 5. Backend y frontend
 
 ```bash
 # Backend (lee el .env de la raíz del repositorio)
 cd backend
 npm install
-npx prisma migrate dev      # desde el Sprint 2
+npm run db:migrate          # aplica las migraciones de Prisma (crea las tablas)
+npm run db:seed             # dependencias, roles, permisos y administrador inicial
 npm run dev                 # http://localhost:3000/api/health
 
 # Frontend (otra terminal)
@@ -89,7 +90,15 @@ npm install
 npm run dev
 ```
 
-Verificación esperada: `GET /api/health` responde 200 y el frontend muestra el estado de la API (criterio de S1-03). Formato de respuestas y errores: [contrato de la API](../02-arquitectura/contrato-api.md).
+Verificación esperada: `GET /api/health` responde 200 y el frontend muestra el estado de la API (criterio de S1-03). Abrir http://localhost:5173 e iniciar sesión con `ADMIN_EMAIL` y `ADMIN_PASSWORD` del `.env`.
+
+**Administrador inicial (Sprint 2):** el seed crea el usuario de `ADMIN_EMAIL` con la contraseña de `ADMIN_PASSWORD` solo si no existe. Para generar una contraseña aleatoria y agregarla al `.env` en Windows:
+
+```powershell
+$pw = -join ((48..57)+(65..90)+(97..122) | Get-Random -Count 16 | ForEach-Object {[char]$_}) + '7a'
+Add-Content .env "`nADMIN_EMAIL=admin@institucion.test`nADMIN_NOMBRE=Administrador del sistema`nADMIN_PASSWORD=$pw`nSESSION_HOURS=8`nCOOKIE_SECURE=false"
+Write-Host "Contraseña del administrador: $pw  (guárdela; no se vuelve a mostrar)"
+``` Formato de respuestas y errores: [contrato de la API](../02-arquitectura/contrato-api.md).
 
 Scripts del backend:
 
@@ -100,6 +109,10 @@ Scripts del backend:
 | `npm run typecheck` | Verificación de tipos de TypeScript |
 | `npm run lint` | ESLint |
 | `npm test` / `npm run test:coverage` | Pruebas con Vitest y Supertest (con cobertura) |
+| `npm run db:migrate` | `prisma migrate dev`: aplica migraciones y regenera el cliente |
+| `npm run db:seed` | Datos iniciales (idempotente) |
+| `npm run db:generate` | Regenera el cliente de Prisma (`src/generated/`, fuera de Git) |
+| `npm run db:studio` | Explorador visual de la base (Prisma Studio) |
 
 Las pruebas del Sprint 1 no necesitan la base de datos: la comprobación de la base se reemplaza por una función simulada.
 

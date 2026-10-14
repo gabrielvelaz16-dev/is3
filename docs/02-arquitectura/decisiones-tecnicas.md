@@ -57,9 +57,12 @@ Registro breve de decisiones de arquitectura (*Architecture Decision Records*). 
 
 ## ADR-05 · Mecanismo de sesión
 
-- **Estado:** Propuesta (se decide en el Sprint 2)
+- **Estado:** Aceptada (Sprint 2, 14/10/2026)
 - **Opciones:** (a) JWT de corta duración en cookie `httpOnly` + `SameSite=Strict`; (b) sesión en servidor guardada en PostgreSQL.
 - **Criterio:** facilidad para invalidar sesiones al cerrar sesión (RF-01) y simplicidad de pruebas.
+- **Decisión:** (b) sesión en el servidor. Token aleatorio de 256 bits en la cookie `is3_sid` (`httpOnly`, `SameSite=Strict`, `Path=/api`, `Secure` con HTTPS); en la tabla `sesiones` se guarda solo su hash SHA-256 y la fecha de vencimiento (`SESSION_HOURS`, 8 h por defecto). Los permisos se leen de la base en cada petición.
+- **Motivo:** cerrar sesión, desactivar un usuario o cambiarle la contraseña invalida sus sesiones de inmediato; con JWT el token seguiría siendo válido hasta vencer. Un cambio de rol se aplica en la siguiente petición.
+- **Consecuencias:** una consulta extra por petición (aceptable para el volumen del prototipo). El frontend usa el proxy de Vite para compartir origen con la API: no se necesita CORS. Límite de 5 intentos fallidos de login por correo cada 15 minutos (en memoria).
 
 ## ADR-06 · Proveedor de identidad mediante adaptador
 
@@ -85,3 +88,18 @@ Registro breve de decisiones de arquitectura (*Architecture Decision Records*). 
 
 - **Estado:** Aceptada
 - **Decisión:** `main` (versiones estables etiquetadas) · `develop` (integración) · `feature/<codigo-tarjeta>-<descripcion>` (trabajo). Integración por *pull request* con CI en verde. Detalle en el [plan de configuración](../06-configuracion-devops/plan-configuracion.md).
+
+## ADR-10 · Hash de contraseñas con scrypt
+
+- **Estado:** Aceptada (Sprint 2, 14/10/2026)
+- **Contexto:** RNF-01 exige un algoritmo de hash seguro. bcrypt y argon2 requieren módulos nativos que suelen fallar al instalarse en Windows.
+- **Decisión:** `scrypt` del módulo `crypto` de Node (N = 2^15, r = 8, p = 1, sal aleatoria de 16 bytes, clave de 64 bytes). Formato guardado: `scrypt$N$r$p$sal$hash`, que permite subir los parámetros más adelante sin invalidar contraseñas existentes. Comparación en tiempo constante (`timingSafeEqual`).
+- **Política de contraseñas:** mínimo 10 caracteres, con letras y números.
+- **Alternativas:** argon2id (recomendado por OWASP, pero dependencia nativa); bcrypt (límite de 72 bytes, dependencia nativa o versión JS lenta).
+- **Consecuencias:** sin dependencias externas. scrypt está entre los algoritmos recomendados por OWASP para contraseñas.
+
+## ADR-11 · Repositorios como interfaces
+
+- **Estado:** Aceptada (Sprint 2)
+- **Decisión:** los servicios dependen de interfaces (`database/repositories.ts`); la implementación real usa Prisma (`database/prisma/repos.ts`) y las pruebas usan repositorios en memoria.
+- **Consecuencias:** `npm test` no necesita base de datos y corre en segundos. Las consultas de Prisma se verifican con la ejecución manual y, en el Sprint 7, con pruebas contra la base `expediente_test`.
