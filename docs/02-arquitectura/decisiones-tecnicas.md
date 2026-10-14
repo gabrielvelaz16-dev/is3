@@ -27,7 +27,8 @@ Registro breve de decisiones de arquitectura (*Architecture Decision Records*). 
 | Zod | 4.6.7 | 4.6.7 | — |
 | Prisma | **7.10.0** | 8.0.0-rc.22 | La etiqueta `latest` apunta a una versión candidata (`rc`), no estable. Se usa la última estable (`prev`). |
 | Vitest | 5.0.4 | 5.0.4 | Compatible con `vite ^8.0.0`. |
-| Supertest | a fijar en el Sprint 1 | — | No consultada en la Fase 0. |
+| Supertest | 7.3.1 | 7.3.1 | Instalada en S1-01 (14/10/2026). |
+| Herramientas del backend (S1-01) | `pg` 8.23.1 · `tsx` 4.23.15 · ESLint 10.12.0 · `typescript-eslint` 8.71.2 · `@types/node` 24.19.2 · `@types/express` 5.0.6 | — | Versión exacta (`npm install -E`) registrada en `backend/package.json` y `package-lock.json`. |
 | PostgreSQL | 18 (`postgres:18-alpine`) | — | Imagen oficial; contenedor verificado el 14/10/2026 (F0-07). |
 | Git · Docker · Compose | 2.55.0 · 29.8.2 · v5.6.0 | — | Instalados en la máquina de desarrollo (Windows). |
 
