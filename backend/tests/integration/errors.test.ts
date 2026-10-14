@@ -2,12 +2,12 @@ import express from 'express';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { createApp } from '../../src/app.js';
+import { crearEntorno } from '../support/memoria.js';
 import { errorHandler } from '../../src/api/middlewares/error-handler.js';
 import { requestId } from '../../src/api/middlewares/request-id.js';
 import { ForbiddenError, NotFoundError } from '../../src/shared/errors.js';
 
-const app = createApp({ dbCheck: async () => true, version: '0.1.0' });
+const { app } = await crearEntorno();
 
 /** App mínima con rutas que fallan a propósito, montando el mismo manejador de errores. */
 function appConRutasQueFallan() {

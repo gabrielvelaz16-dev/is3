@@ -12,6 +12,7 @@ export type ErrorCode =
   | 'NOT_FOUND'
   | 'CONFLICT'
   | 'PAYLOAD_TOO_LARGE'
+  | 'TOO_MANY_REQUESTS'
   | 'SERVICE_UNAVAILABLE'
   | 'INTERNAL_ERROR';
 

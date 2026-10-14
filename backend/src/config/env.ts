@@ -19,6 +19,9 @@ export const envSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/, error: 'DATABASE_URL debe ser una URL de PostgreSQL' }),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error', 'silent']).default('info'),
+  SESSION_HOURS: z.coerce.number().min(1).max(24).default(8),
+  /** true solo si se sirve por HTTPS; en local (http://localhost) debe ser false. */
+  COOKIE_SECURE: z.stringbool().default(false),
 });
 
 export type Env = z.infer<typeof envSchema>;

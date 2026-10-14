@@ -1,4 +1,5 @@
 import express, { type Express } from 'express';
+import { z } from 'zod';
 import { errorHandler } from './api/middlewares/error-handler.js';
 import { notFound } from './api/middlewares/not-found.js';
 import { requestId } from './api/middlewares/request-id.js';
@@ -9,6 +10,9 @@ import { type ApiDeps, apiRouter } from './api/routes/index.js';
  * Crea la aplicación Express sin abrir puertos, para poder probarla con
  * Supertest. Las dependencias externas (base de datos) se inyectan.
  */
+// Mensajes de validación en español para el usuario (RNF-11).
+z.config(z.locales.es());
+
 export function createApp(deps: ApiDeps): Express {
   const app = express();
 
