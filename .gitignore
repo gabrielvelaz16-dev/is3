@@ -33,3 +33,6 @@ desktop.ini
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+
+# Resultados de pruebas generados en CI
+vitest-results.json

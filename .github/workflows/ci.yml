@@ -52,7 +52,10 @@ jobs:
       - name: Lint
         run: npm run lint
       - name: Pruebas con cobertura
-        run: npm run test:coverage
+        run: npm run test:coverage -- --reporter=default --reporter=json --outputFile.json=vitest-results.json
+      - name: Resumen de pruebas (evidencia)
+        if: always()
+        run: node ../scripts/ci/resumen-pruebas.mjs vitest-results.json coverage/coverage-summary.json "Pruebas backend"
       - name: Aplicar migraciones en PostgreSQL de CI
         run: npx prisma migrate deploy
       - name: Seed (usuarios, roles y permisos)
@@ -89,7 +92,10 @@ jobs:
       - name: Lint
         run: npm run lint
       - name: Pruebas
-        run: npm test
+        run: npm test -- --reporter=default --reporter=json --outputFile.json=vitest-results.json
+      - name: Resumen de pruebas (evidencia)
+        if: always()
+        run: node ../scripts/ci/resumen-pruebas.mjs vitest-results.json "" "Pruebas frontend"
       - name: Build
         run: npm run build
       - name: Auditoría de dependencias de producción

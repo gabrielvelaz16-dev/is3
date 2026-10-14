@@ -14,7 +14,7 @@ export default defineConfig({
       provider: 'v8',
       include: ['src/**/*.ts'],
       exclude: ['src/server.ts', 'src/generated/**', 'src/database/prisma/**'],
-      reporter: ['text', 'html'],
+      reporter: ['text', 'html', 'json-summary'],
     },
   },
 });
