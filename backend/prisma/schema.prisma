@@ -1,4 +1,4 @@
-// Modelo de datos — Sprint 2 (S2-01): usuarios, roles, permisos, sesiones y auditoría.
+// Modelo de datos — Sprint 2 (S2-01) + Sprint 3 (S3-01): expedientes.
 // Documentación: docs/03-modelo-datos/modelo-datos.md
 // La URL de conexión se configura en prisma.config.ts (Prisma 7).
 
@@ -18,7 +18,8 @@ model Dependencia {
   codigo   String    @unique @db.VarChar(20)
   nombre   String    @db.VarChar(120)
   activa   Boolean   @default(true)
-  usuarios Usuario[]
+  usuarios    Usuario[]
+  expedientes Expediente[]
 
   @@map("dependencias")
 }
@@ -70,6 +71,9 @@ model Usuario {
   sesiones      Sesion[]
   auditoria     Auditoria[]
 
+  expedientesCreados     Expediente[] @relation("creadoPor")
+  expedientesResponsable Expediente[] @relation("responsable")
+
   @@index([rolId])
   @@index([dependenciaId])
   @@map("usuarios")
@@ -109,4 +113,56 @@ model Auditoria {
   @@index([usuarioId])
   @@index([accion])
   @@map("auditoria")
+}
+
+// ── Sprint 3: Expedientes ──────────────────────────────────────────
+
+enum EstadoExpediente {
+  BORRADOR
+  EN_TRAMITE
+  EN_REVISION
+  RESUELTO
+  ARCHIVADO
+}
+
+enum Prioridad {
+  BAJA
+  MEDIA
+  ALTA
+}
+
+model Expediente {
+  id                 Int              @id @default(autoincrement())
+  numero             String           @unique @db.VarChar(20)
+  caratula           String           @db.VarChar(255)
+  asunto             String           @db.Text
+  tipo               String           @db.VarChar(60)
+  iniciador          String           @db.VarChar(160)
+  estado             EstadoExpediente @default(BORRADOR)
+  prioridad          Prioridad        @default(MEDIA)
+  dependenciaActualId Int             @map("dependencia_actual_id")
+  creadoPorId        Int              @map("creado_por_id")
+  responsableId      Int?             @map("responsable_id")
+  fechaVencimiento   DateTime?        @map("fecha_vencimiento")
+  descripcion        String?          @db.Text
+  creadoEn           DateTime         @default(now()) @map("creado_en")
+  actualizadoEn      DateTime         @updatedAt @map("actualizado_en")
+
+  dependenciaActual Dependencia @relation(fields: [dependenciaActualId], references: [id], onDelete: Restrict)
+  creadoPor         Usuario     @relation("creadoPor", fields: [creadoPorId], references: [id], onDelete: Restrict)
+  responsable       Usuario?    @relation("responsable", fields: [responsableId], references: [id], onDelete: Restrict)
+
+  @@index([estado])
+  @@index([dependenciaActualId])
+  @@index([fechaVencimiento])
+  @@index([creadoPorId])
+  @@map("expedientes")
+}
+
+/// Genera números de expediente de forma atómica por año (EXP-AAAA-NNNNNN).
+model Secuencia {
+  anio          Int @id @map("anio")
+  ultimoNumero  Int @default(0) @map("ultimo_numero")
+
+  @@map("secuencias")
 }

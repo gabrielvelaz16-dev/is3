@@ -1,10 +1,45 @@
 import type { Prisma, PrismaClient } from '../../generated/prisma/client.js';
 import type {
+  CambiosExpediente,
   DependenciaRecord,
+  ExpedienteRecord,
+  FiltrosExpediente,
+  NuevoExpediente,
   Repos,
   RolRecord,
   UsuarioRecord,
 } from '../repositories.js';
+
+const incluirExpediente = {
+  dependenciaActual: true,
+  creadoPor: { select: { id: true, nombre: true, username: true } },
+  responsable: { select: { id: true, nombre: true, username: true } },
+} satisfies Prisma.ExpedienteInclude;
+
+type ExpedienteCompleto = Prisma.ExpedienteGetPayload<{ include: typeof incluirExpediente }>;
+
+function aExpediente(e: ExpedienteCompleto): ExpedienteRecord {
+  return {
+    id: e.id,
+    numero: e.numero,
+    caratula: e.caratula,
+    asunto: e.asunto,
+    tipo: e.tipo,
+    iniciador: e.iniciador,
+    estado: e.estado,
+    prioridad: e.prioridad,
+    dependenciaActualId: e.dependenciaActualId,
+    creadoPorId: e.creadoPorId,
+    responsableId: e.responsableId,
+    fechaVencimiento: e.fechaVencimiento,
+    descripcion: e.descripcion,
+    creadoEn: e.creadoEn,
+    actualizadoEn: e.actualizadoEn,
+    dependenciaActual: e.dependenciaActual satisfies DependenciaRecord,
+    creadoPor: e.creadoPor,
+    responsable: e.responsable,
+  };
+}
 
 const incluirUsuario = {
   dependencia: true,
@@ -127,6 +162,61 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
             requestId: e.requestId,
           },
         });
+      },
+    },
+
+    expedientes: {
+      async findById(id) {
+        const e = await prisma.expediente.findUnique({ where: { id }, include: incluirExpediente });
+        return e ? aExpediente(e) : null;
+      },
+      async findByNumero(numero) {
+        const e = await prisma.expediente.findUnique({ where: { numero }, include: incluirExpediente });
+        return e ? aExpediente(e) : null;
+      },
+      async list(filtros: FiltrosExpediente) {
+        const where: Prisma.ExpedienteWhereInput = {};
+        if (filtros.q) {
+          where.OR = [
+            { caratula: { contains: filtros.q, mode: 'insensitive' } },
+            { asunto: { contains: filtros.q, mode: 'insensitive' } },
+            { numero: { contains: filtros.q, mode: 'insensitive' } },
+            { iniciador: { contains: filtros.q, mode: 'insensitive' } },
+          ];
+        }
+        if (filtros.estado) where.estado = filtros.estado as NuevoExpediente['estado'];
+        if (filtros.prioridad) where.prioridad = filtros.prioridad as NuevoExpediente['prioridad'];
+        if (filtros.dependenciaId) where.dependenciaActualId = filtros.dependenciaId;
+        const [items, total] = await prisma.$transaction([
+          prisma.expediente.findMany({
+            where,
+            include: incluirExpediente,
+            orderBy: { creadoEn: 'desc' },
+            skip: filtros.skip,
+            take: filtros.take,
+          }),
+          prisma.expediente.count({ where }),
+        ]);
+        return { items: items.map(aExpediente), total };
+      },
+      async create(data: NuevoExpediente) {
+        return aExpediente(await prisma.expediente.create({ data, include: incluirExpediente }));
+      },
+      async update(id, data: CambiosExpediente) {
+        return aExpediente(await prisma.expediente.update({ where: { id }, data, include: incluirExpediente }));
+      },
+    },
+
+    secuencia: {
+      async siguienteNumero(anio: number) {
+        // Upsert atómico: crea la fila del año si no existe y luego incrementa.
+        const result = await prisma.$queryRaw<[{ ultimo_numero: number }]>`
+          INSERT INTO secuencias (anio, ultimo_numero)
+          VALUES (${anio}, 1)
+          ON CONFLICT (anio) DO UPDATE SET ultimo_numero = secuencias.ultimo_numero + 1
+          RETURNING ultimo_numero
+        `;
+        return result[0]!.ultimo_numero;
       },
     },
   };

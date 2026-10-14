@@ -1,6 +1,10 @@
 import type {
+  CambiosExpediente,
   DependenciaRecord,
   EventoAuditoria,
+  ExpedienteRecord,
+  FiltrosExpediente,
+  NuevoExpediente,
   Repos,
   RolRecord,
   SesionRecord,
@@ -33,6 +37,23 @@ export function crearReposEnMemoria() {
   const usuarios: Fila[] = [];
   const sesiones = new Map<string, SesionRecord>();
   const auditoria: EventoAuditoria[] = [];
+
+  // Sprint 3: expedientes en memoria
+  type FilaExp = Omit<ExpedienteRecord, 'dependenciaActual' | 'creadoPor' | 'responsable'>;
+  const expedientes: FilaExp[] = [];
+  const secuencias = new Map<number, number>();
+
+  const completarExp = (f: FilaExp): ExpedienteRecord => {
+    const dep = dependencias.find((d) => d.id === f.dependenciaActualId)!;
+    const creador = usuarios.find((u) => u.id === f.creadoPorId)!;
+    const resp = f.responsableId ? usuarios.find((u) => u.id === f.responsableId) : null;
+    return {
+      ...f,
+      dependenciaActual: dep,
+      creadoPor: creador ? { id: creador.id, nombre: creador.nombre, username: creador.username } : { id: f.creadoPorId, nombre: '', username: '' },
+      responsable: resp ? { id: resp.id, nombre: resp.nombre, username: resp.username } : null,
+    };
+  };
 
   const completar = (f: Fila): UsuarioRecord => {
     const { rolId, dependenciaId, ...resto } = f;
@@ -96,6 +117,72 @@ export function crearReposEnMemoria() {
     auditoria: {
       insert: async (e) => {
         auditoria.push(e);
+      },
+    },
+
+    expedientes: {
+      findById: async (id) => {
+        const f = expedientes.find((e) => e.id === id);
+        return f ? completarExp(f) : null;
+      },
+      findByNumero: async (numero) => {
+        const f = expedientes.find((e) => e.numero === numero);
+        return f ? completarExp(f) : null;
+      },
+      list: async (filtros: FiltrosExpediente) => {
+        let filtrados = [...expedientes];
+        if (filtros.q) {
+          const q = filtros.q.toLowerCase();
+          filtrados = filtrados.filter(
+            (e) =>
+              e.caratula.toLowerCase().includes(q) ||
+              e.asunto.toLowerCase().includes(q) ||
+              e.numero.toLowerCase().includes(q) ||
+              e.iniciador.toLowerCase().includes(q),
+          );
+        }
+        if (filtros.estado) filtrados = filtrados.filter((e) => e.estado === filtros.estado);
+        if (filtros.prioridad) filtrados = filtrados.filter((e) => e.prioridad === filtros.prioridad);
+        if (filtros.dependenciaId) filtrados = filtrados.filter((e) => e.dependenciaActualId === filtros.dependenciaId);
+        filtrados.sort((a, b) => b.creadoEn.getTime() - a.creadoEn.getTime());
+        return { items: filtrados.slice(filtros.skip, filtros.skip + filtros.take).map(completarExp), total: filtrados.length };
+      },
+      create: async (data: NuevoExpediente) => {
+        const now = new Date();
+        const fila: FilaExp = {
+          id: expedientes.length + 1,
+          numero: data.numero,
+          caratula: data.caratula,
+          asunto: data.asunto,
+          tipo: data.tipo,
+          iniciador: data.iniciador,
+          estado: data.estado ?? 'BORRADOR',
+          prioridad: data.prioridad ?? 'MEDIA',
+          dependenciaActualId: data.dependenciaActualId,
+          creadoPorId: data.creadoPorId,
+          responsableId: data.responsableId ?? null,
+          fechaVencimiento: data.fechaVencimiento ?? null,
+          descripcion: data.descripcion ?? null,
+          creadoEn: now,
+          actualizadoEn: now,
+        };
+        expedientes.push(fila);
+        return completarExp(fila);
+      },
+      update: async (id, data: CambiosExpediente) => {
+        const fila = expedientes.find((e) => e.id === id);
+        if (!fila) throw new Error('expediente no existe');
+        Object.assign(fila, data, { actualizadoEn: new Date() });
+        return completarExp(fila);
+      },
+    },
+
+    secuencia: {
+      siguienteNumero: async (anio: number) => {
+        const actual = secuencias.get(anio) ?? 0;
+        const siguiente = actual + 1;
+        secuencias.set(anio, siguiente);
+        return siguiente;
       },
     },
   };

@@ -113,6 +113,49 @@ async function main() {
       console.log(`${existente ? 'Usuario restablecido' : 'Usuario creado'}: ${u.username} / ${u.password === PASSWORD_DEMO ? PASSWORD_DEMO : '(contraseña del .env)'} (${u.rol})`);
     }
 
+    // ── Expedientes de demostración (Sprint 3) ──────────────────────
+    if (process.env.SEED_USUARIOS_DEMO !== 'false') {
+      const anio = new Date().getFullYear();
+      const mesaUser = await prisma.usuario.findUniqueOrThrow({ where: { username: 'mesa' } });
+      const funcUser = await prisma.usuario.findUniqueOrThrow({ where: { username: 'funcionario' } });
+      const jefeUser = await prisma.usuario.findUniqueOrThrow({ where: { username: 'jefe' } });
+      const mesaDep = await depId('MESA');
+      const ajurDep = await depId('AJUR');
+
+      const expedientesDemo = [
+        { caratula: 'Solicitud de licencia anual — López, Juan', asunto: 'El funcionario Juan López solicita licencia ordinaria por 15 días hábiles a partir del 01/11/2026.', tipo: 'SOLICITUD', iniciador: 'Juan López', estado: 'EN_TRAMITE' as const, prioridad: 'MEDIA' as const, depId: mesaDep, creadoPorId: mesaUser.id, responsableId: funcUser.id },
+        { caratula: 'Dictamen sobre contrato de mantenimiento edilicio', asunto: 'Asesoría Jurídica debe dictaminar sobre el proyecto de contrato presentado por la empresa ACME S.A.', tipo: 'DICTAMEN', iniciador: 'Dirección General', estado: 'EN_REVISION' as const, prioridad: 'ALTA' as const, depId: ajurDep, creadoPorId: jefeUser.id, responsableId: funcUser.id },
+        { caratula: 'Nota interna — Actualización de procedimientos', asunto: 'Se comunica la actualización del manual de procedimientos administrativos.', tipo: 'NOTA', iniciador: 'Administración General', estado: 'BORRADOR' as const, prioridad: 'BAJA' as const, depId: mesaDep, creadoPorId: mesaUser.id, responsableId: null },
+        { caratula: 'Reclamo por demora en trámite de habilitación', asunto: 'El ciudadano Carlos Ramírez reclama por la demora en el trámite de habilitación comercial iniciado hace 60 días.', tipo: 'RECLAMO', iniciador: 'Carlos Ramírez', estado: 'EN_TRAMITE' as const, prioridad: 'ALTA' as const, depId: mesaDep, creadoPorId: mesaUser.id, responsableId: jefeUser.id },
+        { caratula: 'Resolución de designación de personal temporario', asunto: 'Se resuelve la designación de personal temporario para el período estival 2026-2027.', tipo: 'RESOLUCION', iniciador: 'RRHH', estado: 'RESUELTO' as const, prioridad: 'MEDIA' as const, depId: ajurDep, creadoPorId: jefeUser.id, responsableId: null },
+      ];
+
+      let secuencial = 0;
+      for (const exp of expedientesDemo) {
+        const numero = `EXP-${anio}-${String(++secuencial).padStart(6, '0')}`;
+        const existe = await prisma.expediente.findUnique({ where: { numero } });
+        if (!existe) {
+          await prisma.expediente.create({
+            data: {
+              numero,
+              caratula: exp.caratula,
+              asunto: exp.asunto,
+              tipo: exp.tipo,
+              iniciador: exp.iniciador,
+              estado: exp.estado,
+              prioridad: exp.prioridad,
+              dependenciaActualId: exp.depId,
+              creadoPorId: exp.creadoPorId,
+              responsableId: exp.responsableId,
+            },
+          });
+          console.log(`Expediente de demo creado: ${numero} — ${exp.caratula.slice(0, 50)}`);
+        }
+      }
+      // Sincronizar la tabla de secuencias
+      await prisma.$executeRaw`INSERT INTO secuencias (anio, ultimo_numero) VALUES (${anio}, ${secuencial}) ON CONFLICT (anio) DO UPDATE SET ultimo_numero = GREATEST(secuencias.ultimo_numero, ${secuencial})`;
+    }
+
     console.log(`Seed completo: ${DEPENDENCIAS.length} dependencias, ${permisos.size} permisos, ${Object.keys(ROLES).length} roles.`);
   } finally {
     await prisma.$disconnect();
