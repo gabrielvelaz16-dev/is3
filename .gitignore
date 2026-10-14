@@ -1,0 +1,35 @@
+# --- Secretos y configuración local -----------------------------------------
+.env
+.env.*
+!.env.example
+
+# --- Dependencias y compilados ----------------------------------------------
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+.vite/
+
+# --- Prisma (cliente generado) ----------------------------------------------
+backend/src/generated/
+
+# --- Datos locales: documentos adjuntos y copias de seguridad ---------------
+storage/
+backups/
+*.dump
+*.backup
+
+# --- Logs --------------------------------------------------------------------
+logs/
+*.log
+npm-debug.log*
+
+# --- Sistema operativo y editores --------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
