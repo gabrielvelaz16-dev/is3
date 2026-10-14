@@ -77,9 +77,10 @@ La deuda técnica no surge solo de decisiones del programador; también de plani
 | ID | Deuda | Origen | Impacto / riesgo | Prioridad | Plan |
 |---|---|---|---|---|---|
 | DT-01 | Integración real de identidad reemplazada por un adaptador simulado | Decisión de diseño (R01, ADR-06) | Alto si se pasara a producción; bajo para el prototipo | Alta | Mantener la interfaz documentada; prueba de contrato del adaptador |
-| DT-02 | Versiones de dependencias aún no verificadas en la máquina de desarrollo | Restricción de la Fase 0 | Medio: incompatibilidades al instalar | Alta | Verificar y fijar en el Sprint 1 (F0-05, ADR-01) |
+| DT-02 | Versiones de dependencias aún no verificadas en la máquina de desarrollo | Restricción de la Fase 0 | Medio: incompatibilidades al instalar | Alta | **Resuelta** 14/10/2026: versiones fijadas en ADR-01 y `package-lock.json` |
 | DT-03 | Puntos de Función sin calcular | Planificación (TP Unidad 4) | Medio: estimación macro sin tamaño funcional | Media | Conteo en el Sprint 2 con el modelo implementado |
 | DT-04 | Almacenamiento de documentos en disco local | Decisión de diseño (ADR-08) | Bajo en el prototipo; el backup debe incluir la carpeta | Baja | Incluir `storage/` en el script de backup (S7-04) |
+| DT-05 | 4 vulnerabilidades altas en la CLI de Prisma 7.10.0 (`mysql2` ≤ 3.23.0: GHSA-3f6p-5ww8-9rcr, GHSA-rgwj-5xj2-c3m3; `deepmerge-ts` < 8.0.0: GHSA-ggr8-5vv4-36mx), detectadas por CI el 14/10/2026 | Dependencia de desarrollo (`prisma`); el arreglo sugerido es bajar a Prisma 6 | Bajo: la CLI solo se usa para migraciones en la PC y en CI; el servidor no carga `mysql2` ni `@prisma/config`, y el proyecto no usa MySQL | Media | La CI informa estas vulnerabilidades como advertencia (solo desarrollo) y sigue fallando ante vulnerabilidades altas en paquetes de producción. Revisar en cada sprint y actualizar Prisma cuando publique el arreglo |
 
 ## 7. Gestión de defectos
 

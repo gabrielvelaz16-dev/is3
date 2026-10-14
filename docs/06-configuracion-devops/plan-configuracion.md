@@ -70,7 +70,7 @@ Los ambientes se separan por variables de entorno (`NODE_ENV`, `DATABASE_URL`, `
 
 ## 6. Integración y entrega continua (CI/CD)
 
-**CI (Sprint 1, S1-06)** — en cada *push* y *pull request* a `develop` y `main`:
+**CI (Sprint 1, S1-06)** — implementado en [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml). Se ejecuta en cada *push* a cualquier rama y en cada *pull request* a `develop` y `main`. Pasos reales: backend (`npm ci` → tipos con `prisma generate` → lint → pruebas con cobertura → `prisma migrate deploy` sobre PostgreSQL 18 de CI → seed → verificación de que la auditoría rechaza `DELETE` → build → auditoría de dependencias) y frontend (`npm ci` → tipos → lint → pruebas → build → auditoría de dependencias). Plan original:
 
 ```
 checkout → instalar dependencias (npm ci) → lint → verificación de tipos
@@ -108,7 +108,7 @@ checkout → instalar dependencias (npm ci) → lint → verificación de tipos
 | Control | Herramienta | Etapa |
 |---|---|---|
 | Secretos fuera del repositorio | `.gitignore`, `.env.example`, *secret scanning* de GitHub | Commit |
-| Dependencias vulnerables | `npm audit` en CI, Dependabot | CI |
+| Dependencias vulnerables | `scripts/ci/audit.mjs` (sobre `npm audit`) en CI: falla con vulnerabilidades altas o críticas en dependencias de producción; las de paquetes solo de desarrollo se publican como advertencia y se registran como deuda técnica (DT-05) | CI |
 | Revisión obligatoria | Protección de ramas `main` y `develop` | PR |
 | Análisis estático | ESLint + TypeScript estricto | CI |
 | Pruebas de seguridad | PR-02, PR-09, PR-20, PR-25 | CI |
