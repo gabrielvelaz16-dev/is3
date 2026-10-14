@@ -1,0 +1,102 @@
+# Integración continua (S1-06, plan de configuración §6).
+# En cada push y en cada PR hacia develop/main: instalación limpia, tipos,
+# lint, pruebas con cobertura, migraciones sobre PostgreSQL real, seed,
+# build y auditoría de dependencias. Un paso que falla deja el PR en rojo.
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [develop, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (Express + Prisma)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: expediente_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U ci -d expediente_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      # Credenciales solo de la base efímera de CI (no son secretos reales).
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/expediente_ci?schema=public
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Instalar dependencias (npm ci)
+        run: npm ci
+      - name: Verificar tipos (incluye prisma generate)
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Pruebas con cobertura
+        run: npm run test:coverage -- --reporter=default --reporter=json --outputFile.json=vitest-results.json
+      - name: Resumen de pruebas (evidencia)
+        if: always()
+        run: node ../scripts/ci/resumen-pruebas.mjs vitest-results.json coverage/coverage-summary.json "Pruebas backend"
+      - name: Aplicar migraciones en PostgreSQL de CI
+        run: npx prisma migrate deploy
+      - name: Seed (usuarios, roles y permisos)
+        run: npm run db:seed
+      - name: Verificar que la auditoría rechaza modificaciones (ADR-07)
+        run: |
+          if PGPASSWORD=ci psql -h localhost -U ci -d expediente_ci -v ON_ERROR_STOP=1 -c "DELETE FROM auditoria;"; then
+            echo "ERROR: la auditoría permitió un DELETE"; exit 1
+          else
+            echo "OK: la base rechazó el DELETE sobre auditoria"
+          fi
+      - name: Build
+        run: npm run build
+      - name: Auditoría de dependencias de producción
+        run: node ../scripts/ci/audit.mjs
+
+  frontend:
+    name: Frontend (React + Vite)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Instalar dependencias (npm ci)
+        run: npm ci
+      - name: Verificar tipos
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Pruebas
+        run: npm test -- --reporter=default --reporter=json --outputFile.json=vitest-results.json
+      - name: Resumen de pruebas (evidencia)
+        if: always()
+        run: node ../scripts/ci/resumen-pruebas.mjs vitest-results.json "" "Pruebas frontend"
+      - name: Build
+        run: npm run build
+      - name: Auditoría de dependencias de producción
+        run: node ../scripts/ci/audit.mjs
