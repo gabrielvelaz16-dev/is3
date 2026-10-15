@@ -101,6 +101,9 @@ export interface AuditoriaRepo {
 
 // ── Sprint 3: Expedientes ──────────────────────────────────────────
 
+export type EstadoExpediente = 'BORRADOR' | 'EN_TRAMITE' | 'EN_REVISION' | 'RESUELTO' | 'ARCHIVADO';
+export type Prioridad = 'BAJA' | 'MEDIA' | 'ALTA';
+
 export interface ExpedienteRecord {
   id: number;
   numero: string;
@@ -108,8 +111,8 @@ export interface ExpedienteRecord {
   asunto: string;
   tipo: string;
   iniciador: string;
-  estado: string;
-  prioridad: string;
+  estado: EstadoExpediente;
+  prioridad: Prioridad;
   dependenciaActualId: number;
   creadoPorId: number;
   responsableId: number | null;
@@ -128,8 +131,8 @@ export interface NuevoExpediente {
   asunto: string;
   tipo: string;
   iniciador: string;
-  estado?: string;
-  prioridad?: string;
+  estado?: EstadoExpediente;
+  prioridad?: Prioridad;
   dependenciaActualId: number;
   creadoPorId: number;
   responsableId?: number | null;
@@ -142,8 +145,8 @@ export type CambiosExpediente = Partial<{
   asunto: string;
   tipo: string;
   iniciador: string;
-  estado: string;
-  prioridad: string;
+  estado: EstadoExpediente;
+  prioridad: Prioridad;
   dependenciaActualId: number;
   responsableId: number | null;
   fechaVencimiento: Date | null;
@@ -152,8 +155,8 @@ export type CambiosExpediente = Partial<{
 
 export interface FiltrosExpediente {
   q?: string;
-  estado?: string;
-  prioridad?: string;
+  estado?: EstadoExpediente;
+  prioridad?: Prioridad;
   dependenciaId?: number;
   skip: number;
   take: number;

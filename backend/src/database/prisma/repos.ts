@@ -184,8 +184,8 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
             { iniciador: { contains: filtros.q, mode: 'insensitive' } },
           ];
         }
-        if (filtros.estado) where.estado = filtros.estado as NuevoExpediente['estado'];
-        if (filtros.prioridad) where.prioridad = filtros.prioridad as NuevoExpediente['prioridad'];
+        if (filtros.estado) where.estado = filtros.estado;
+        if (filtros.prioridad) where.prioridad = filtros.prioridad;
         if (filtros.dependenciaId) where.dependenciaActualId = filtros.dependenciaId;
         const [items, total] = await prisma.$transaction([
           prisma.expediente.findMany({
