@@ -17,7 +17,7 @@ export function mockApi(handlers: Record<string, Handler>) {
     const ruta = url.split('?')[0];
     const handler = handlers[`${init?.method ?? 'GET'} ${ruta}`];
     const r: Respuesta = handler
-      ? handler(init?.body ? JSON.parse(String(init.body)) : undefined, url)
+      ? handler(typeof init?.body === 'string' ? JSON.parse(init.body) : init?.body, url)
       : { status: 404, body: { error: { code: 'NOT_FOUND', message: 'No existe', requestId: 't' } } };
     const status = r.status ?? 200;
     return { ok: status < 400, status, json: async () => r.body } as Response;
@@ -47,6 +47,9 @@ export const ADMIN: UsuarioSesion = {
     'expedientes.consultar',
     'expedientes.consultar_todas',
     'expedientes.modificar',
+    'documentos.adjuntar',
+    'documentos.descargar',
+    'actuaciones.registrar',
   ],
 };
 

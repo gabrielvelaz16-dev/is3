@@ -34,20 +34,63 @@ export interface Pagina<T> {
 
 type Metodo = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
-export async function apiRaw<T>(ruta: string, opciones: { method?: Metodo; body?: unknown; signal?: AbortSignal } = {}): Promise<Pagina<T>> {
-  let res: Response;
+/** Archivo enviado tal cual como cuerpo de la petición (subida de documentos, ADR-12). */
+export interface CuerpoArchivo {
+  contenido: Blob;
+  tipo: string;
+  encabezados?: Record<string, string>;
+}
+
+export interface OpcionesApi {
+  method?: Metodo;
+  body?: unknown;
+  archivo?: CuerpoArchivo;
+  signal?: AbortSignal;
+}
+
+const ERROR_RED = 'No se pudo conectar con el servidor. Verifique que el backend esté en ejecución.';
+
+/** Hace la petición; solo traduce los errores de red a ApiError. */
+export async function pedir(ruta: string, opciones: OpcionesApi = {}): Promise<Response> {
+  let headers: Record<string, string> | undefined;
+  let body: BodyInit | undefined;
+  if (opciones.archivo) {
+    headers = { 'Content-Type': opciones.archivo.tipo || 'application/octet-stream', ...opciones.archivo.encabezados };
+    body = opciones.archivo.contenido;
+  } else if (opciones.body !== undefined) {
+    headers = { 'Content-Type': 'application/json' };
+    body = JSON.stringify(opciones.body);
+  }
   try {
-    res = await fetch(`/api${ruta}`, {
+    return await fetch(`/api${ruta}`, {
       method: opciones.method ?? 'GET',
       credentials: 'same-origin',
-      headers: opciones.body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
-      body: opciones.body !== undefined ? JSON.stringify(opciones.body) : undefined,
+      headers,
+      body,
       signal: opciones.signal,
     });
   } catch (err) {
     if ((err as Error).name === 'AbortError') throw err;
-    throw new ApiError(0, 'NETWORK_ERROR', 'No se pudo conectar con el servidor. Verifique que el backend esté en ejecución.');
+    throw new ApiError(0, 'NETWORK_ERROR', ERROR_RED);
   }
+}
+
+/** Convierte una respuesta con el contrato de error en ApiError (si la hay). */
+export async function errorDe(res: Response): Promise<ApiError> {
+  let cuerpo: { error?: { code: string; message: string; requestId?: string; details?: ErrorDetail[] } } | null = null;
+  try {
+    cuerpo = await res.json();
+  } catch {
+    // Sin JSON.
+  }
+  const e = cuerpo?.error;
+  return e
+    ? new ApiError(res.status, e.code, e.message, e.requestId, e.details ?? [])
+    : new ApiError(res.status, 'HTTP_ERROR', `El servidor respondió con un error (${res.status}).`);
+}
+
+export async function apiRaw<T>(ruta: string, opciones: OpcionesApi = {}): Promise<Pagina<T>> {
+  const res = await pedir(ruta, opciones);
 
   let cuerpo: unknown = null;
   try {
@@ -67,6 +110,6 @@ export async function apiRaw<T>(ruta: string, opciones: { method?: Metodo; body?
   return cuerpo as Pagina<T>;
 }
 
-export async function api<T>(ruta: string, opciones: Parameters<typeof apiRaw>[1] = {}): Promise<T> {
+export async function api<T>(ruta: string, opciones: OpcionesApi = {}): Promise<T> {
   return (await apiRaw<T>(ruta, opciones)).data;
 }

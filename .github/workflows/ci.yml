@@ -60,13 +60,16 @@ jobs:
         run: npx prisma migrate deploy
       - name: Seed (usuarios, roles y permisos)
         run: npm run db:seed
-      - name: Verificar que la auditoría rechaza modificaciones (ADR-07)
+      - name: Verificar tablas de solo inserción (ADR-07, historial del Sprint 4)
         run: |
-          if PGPASSWORD=ci psql -h localhost -U ci -d expediente_ci -v ON_ERROR_STOP=1 -c "DELETE FROM auditoria;"; then
-            echo "ERROR: la auditoría permitió un DELETE"; exit 1
-          else
-            echo "OK: la base rechazó el DELETE sobre auditoria"
-          fi
+          for tabla in auditoria documentos actuaciones cambios_estado; do
+            for sql in "DELETE FROM $tabla;" "UPDATE $tabla SET id = id;" "TRUNCATE $tabla;"; do
+              if PGPASSWORD=ci psql -h localhost -U ci -d expediente_ci -v ON_ERROR_STOP=1 -c "$sql" >/dev/null 2>&1; then
+                echo "::error title=Solo inserción::$tabla permitió: $sql"; exit 1
+              fi
+            done
+            echo "OK: $tabla rechazó DELETE, UPDATE y TRUNCATE"
+          done
       - name: Build
         run: npm run build
       - name: Auditoría de dependencias de producción
