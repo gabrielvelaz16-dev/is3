@@ -87,7 +87,7 @@ describe('Detalle del expediente: seguimiento (Sprint 5)', () => {
     });
 
     const select = await screen.findByLabelText('Responsable');
-    await screen.findByRole('option', { name: 'Funcionaria Prueba' });
+    await within(select).findByRole('option', { name: 'Funcionaria Prueba' });
     await user.selectOptions(select, 'Funcionaria Prueba');
     await user.click(screen.getByRole('button', { name: 'Asignar' }));
 
