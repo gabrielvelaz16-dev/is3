@@ -22,6 +22,7 @@ const EXPEDIENTE = {
   dependenciaActual: { id: 1, codigo: 'ADM', nombre: 'Administración General', activa: true },
   creadoPor: { id: 1, nombre: 'Administrador del sistema', username: 'admin' },
   responsable: null,
+  paseEnTransito: null,
 };
 
 const persona = { id: 1, nombre: 'Administrador del sistema', username: 'admin' };
@@ -52,6 +53,7 @@ function handlers(extra: Record<string, (body: unknown) => { status?: number; bo
     'GET /api/expedientes/7/documentos': ok([DOCUMENTO]),
     'GET /api/expedientes/7/actuaciones': ok([]),
     'GET /api/expedientes/7/historial': ok(HISTORIAL),
+    'GET /api/expedientes/7/tareas': ok([]),
     ...extra,
   };
 }

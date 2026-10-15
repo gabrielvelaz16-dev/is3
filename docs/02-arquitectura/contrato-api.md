@@ -108,13 +108,28 @@ Todas requieren sesión. Las rutas de un expediente verifican además que el usu
 | `GET /api/expedientes` | `expedientes.consultar` | `?q=&estado=&prioridad=&dependenciaId=&pagina=1&porPagina=20` | 200 `{ data: [expediente], paginacion: { total, pagina, porPagina, totalPaginas } }` |
 | `POST /api/expedientes` | `expedientes.crear` | `{ caratula, asunto, tipo, iniciador, prioridad?, descripcion?, fechaVencimiento?, responsableId? }` | 201 · 400 (incluye responsable inexistente) |
 | `GET /api/expedientes/:id` | `expedientes.consultar` | — | 200 · 403 · 404 |
-| `PATCH /api/expedientes/:id` | `expedientes.modificar` | Campos a cambiar, incluido `estado` | 200 · 400 · 403 · 404 · **409** transición no permitida o expediente archivado |
+| `PATCH /api/expedientes/:id` | `expedientes.modificar` | Datos generales (`caratula`, `asunto`, `tipo`, `iniciador`, `prioridad`, `descripcion`, `fechaVencimiento`). **Desde el Sprint 5 no acepta `estado` ni `responsableId`** (400): tienen rutas propias | 200 · 400 · 403 · 404 · **409** archivado o en tránsito |
 | `GET /api/expedientes/:id/documentos` | `expedientes.consultar` | — | 200 `{ data: [documento] }` |
 | `POST /api/expedientes/:id/documentos` | `documentos.adjuntar` | **Cuerpo = archivo** (ADR-12). Encabezados: `Content-Type`, `X-Nombre-Archivo`, `X-Descripcion` opcional (codificados con `encodeURIComponent`) | 201 `{ data: documento }` · 400 tipo no permitido, vacío o sin nombre · 409 archivado · **413** supera `MAX_UPLOAD_MB` |
 | `GET /api/expedientes/:id/documentos/:documentoId/descarga` | `documentos.descargar` | — | 200 con el archivo (`Content-Disposition: attachment`, `X-Content-Type-Options: nosniff`, `Cache-Control: no-store`) · 404 si el documento no es de ese expediente · 500 genérico si el archivo falta o fue alterado (hash) |
 | `GET /api/expedientes/:id/actuaciones` | `expedientes.consultar` | — | 200 `{ data: [actuacion] }` en orden cronológico |
 | `POST /api/expedientes/:id/actuaciones` | `actuaciones.registrar` | `{ tipo: "ACTUACION" \| "OBSERVACION", texto }` (3 a 5000 caracteres; fecha y autor los pone el servidor) | 201 · 400 · 409 archivado |
 | `GET /api/expedientes/:id/historial` | `expedientes.consultar` | — | 200 `{ data: [evento] }` ordenado por fecha |
+
+**Sprint 5 — seguimiento.** Un expediente con un pase sin recibir está **en tránsito**: responde con `paseEnTransito: { id, destino, enviadoEn }`, lo puede consultar también la dependencia destino, y toda modificación, carga o acción responde 409 hasta que se reciba.
+
+| Método y ruta | Permiso | Entrada | Respuesta |
+|---|---|---|---|
+| `POST /api/expedientes/:id/estado` | `estados.cambiar` | `{ estado, motivo? }` | 200 `{ data: expediente }` · 409 transición no permitida, archivado o en tránsito |
+| `POST /api/expedientes/:id/responsable` | `responsables.asignar` | `{ responsableId: number \| null }` (usuario activo de la dependencia del expediente) | 200 · 400 |
+| `POST /api/expedientes/:id/pases` | `expedientes.enviar` (y estar en la dependencia del expediente, salvo `expedientes.consultar_todas`) | `{ destinoId, motivo }` | 201 `{ data: pase }` · 400 destino inválido · 403 · 409 archivado o ya en tránsito. Un borrador pasa a `EN_TRAMITE` |
+| `GET /api/expedientes/:id/tareas` | `expedientes.consultar` | — | 200 `{ data: [tarea] }` |
+| `POST /api/expedientes/:id/tareas` | `tareas.gestionar` | `{ titulo, asignadoAId, vencimiento, descripcion? }` (vencimiento obligatorio y no pasado) | 201 · 400 · 409 |
+| `PATCH /api/tareas/:id` | `tareas.gestionar` (y ser el asignado, el creador o tener `responsables.asignar`) | `{ estado }` | 200 · 403 · 404 · 409 tarea cerrada |
+| `GET /api/pases/recibidos` | `expedientes.recibir` | — | 200 `{ data: [pase sin recibir hacia mi dependencia] }` |
+| `POST /api/pases/:id/recepcion` | `expedientes.recibir` (solo la dependencia destino) | — | 200 `{ data: pase }`; el expediente pasa a la dependencia destino sin responsable · 403 · 404 · 409 ya recibido |
+| `GET /api/pendientes` | sesión | — | 200 `{ data: { tareas: [tarea + alerta], recibidos: [pase], expedientesPorVencer: [expediente + alerta] } }`; `alerta` = `VENCIDA`, `POR_VENCER` (3 días) o `null` |
+| `GET /api/dependencias/:id/usuarios` | `tareas.gestionar` o `responsables.asignar` | — | 200 `{ data: [{ id, nombre, username }] }` (activos) |
 
 No existen rutas para modificar ni borrar documentos, actuaciones o cambios de estado: son de solo inserción también en la base (triggers).
 

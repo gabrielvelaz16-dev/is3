@@ -31,6 +31,7 @@ export const sections: Section[] = [
     description: 'Responsables, tareas con vencimiento, pases entre dependencias y alertas.',
     sprint: 5,
     requisitos: 'RF-12 a RF-17',
+    implementada: true,
   },
   {
     path: '/reportes',

@@ -27,7 +27,16 @@ export interface Actuacion {
   autor: Referencia;
 }
 
-export type TipoEvento = 'CREACION' | 'CAMBIO_ESTADO' | 'DOCUMENTO' | 'ACTUACION' | 'OBSERVACION';
+export type TipoEvento =
+  | 'CREACION'
+  | 'CAMBIO_ESTADO'
+  | 'DOCUMENTO'
+  | 'ACTUACION'
+  | 'OBSERVACION'
+  | 'PASE_ENVIADO'
+  | 'PASE_RECIBIDO'
+  | 'ASIGNACION'
+  | 'TAREA';
 
 export interface EventoHistorial {
   tipo: TipoEvento;

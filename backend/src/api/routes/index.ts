@@ -9,11 +9,15 @@ import { AuthService } from '../../modules/auth/auth.service.js';
 import { DocumentosService } from '../../modules/documentos/documentos.service.js';
 import { ExpedientesService } from '../../modules/expedientes/expedientes.service.js';
 import { HistorialService } from '../../modules/historial/historial.service.js';
+import { PasesService } from '../../modules/pases/pases.service.js';
+import { PendientesService } from '../../modules/pendientes/pendientes.service.js';
+import { TareasService } from '../../modules/tareas/tareas.service.js';
 import { UsuariosService } from '../../modules/usuarios/usuarios.service.js';
 import { healthController } from '../controllers/health.controller.js';
 import { cargarSesion } from '../middlewares/auth.js';
 import { authRouter } from './auth.routes.js';
 import { expedientesRouter } from './expedientes.routes.js';
+import { seguimientoRouter } from './seguimiento.routes.js';
 import { catalogosRouter, usuariosRouter } from './usuarios.routes.js';
 
 export interface ApiDeps {
@@ -44,8 +48,11 @@ export function apiRouter(deps: ApiDeps): Router {
     documentos: new DocumentosService(deps.repos, deps.almacenamiento, auditoria, { maxBytes }),
     actuaciones: new ActuacionesService(deps.repos, auditoria),
     historial: new HistorialService(deps.repos),
+    pases: new PasesService(deps.repos, expedientesService, auditoria),
+    tareas: new TareasService(deps.repos, expedientesService, auditoria, { now: deps.now }),
     maxBytes,
   };
+  const pendientes = new PendientesService(deps.repos, { now: deps.now });
 
   const router = Router();
   router.get('/health', healthController(deps.dbCheck, deps.version));
@@ -54,6 +61,7 @@ export function apiRouter(deps: ApiDeps): Router {
   router.use('/auth', authRouter(auth, { secure: deps.cookieSecure ?? false }));
   router.use('/usuarios', usuariosRouter(usuarios));
   router.use('/expedientes', expedientesRouter(expedientesService, anexos));
+  router.use('/', seguimientoRouter({ repos: deps.repos, pases: anexos.pases, tareas: anexos.tareas, pendientes }));
   router.use('/', catalogosRouter(deps.repos.roles, deps.repos.dependencias));
   return router;
 }

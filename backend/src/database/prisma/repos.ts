@@ -5,6 +5,8 @@ import type {
   ExpedienteRecord,
   DocumentoRecord,
   FiltrosExpediente,
+  PaseRecord,
+  TareaRecord,
   NuevoExpediente,
   Repos,
   RolRecord,
@@ -15,6 +17,8 @@ const incluirExpediente = {
   dependenciaActual: true,
   creadoPor: { select: { id: true, nombre: true, username: true } },
   responsable: { select: { id: true, nombre: true, username: true } },
+  // Pase sin recibir (a lo sumo uno, por el índice único parcial).
+  pases: { where: { recibidoEn: null }, select: { id: true, enviadoEn: true, destino: true }, take: 1 },
 } satisfies Prisma.ExpedienteInclude;
 
 type ExpedienteCompleto = Prisma.ExpedienteGetPayload<{ include: typeof incluirExpediente }>;
@@ -39,7 +43,14 @@ function aExpediente(e: ExpedienteCompleto): ExpedienteRecord {
     dependenciaActual: e.dependenciaActual satisfies DependenciaRecord,
     creadoPor: e.creadoPor,
     responsable: e.responsable,
+    paseEnTransito: e.pases[0]
+      ? { id: e.pases[0].id, enviadoEn: e.pases[0].enviadoEn, destino: aDependenciaRef(e.pases[0].destino) }
+      : null,
   };
+}
+
+function aDependenciaRef(d: { id: number; codigo: string; nombre: string }) {
+  return { id: d.id, codigo: d.codigo, nombre: d.nombre };
 }
 
 const persona = { select: { id: true, nombre: true, username: true } } as const;
@@ -59,6 +70,51 @@ function aDocumento(d: DocumentoCompleto): DocumentoRecord {
     descripcion: d.descripcion,
     subidoEn: d.subidoEn,
     subidoPor: d.subidoPor,
+  };
+}
+
+const expedienteRef = { select: { id: true, numero: true, caratula: true } } as const;
+
+const incluirTarea = { asignadoA: persona, creadoPor: persona, expediente: expedienteRef } satisfies Prisma.TareaInclude;
+type TareaCompleta = Prisma.TareaGetPayload<{ include: typeof incluirTarea }>;
+
+function aTarea(t: TareaCompleta): TareaRecord {
+  return {
+    id: t.id,
+    expedienteId: t.expedienteId,
+    titulo: t.titulo,
+    descripcion: t.descripcion,
+    vencimiento: t.vencimiento,
+    estado: t.estado,
+    creadaEn: t.creadaEn,
+    cerradaEn: t.cerradaEn,
+    asignadoA: t.asignadoA,
+    creadoPor: t.creadoPor,
+    expediente: t.expediente,
+  };
+}
+
+const incluirPase = {
+  origen: true,
+  destino: true,
+  enviadoPor: persona,
+  recibidoPor: persona,
+  expediente: expedienteRef,
+} satisfies Prisma.PaseInclude;
+type PaseCompleto = Prisma.PaseGetPayload<{ include: typeof incluirPase }>;
+
+function aPase(p: PaseCompleto): PaseRecord {
+  return {
+    id: p.id,
+    expedienteId: p.expedienteId,
+    origen: aDependenciaRef(p.origen),
+    destino: aDependenciaRef(p.destino),
+    motivo: p.motivo,
+    enviadoEn: p.enviadoEn,
+    enviadoPor: p.enviadoPor,
+    recibidoEn: p.recibidoEn,
+    recibidoPor: p.recibidoPor,
+    expediente: p.expediente,
   };
 }
 
@@ -138,6 +194,13 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
           where: { activo: true, rol: { clave: rolClave }, ...(excluirId ? { id: { not: excluirId } } : {}) },
         });
       },
+      listActivosDeDependencia(dependenciaId) {
+        return prisma.usuario.findMany({
+          where: { dependenciaId, activo: true },
+          select: { id: true, nombre: true, username: true },
+          orderBy: { nombre: 'asc' },
+        });
+      },
     },
 
     roles: {
@@ -187,6 +250,19 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
     },
 
     expedientes: {
+      async listPorVencer({ dependenciaId, hasta }) {
+        const filas = await prisma.expediente.findMany({
+          where: {
+            fechaVencimiento: { lte: hasta },
+            estado: { notIn: ['RESUELTO', 'ARCHIVADO'] },
+            ...(dependenciaId ? { dependenciaActualId: dependenciaId } : {}),
+          },
+          include: incluirExpediente,
+          orderBy: { fechaVencimiento: 'asc' },
+          take: 50,
+        });
+        return filas.map(aExpediente);
+      },
       async findById(id) {
         const e = await prisma.expediente.findUnique({ where: { id }, include: incluirExpediente });
         return e ? aExpediente(e) : null;
@@ -272,6 +348,84 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
       },
       async insert(data) {
         await prisma.cambioEstado.create({ data });
+      },
+    },
+
+    tareas: {
+      async listByExpediente(expedienteId) {
+        const filas = await prisma.tarea.findMany({ where: { expedienteId }, include: incluirTarea, orderBy: { creadaEn: 'asc' } });
+        return filas.map(aTarea);
+      },
+      async listAbiertasDe(usuarioId) {
+        const filas = await prisma.tarea.findMany({
+          where: { asignadoAId: usuarioId, estado: { in: ['PENDIENTE', 'EN_CURSO'] } },
+          include: incluirTarea,
+          orderBy: { vencimiento: 'asc' },
+        });
+        return filas.map(aTarea);
+      },
+      async findById(id) {
+        const t = await prisma.tarea.findUnique({ where: { id }, include: incluirTarea });
+        return t ? aTarea(t) : null;
+      },
+      async create(data) {
+        return aTarea(await prisma.tarea.create({ data, include: incluirTarea }));
+      },
+      async actualizarEstado(id, estado, cerradaEn) {
+        return aTarea(await prisma.tarea.update({ where: { id }, data: { estado, cerradaEn }, include: incluirTarea }));
+      },
+    },
+
+    pases: {
+      async listByExpediente(expedienteId) {
+        const filas = await prisma.pase.findMany({ where: { expedienteId }, include: incluirPase, orderBy: { enviadoEn: 'asc' } });
+        return filas.map(aPase);
+      },
+      async listPendientesHacia(dependenciaId) {
+        const filas = await prisma.pase.findMany({
+          where: { destinoId: dependenciaId, recibidoEn: null },
+          include: incluirPase,
+          orderBy: { enviadoEn: 'asc' },
+        });
+        return filas.map(aPase);
+      },
+      async findById(id) {
+        const p = await prisma.pase.findUnique({ where: { id }, include: incluirPase });
+        return p ? aPase(p) : null;
+      },
+      async create(data) {
+        return aPase(await prisma.pase.create({ data, include: incluirPase }));
+      },
+      async recibir(id, usuarioId) {
+        // Recepción y cambio de dependencia en una sola transacción. La condición
+        // recibidoEn = null evita registrar dos veces la misma recepción.
+        return prisma.$transaction(async (tx) => {
+          const { count } = await tx.pase.updateMany({
+            where: { id, recibidoEn: null },
+            data: { recibidoPorId: usuarioId, recibidoEn: new Date() },
+          });
+          if (count === 0) return null;
+          const pase = await tx.pase.findUniqueOrThrow({ where: { id }, include: incluirPase });
+          await tx.expediente.update({
+            where: { id: pase.expedienteId },
+            data: { dependenciaActualId: pase.destinoId, responsableId: null },
+          });
+          return aPase(pase);
+        });
+      },
+    },
+
+    asignaciones: {
+      async listByExpediente(expedienteId) {
+        const filas = await prisma.asignacion.findMany({
+          where: { expedienteId },
+          include: { responsable: persona, usuario: persona },
+          orderBy: { fecha: 'asc' },
+        });
+        return filas.map(({ responsableId: _r, usuarioId: _u, ...a }) => a);
+      },
+      async insert(data) {
+        await prisma.asignacion.create({ data });
       },
     },
 

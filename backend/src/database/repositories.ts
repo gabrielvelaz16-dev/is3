@@ -59,6 +59,8 @@ export interface UsuariosRepo {
   update(id: number, data: CambiosUsuario): Promise<UsuarioRecord>;
   /** Cantidad de usuarios activos con un rol, opcionalmente excluyendo uno. */
   countActivosConRol(rolClave: string, excluirId?: number): Promise<number>;
+  /** Usuarios activos de una dependencia (para asignar responsables y tareas, Sprint 5). */
+  listActivosDeDependencia(dependenciaId: number): Promise<{ id: number; nombre: string; username: string }[]>;
 }
 
 export interface RolesRepo {
@@ -123,7 +125,11 @@ export interface ExpedienteRecord {
   dependenciaActual: DependenciaRecord;
   creadoPor: { id: number; nombre: string; username: string };
   responsable: { id: number; nombre: string; username: string } | null;
+  /** Pase sin recibir (Sprint 5): mientras exista, el expediente está "en tránsito". */
+  paseEnTransito: { id: number; destino: DependenciaRef; enviadoEn: Date } | null;
 }
+
+export type DependenciaRef = Pick<DependenciaRecord, 'id' | 'codigo' | 'nombre'>;
 
 export interface NuevoExpediente {
   numero: string;
@@ -163,6 +169,8 @@ export interface FiltrosExpediente {
 }
 
 export interface ExpedientesRepo {
+  /** Expedientes no resueltos ni archivados que vencen hasta `hasta` (pendientes, Sprint 5). */
+  listPorVencer(params: { dependenciaId?: number; hasta: Date }): Promise<ExpedienteRecord[]>;
   findById(id: number): Promise<ExpedienteRecord | null>;
   findByNumero(numero: string): Promise<ExpedienteRecord | null>;
   list(filtros: FiltrosExpediente): Promise<{ items: ExpedienteRecord[]; total: number }>;
@@ -226,13 +234,99 @@ export interface CambioEstadoRecord {
   expedienteId: number;
   estadoAnterior: EstadoExpediente | null;
   estadoNuevo: EstadoExpediente;
+  motivo: string | null;
   fecha: Date;
   usuario: PersonaRef;
 }
 
 export interface CambiosEstadoRepo {
   listByExpediente(expedienteId: number): Promise<CambioEstadoRecord[]>;
-  insert(data: { expedienteId: number; estadoAnterior: EstadoExpediente | null; estadoNuevo: EstadoExpediente; usuarioId: number }): Promise<void>;
+  insert(data: {
+    expedienteId: number;
+    estadoAnterior: EstadoExpediente | null;
+    estadoNuevo: EstadoExpediente;
+    motivo?: string | null;
+    usuarioId: number;
+  }): Promise<void>;
+}
+
+// ── Sprint 5: Tareas, pases y asignaciones ────────────────────────
+
+export type EstadoTarea = 'PENDIENTE' | 'EN_CURSO' | 'COMPLETADA' | 'CANCELADA';
+
+export interface ExpedienteRef {
+  id: number;
+  numero: string;
+  caratula: string;
+}
+
+export interface TareaRecord {
+  id: number;
+  expedienteId: number;
+  titulo: string;
+  descripcion: string | null;
+  vencimiento: Date;
+  estado: EstadoTarea;
+  creadaEn: Date;
+  cerradaEn: Date | null;
+  asignadoA: PersonaRef;
+  creadoPor: PersonaRef;
+  expediente: ExpedienteRef;
+}
+
+export interface TareasRepo {
+  listByExpediente(expedienteId: number): Promise<TareaRecord[]>;
+  /** Tareas pendientes o en curso asignadas a un usuario, por vencimiento. */
+  listAbiertasDe(usuarioId: number): Promise<TareaRecord[]>;
+  findById(id: number): Promise<TareaRecord | null>;
+  create(data: {
+    expedienteId: number;
+    titulo: string;
+    descripcion: string | null;
+    asignadoAId: number;
+    creadoPorId: number;
+    vencimiento: Date;
+  }): Promise<TareaRecord>;
+  actualizarEstado(id: number, estado: EstadoTarea, cerradaEn: Date | null): Promise<TareaRecord>;
+}
+
+export interface PaseRecord {
+  id: number;
+  expedienteId: number;
+  origen: DependenciaRef;
+  destino: DependenciaRef;
+  motivo: string;
+  enviadoEn: Date;
+  enviadoPor: PersonaRef;
+  recibidoEn: Date | null;
+  recibidoPor: PersonaRef | null;
+  expediente: ExpedienteRef;
+}
+
+export interface PasesRepo {
+  listByExpediente(expedienteId: number): Promise<PaseRecord[]>;
+  /** Bandeja de entrada: pases sin recibir hacia una dependencia. */
+  listPendientesHacia(dependenciaId: number): Promise<PaseRecord[]>;
+  findById(id: number): Promise<PaseRecord | null>;
+  create(data: { expedienteId: number; origenId: number; destinoId: number; motivo: string; enviadoPorId: number }): Promise<PaseRecord>;
+  /**
+   * Registra la recepción y pasa el expediente a la dependencia destino (sin responsable),
+   * todo junto. Devuelve null si el pase ya había sido recibido.
+   */
+  recibir(id: number, usuarioId: number): Promise<PaseRecord | null>;
+}
+
+export interface AsignacionRecord {
+  id: number;
+  expedienteId: number;
+  responsable: PersonaRef | null;
+  usuario: PersonaRef;
+  fecha: Date;
+}
+
+export interface AsignacionesRepo {
+  listByExpediente(expedienteId: number): Promise<AsignacionRecord[]>;
+  insert(data: { expedienteId: number; responsableId: number | null; usuarioId: number }): Promise<void>;
 }
 
 export interface Repos {
@@ -246,4 +340,7 @@ export interface Repos {
   documentos: DocumentosRepo;
   actuaciones: ActuacionesRepo;
   cambiosEstado: CambiosEstadoRepo;
+  tareas: TareasRepo;
+  pases: PasesRepo;
+  asignaciones: AsignacionesRepo;
 }

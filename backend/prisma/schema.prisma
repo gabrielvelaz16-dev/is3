@@ -20,6 +20,8 @@ model Dependencia {
   activa   Boolean   @default(true)
   usuarios    Usuario[]
   expedientes Expediente[]
+  pasesOrigen  Pase[] @relation("paseOrigen")
+  pasesDestino Pase[] @relation("paseDestino")
 
   @@map("dependencias")
 }
@@ -76,6 +78,12 @@ model Usuario {
   documentosSubidos      Documento[]
   actuaciones            Actuacion[]
   cambiosEstado          CambioEstado[]
+  tareasAsignadas        Tarea[]        @relation("tareaAsignada")
+  tareasCreadas          Tarea[]        @relation("tareaCreada")
+  pasesEnviados          Pase[]         @relation("paseEnviado")
+  pasesRecibidos         Pase[]         @relation("paseRecibido")
+  asignacionesHechas     Asignacion[]   @relation("asignacionHecha")
+  asignacionesRecibidas  Asignacion[]   @relation("asignacionRecibida")
 
   @@index([rolId])
   @@index([dependenciaId])
@@ -157,6 +165,9 @@ model Expediente {
   documentos        Documento[]
   actuaciones       Actuacion[]
   cambiosEstado     CambioEstado[]
+  tareas            Tarea[]
+  pases             Pase[]
+  asignaciones      Asignacion[]
 
   @@index([estado])
   @@index([dependenciaActualId])
@@ -224,6 +235,7 @@ model CambioEstado {
   expedienteId   Int               @map("expediente_id")
   estadoAnterior EstadoExpediente? @map("estado_anterior")
   estadoNuevo    EstadoExpediente  @map("estado_nuevo")
+  motivo         String?           @db.VarChar(500)
   usuarioId      Int               @map("usuario_id")
   fecha          DateTime          @default(now())
 
@@ -232,4 +244,77 @@ model CambioEstado {
 
   @@index([expedienteId])
   @@map("cambios_estado")
+}
+
+// ── Sprint 5: Tareas y seguimiento ─────────────────────────────────
+
+enum EstadoTarea {
+  PENDIENTE
+  EN_CURSO
+  COMPLETADA
+  CANCELADA
+}
+
+/// Tarea sobre un expediente con responsable y vencimiento (RF-13).
+model Tarea {
+  id           Int         @id @default(autoincrement())
+  expedienteId Int         @map("expediente_id")
+  titulo       String      @db.VarChar(160)
+  descripcion  String?     @db.Text
+  asignadoAId  Int         @map("asignado_a_id")
+  creadoPorId  Int         @map("creado_por_id")
+  vencimiento  DateTime
+  estado       EstadoTarea @default(PENDIENTE)
+  creadaEn     DateTime    @default(now()) @map("creada_en")
+  actualizadaEn DateTime   @updatedAt @map("actualizada_en")
+  cerradaEn    DateTime?   @map("cerrada_en")
+
+  expediente Expediente @relation(fields: [expedienteId], references: [id], onDelete: Restrict)
+  asignadoA  Usuario    @relation("tareaAsignada", fields: [asignadoAId], references: [id], onDelete: Restrict)
+  creadoPor  Usuario    @relation("tareaCreada", fields: [creadoPorId], references: [id], onDelete: Restrict)
+
+  @@index([expedienteId])
+  @@index([asignadoAId, estado])
+  @@index([vencimiento])
+  @@map("tareas")
+}
+
+/// Pase de un expediente entre dependencias (RF-15, RF-16).
+/// Mientras no se recibe, el expediente está "en tránsito"; solo puede haber uno pendiente.
+model Pase {
+  id            Int       @id @default(autoincrement())
+  expedienteId  Int       @map("expediente_id")
+  origenId      Int       @map("origen_id")
+  destinoId     Int       @map("destino_id")
+  motivo        String    @db.VarChar(500)
+  enviadoPorId  Int       @map("enviado_por_id")
+  enviadoEn     DateTime  @default(now()) @map("enviado_en")
+  recibidoPorId Int?      @map("recibido_por_id")
+  recibidoEn    DateTime? @map("recibido_en")
+
+  expediente  Expediente  @relation(fields: [expedienteId], references: [id], onDelete: Restrict)
+  origen      Dependencia @relation("paseOrigen", fields: [origenId], references: [id], onDelete: Restrict)
+  destino     Dependencia @relation("paseDestino", fields: [destinoId], references: [id], onDelete: Restrict)
+  enviadoPor  Usuario     @relation("paseEnviado", fields: [enviadoPorId], references: [id], onDelete: Restrict)
+  recibidoPor Usuario?    @relation("paseRecibido", fields: [recibidoPorId], references: [id], onDelete: Restrict)
+
+  @@index([expedienteId])
+  @@index([destinoId, recibidoEn])
+  @@map("pases")
+}
+
+/// Cada asignación de responsable, para el historial (RF-12). Solo inserción.
+model Asignacion {
+  id            Int      @id @default(autoincrement())
+  expedienteId  Int      @map("expediente_id")
+  responsableId Int?     @map("responsable_id")
+  usuarioId     Int      @map("usuario_id")
+  fecha         DateTime @default(now())
+
+  expediente  Expediente @relation(fields: [expedienteId], references: [id], onDelete: Restrict)
+  responsable Usuario?   @relation("asignacionRecibida", fields: [responsableId], references: [id], onDelete: Restrict)
+  usuario     Usuario    @relation("asignacionHecha", fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@index([expedienteId])
+  @@map("asignaciones")
 }

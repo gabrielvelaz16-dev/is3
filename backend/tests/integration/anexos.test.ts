@@ -248,7 +248,7 @@ describe('Documentos, actuaciones e historial (Sprint 4: RF-08 a RF-11)', () => 
     it('no admite documentos ni actuaciones nuevas (409), pero se puede consultar y descargar', async () => {
       const { body } = await subir(admin, expedienteId, PDF, 'a.pdf', 'application/pdf');
       for (const estado of ['EN_TRAMITE', 'RESUELTO', 'ARCHIVADO']) {
-        expect((await admin.patch(`/api/expedientes/${expedienteId}`).send({ estado })).status).toBe(200);
+        expect((await admin.post(`/api/expedientes/${expedienteId}/estado`).send({ estado })).status).toBe(200);
       }
       expect((await subir(admin, expedienteId, PDF, 'b.pdf', 'application/pdf')).status).toBe(409);
       expect((await admin.post(`/api/expedientes/${expedienteId}/actuaciones`).send({ tipo: 'ACTUACION', texto: 'Tarde' })).status).toBe(409);
@@ -260,10 +260,10 @@ describe('Documentos, actuaciones e historial (Sprint 4: RF-08 a RF-11)', () => 
 
   describe('historial del expediente (S4-04, RF-11)', () => {
     it('muestra creación, cambios de estado, documentos y actuaciones en orden cronológico', async () => {
-      await admin.patch(`/api/expedientes/${expedienteId}`).send({ estado: 'EN_TRAMITE' });
+      await admin.post(`/api/expedientes/${expedienteId}/estado`).send({ estado: 'EN_TRAMITE' });
       await subir(admin, expedienteId, PDF, 'informe.pdf', 'application/pdf');
       await admin.post(`/api/expedientes/${expedienteId}/actuaciones`).send({ tipo: 'OBSERVACION', texto: 'Revisar el anexo' });
-      await admin.patch(`/api/expedientes/${expedienteId}`).send({ estado: 'EN_REVISION' });
+      await admin.post(`/api/expedientes/${expedienteId}/estado`).send({ estado: 'EN_REVISION' });
 
       const res = await admin.get(`/api/expedientes/${expedienteId}/historial`);
       expect(res.status).toBe(200);

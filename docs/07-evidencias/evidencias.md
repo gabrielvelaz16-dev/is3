@@ -68,6 +68,19 @@ Fecha: 15/10/2026 · Release: R2 · Detalle: [sprint-04.md](../04-gestion/sprint
 | Decisión de subir archivos sin multer | 8 | [ADR-12](../02-arquitectura/decisiones-tecnicas.md#adr-12--subida-de-documentos-sin-multer) | Aprobada por el PO |
 | Prueba manual en la PC (adjuntar, descargar, registrar, ver historial) | 7 | — | Pendiente (requiere `npm run db:migrate`) |
 
+## Sprint 5 — Tareas y seguimiento
+
+Fecha: 15/10/2026 · Release: R3 · Detalle: [sprint-05.md](../04-gestion/sprints/sprint-05.md)
+
+| Evidencia | Unidad | Artefacto | Estado |
+|---|---|---|---|
+| Cambio CR-03 (S5-06 al Sprint 6) aprobado por el PO | 2, 3, 4 | [control-cambios.md](../04-gestion/control-cambios.md) | Hecho |
+| Migración de tareas, pases y asignaciones aplicada en PostgreSQL de CI | 3, 8 | `backend/prisma/migrations/20261015150000_tareas_pases` · [run 38745648399](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38745648399) | Hecho |
+| CI en verde: backend 115/115, frontend 34/34, cobertura 93,46 % | 7, 8 | [run 38745648399](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38745648399) | Hecho |
+| Protección de pases y asignaciones verificada en la base | 7, 8 | Paso "Verificar tablas de solo inserción" en [run 38745648399](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38745648399) | Hecho |
+| Velocidad y pronóstico actualizados | 4, 9 | [estimacion-calendario.md](../04-gestion/estimacion-calendario.md) | Hecho |
+| Prueba manual en la PC (enviar, recibir, tareas, pendientes) | 7 | — | Pendiente (requiere `npm run db:migrate`) |
+
 ## Plantilla por sprint
 
 ```

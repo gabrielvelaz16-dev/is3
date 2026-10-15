@@ -12,20 +12,31 @@ export const crearExpedienteSchema = z.object({
   prioridad: z.enum(PRIORIDADES).optional(),
   descripcion: z.string().max(5000).nullable().optional(),
   fechaVencimiento: z.iso.datetime().nullable().optional(),
-  responsableId: z.number().int().positive().nullable().optional(),
 });
 
+/** Datos generales. El estado y el responsable tienen sus propias rutas (Sprint 5); enviarlos aquí da 400. */
 export const modificarExpedienteSchema = z.object({
   caratula: z.string().min(3).max(255).optional(),
   asunto: z.string().min(3).max(2000).optional(),
   tipo: z.enum(TIPOS_EXPEDIENTE).optional(),
   iniciador: z.string().min(2).max(160).optional(),
   prioridad: z.enum(PRIORIDADES).optional(),
-  estado: z.enum(ESTADOS_EXPEDIENTE).optional(),
   descripcion: z.string().max(5000).nullable().optional(),
   fechaVencimiento: z.iso.datetime().nullable().optional(),
-  responsableId: z.number().int().positive().nullable().optional(),
 }).strict();
+
+/** S5-03 */
+export const cambiarEstadoSchema = z
+  .object({
+    estado: z.enum(ESTADOS_EXPEDIENTE),
+    motivo: z.string().trim().max(500).optional(),
+  })
+  .strict();
+
+/** S5-01: null quita el responsable. */
+export const asignarResponsableSchema = z
+  .object({ responsableId: z.number().int().positive().nullable() })
+  .strict();
 
 export const listarExpedientesSchema = z.object({
   q: z.string().max(200).optional(),

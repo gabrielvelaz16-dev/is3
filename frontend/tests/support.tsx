@@ -79,6 +79,7 @@ export function renderApp(path: string, opciones: { usuario?: UsuarioSesion | nu
       usuario ? { body: { data: { usuario } } } : { status: 401, body: { error: { code: 'UNAUTHORIZED', message: 'Debe iniciar sesión', requestId: 't' } } },
     'GET /api/health': () => ({ body: health }),
     'POST /api/auth/logout': () => ({ body: { data: { ok: true } } }),
+    'GET /api/pendientes': () => ({ body: { data: { tareas: [], recibidos: [], expedientesPorVencer: [] } } }),
     'GET /api/expedientes': () => ({ body: { data: [], paginacion: { total: 0, pagina: 1, porPagina: 20, totalPaginas: 0 } } }),
     ...opciones.handlers,
   });

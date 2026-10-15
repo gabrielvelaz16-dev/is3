@@ -21,12 +21,12 @@ Cadena: **Paquete de trabajo → Épica → Historia → Requisito → Prueba �
 | 1.5.1 / riesgo R06 | E4 | S4-05 Control de acceso a documentos | RF-09 | PR-09 | R2 | PR #11 (`feature/S4-documentos-actuaciones`) |
 | 1.7 Desarrollo | E4 | S4-03 Actuaciones | RF-10 | PR-10 | R2 | PR #11 (`feature/S4-documentos-actuaciones`) |
 | 1.7 Desarrollo | E4 | S4-04 Historial | RF-11 | PR-11 | R2 | PR #11 (`feature/S4-documentos-actuaciones`) |
-| 1.7 Desarrollo | E5 Flujo documental | S5-01 Asignar responsables | RF-12 | PR-12 | R3 | pendiente |
-| 1.7 Desarrollo | E5 | S5-02 Tareas y vencimientos | RF-13 | PR-13 | R3 | pendiente |
-| 1.7 Desarrollo / CR-01 | E5 | S5-03 Cambiar estado | RF-14 | PR-14 | R3 | pendiente |
-| 1.6.2 Despliegue por dependencias | E5 | S5-04 Enviar expediente | RF-15 | PR-15 | R3 | pendiente |
-| 1.6.2 Despliegue por dependencias | E5 | S5-05 Recibir expediente | RF-16 | PR-16 | R3 | pendiente |
-| 1.7 Desarrollo | E5 | S5-06 Notificaciones | RF-17 | PR-17 | R3 | pendiente |
+| 1.7 Desarrollo | E5 Flujo documental | S5-01 Asignar responsables | RF-12 | PR-12 | R3 | PR #12 (`feature/S5-tareas-seguimiento`) |
+| 1.7 Desarrollo | E5 | S5-02 Tareas y vencimientos | RF-13 | PR-13 | R3 | PR #12 (`feature/S5-tareas-seguimiento`) |
+| 1.7 Desarrollo / CR-01 | E5 | S5-03 Cambiar estado | RF-14 | PR-14 | R3 | PR #12 (`feature/S5-tareas-seguimiento`) |
+| 1.6.2 Despliegue por dependencias | E5 | S5-04 Enviar expediente | RF-15 | PR-15 | R3 | PR #12 (`feature/S5-tareas-seguimiento`) |
+| 1.6.2 Despliegue por dependencias | E5 | S5-05 Recibir expediente | RF-16 | PR-16 | R3 | PR #12 (`feature/S5-tareas-seguimiento`) |
+| 1.7 Desarrollo | E5 | S5-06 Notificaciones | RF-17 | PR-17 | R3 | Sprint 6 (CR-03) |
 | 1.7 Desarrollo | E6 Reportes | S6-01 Dashboard | RF-18, RNF-08 | PR-18 | R3 | pendiente |
 | 1.7 Desarrollo | E6 | S6-02 / S6-03 Reportes | RF-19 | PR-19 | R3 | pendiente |
 | 1.5.2 Validaciones de seguridad | E7 Calidad | S7-03 Auditoría | RF-21, RNF-03 | PR-21 | R4 | pendiente |

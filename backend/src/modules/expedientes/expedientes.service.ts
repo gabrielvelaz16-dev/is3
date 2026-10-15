@@ -1,5 +1,6 @@
 /**
  * Servicio de expedientes — Sprint 3 (S3-01 a S3-06), corregido antes del Sprint 4 (D-04 a D-07).
+ * Sprint 5: el estado y el responsable se cambian con acciones propias (S5-01, S5-03).
  * Reglas de negocio para crear, consultar, modificar y listar expedientes.
  */
 import type {
@@ -44,10 +45,21 @@ export const TRANSICIONES: Record<EstadoExpediente, readonly EstadoExpediente[]>
   ARCHIVADO: [],
 };
 
-/** Un expediente archivado no admite cambios, documentos ni actuaciones. */
-export function verificarNoArchivado(expediente: Pick<ExpedienteRecord, 'estado'>, accion: string): void {
+/**
+ * Un expediente archivado o en tránsito hacia otra dependencia no admite cambios,
+ * documentos, actuaciones, tareas ni asignaciones (409). Sí se puede consultar.
+ */
+export function verificarEditable(
+  expediente: Pick<ExpedienteRecord, 'estado' | 'paseEnTransito'>,
+  accion: string,
+): void {
   if (expediente.estado === 'ARCHIVADO') {
     throw new ConflictError(`No se puede ${accion} un expediente archivado`);
+  }
+  if (expediente.paseEnTransito) {
+    throw new ConflictError(
+      `El expediente está en tránsito hacia ${expediente.paseEnTransito.destino.nombre}: no se puede ${accion} hasta que se reciba`,
+    );
   }
 }
 
@@ -64,19 +76,17 @@ export interface CrearExpedienteInput {
   prioridad?: Prioridad;
   descripcion?: string | null;
   fechaVencimiento?: string | null;
-  responsableId?: number | null;
 }
 
+/** Datos generales. El estado y el responsable tienen acciones propias (Sprint 5). */
 export interface ModificarExpedienteInput {
   caratula?: string;
   asunto?: string;
   tipo?: string;
   iniciador?: string;
   prioridad?: Prioridad;
-  estado?: EstadoExpediente;
   descripcion?: string | null;
   fechaVencimiento?: string | null;
-  responsableId?: number | null;
 }
 
 export class ExpedientesService {
@@ -96,8 +106,6 @@ export class ExpedientesService {
     dependenciaId: number,
     ctx: Contexto = {},
   ): Promise<ExpedienteRecord> {
-    if (input.responsableId) await this.verificarResponsable(input.responsableId);
-
     // Generar número único
     const anio = this.ahora().getFullYear();
     const secuencial = await this.repos.secuencia.siguienteNumero(anio);
@@ -114,7 +122,6 @@ export class ExpedientesService {
       fechaVencimiento: input.fechaVencimiento ? new Date(input.fechaVencimiento) : null,
       dependenciaActualId: dependenciaId,
       creadoPorId: usuarioId,
-      responsableId: input.responsableId ?? null,
     };
 
     const expediente = await this.repos.expedientes.create(data);
@@ -146,16 +153,7 @@ export class ExpedientesService {
   ): Promise<ExpedienteRecord> {
     const existente = await this.repos.expedientes.findById(id);
     if (!existente) throw new NotFoundError('Expediente no encontrado');
-    verificarNoArchivado(existente, 'modificar');
-
-    if (input.responsableId !== undefined && input.responsableId !== null) {
-      await this.verificarResponsable(input.responsableId);
-    }
-
-    // Validar transiciones de estado
-    if (input.estado && input.estado !== existente.estado) {
-      this.validarTransicion(existente.estado, input.estado);
-    }
+    verificarEditable(existente, 'modificar');
 
     const cambios: CambiosExpediente = {};
     if (input.caratula !== undefined) cambios.caratula = input.caratula;
@@ -163,48 +161,96 @@ export class ExpedientesService {
     if (input.tipo !== undefined) cambios.tipo = input.tipo;
     if (input.iniciador !== undefined) cambios.iniciador = input.iniciador;
     if (input.prioridad !== undefined) cambios.prioridad = input.prioridad;
-    if (input.estado !== undefined) cambios.estado = input.estado;
     if (input.descripcion !== undefined) cambios.descripcion = input.descripcion;
     if (input.fechaVencimiento !== undefined) {
       cambios.fechaVencimiento = input.fechaVencimiento ? new Date(input.fechaVencimiento) : null;
     }
-    if (input.responsableId !== undefined) cambios.responsableId = input.responsableId;
 
     const actualizado = await this.repos.expedientes.update(id, cambios);
-
-    // Historial (S4-04): cada transición queda en una tabla de solo inserción.
-    if (cambios.estado && cambios.estado !== existente.estado) {
-      await this.repos.cambiosEstado.insert({
-        expedienteId: id,
-        estadoAnterior: existente.estado,
-        estadoNuevo: cambios.estado,
-        usuarioId,
-      });
-    }
 
     await this.auditoria.registrar({ ...ctx, usuarioId }, {
       accion: 'expediente.modificar',
       resultado: 'EXITO',
       entidad: 'Expediente',
       entidadId: String(id),
-      detalle: { cambios: Object.keys(cambios), ...(cambios.estado ? { estado: `${existente.estado} → ${cambios.estado}` } : {}) },
+      detalle: { cambios: Object.keys(cambios) },
     });
 
     return actualizado;
   }
 
-  private async verificarResponsable(responsableId: number): Promise<void> {
-    const resp = await this.repos.usuarios.findById(responsableId);
-    if (!resp || !resp.activo) {
-      throw new ValidationError(
-        [{ field: 'responsableId', message: 'El responsable indicado no existe o está inactivo' }],
-        'El responsable indicado no existe o está inactivo',
-      );
+  /** S5-03: cambio de estado según la máquina de estados (RF-14). Queda en el historial con su motivo. */
+  async cambiarEstado(
+    expediente: ExpedienteRecord,
+    estado: EstadoExpediente,
+    motivo: string | null,
+    usuarioId: number,
+    ctx: Contexto = {},
+  ): Promise<ExpedienteRecord> {
+    verificarEditable(expediente, 'cambiar el estado de');
+    this.validarTransicion(expediente.estado, estado);
+    return this.aplicarEstado(expediente, estado, motivo, usuarioId, ctx);
+  }
+
+  /** Aplica una transición ya validada (la usa también el envío de un expediente en borrador). */
+  async aplicarEstado(
+    expediente: ExpedienteRecord,
+    estado: EstadoExpediente,
+    motivo: string | null,
+    usuarioId: number,
+    ctx: Contexto = {},
+  ): Promise<ExpedienteRecord> {
+    const actualizado = await this.repos.expedientes.update(expediente.id, { estado });
+    await this.repos.cambiosEstado.insert({
+      expedienteId: expediente.id,
+      estadoAnterior: expediente.estado,
+      estadoNuevo: estado,
+      motivo,
+      usuarioId,
+    });
+    await this.auditoria.registrar({ ...ctx, usuarioId }, {
+      accion: 'expediente.cambiar_estado',
+      resultado: 'EXITO',
+      entidad: 'Expediente',
+      entidadId: String(expediente.id),
+      detalle: { estado: `${expediente.estado} → ${estado}`, ...(motivo ? { motivo } : {}) },
+    });
+    return actualizado;
+  }
+
+  /** S5-01: asigna (o quita, con null) el responsable. Debe ser un usuario activo de la dependencia del expediente. */
+  async asignarResponsable(
+    expediente: ExpedienteRecord,
+    responsableId: number | null,
+    usuarioId: number,
+    ctx: Contexto = {},
+  ): Promise<ExpedienteRecord> {
+    verificarEditable(expediente, 'asignar el responsable de');
+    if (responsableId !== null) await this.verificarDeLaDependencia(responsableId, expediente.dependenciaActualId, 'responsableId');
+
+    const actualizado = await this.repos.expedientes.update(expediente.id, { responsableId });
+    await this.repos.asignaciones.insert({ expedienteId: expediente.id, responsableId, usuarioId });
+    await this.auditoria.registrar({ ...ctx, usuarioId }, {
+      accion: 'expediente.asignar_responsable',
+      resultado: 'EXITO',
+      entidad: 'Expediente',
+      entidadId: String(expediente.id),
+      detalle: { anterior: expediente.responsableId, nuevo: responsableId },
+    });
+    return actualizado;
+  }
+
+  /** Usuario activo que pertenece a la dependencia indicada; si no, 400 sobre el campo indicado. */
+  async verificarDeLaDependencia(usuarioId: number, dependenciaId: number, campo: string): Promise<void> {
+    const u = await this.repos.usuarios.findById(usuarioId);
+    if (!u || !u.activo || u.dependencia.id !== dependenciaId) {
+      const mensaje = 'Debe ser un usuario activo de la dependencia donde está el expediente';
+      throw new ValidationError([{ field: campo, message: mensaje }], mensaje);
     }
   }
 
   /** 409 si la transición no está permitida por la máquina de estados (contrato de la API). */
-  private validarTransicion(desde: EstadoExpediente, hacia: EstadoExpediente): void {
+  validarTransicion(desde: EstadoExpediente, hacia: EstadoExpediente): void {
     if (!TRANSICIONES[desde].includes(hacia)) {
       throw new ConflictError(`Transición de estado no permitida: ${desde} → ${hacia}`);
     }

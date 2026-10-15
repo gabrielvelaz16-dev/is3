@@ -16,6 +16,7 @@ import {
   type TipoEvento,
 } from '../../services/anexos';
 import { ApiError } from '../../services/api';
+import { ETIQUETA_TAREA, finDelDia, seguimientoApi, type Tarea } from '../../services/seguimiento';
 import type { Expediente } from '../../services/tipos';
 
 const fechaHora = (iso: string) => new Date(iso).toLocaleString('es-PY', { dateStyle: 'medium', timeStyle: 'short' });
@@ -63,7 +64,7 @@ const Aviso = ({ texto }: { texto: string }) => (
 
 // ── Documentos ────────────────────────────────────────────────────
 
-function DocumentosSeccion({ expediente, version, onCambio }: Props) {
+function DocumentosSeccion({ expediente, version, onCambio, editable }: PropsSeccion) {
   const { puede } = useAuth();
   const { datos: documentos, error } = useCarga(() => anexosApi.documentos(expediente.id), version);
   const [archivo, setArchivo] = useState<File | null>(null);
@@ -73,7 +74,7 @@ function DocumentosSeccion({ expediente, version, onCambio }: Props) {
   const [aviso, setAviso] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const puedeAdjuntar = puede('documentos.adjuntar') && expediente.estado !== 'ARCHIVADO';
+  const puedeAdjuntar = puede('documentos.adjuntar') && editable;
 
   async function adjuntar(ev: FormEvent) {
     ev.preventDefault();
@@ -190,7 +191,7 @@ function DocumentosSeccion({ expediente, version, onCambio }: Props) {
 
 const ETIQUETA_ACTUACION: Record<TipoActuacion, string> = { ACTUACION: 'Actuación', OBSERVACION: 'Observación' };
 
-function ActuacionesSeccion({ expediente, version, onCambio }: Props) {
+function ActuacionesSeccion({ expediente, version, onCambio, editable }: PropsSeccion) {
   const { puede } = useAuth();
   const { datos: actuaciones, error } = useCarga(() => anexosApi.actuaciones(expediente.id), version);
   const [tipo, setTipo] = useState<TipoActuacion>('ACTUACION');
@@ -198,7 +199,7 @@ function ActuacionesSeccion({ expediente, version, onCambio }: Props) {
   const [enviando, setEnviando] = useState(false);
   const [errorAccion, setErrorAccion] = useState<string | null>(null);
 
-  const puedeRegistrar = puede('actuaciones.registrar') && expediente.estado !== 'ARCHIVADO';
+  const puedeRegistrar = puede('actuaciones.registrar') && editable;
 
   async function registrar(ev: FormEvent) {
     ev.preventDefault();
@@ -279,6 +280,10 @@ const ETIQUETA_EVENTO: Record<TipoEvento, string> = {
   DOCUMENTO: 'Documento',
   ACTUACION: 'Actuación',
   OBSERVACION: 'Observación',
+  PASE_ENVIADO: 'Pase enviado',
+  PASE_RECIBIDO: 'Pase recibido',
+  ASIGNACION: 'Responsable',
+  TAREA: 'Tarea',
 };
 
 const COLOR_EVENTO: Record<TipoEvento, string> = {
@@ -287,9 +292,128 @@ const COLOR_EVENTO: Record<TipoEvento, string> = {
   DOCUMENTO: 'bg-green-600',
   ACTUACION: 'bg-marca-700',
   OBSERVACION: 'bg-amber-500',
+  PASE_ENVIADO: 'bg-violet-600',
+  PASE_RECIBIDO: 'bg-violet-600',
+  ASIGNACION: 'bg-teal-600',
+  TAREA: 'bg-slate-700',
 };
 
-function HistorialSeccion({ expediente, version }: Omit<Props, 'onCambio'>) {
+// ── Tareas (Sprint 5) ─────────────────────────────────────────────
+
+const CLASE_TAREA: Record<Tarea['estado'], string> = {
+  PENDIENTE: 'bg-slate-100 text-slate-700',
+  EN_CURSO: 'bg-blue-100 text-blue-800',
+  COMPLETADA: 'bg-green-100 text-green-800',
+  CANCELADA: 'bg-slate-200 text-slate-500 line-through',
+};
+
+const soloFecha = (iso: string) => new Date(iso).toLocaleDateString('es-PY', { dateStyle: 'medium' });
+
+function TareasSeccion({ expediente, version, onCambio, editable }: PropsSeccion) {
+  const { puede } = useAuth();
+  const { datos: tareas, error } = useCarga(() => seguimientoApi.tareas(expediente.id), version);
+  const puedeCrear = puede('tareas.gestionar') && editable;
+  const [usuarios, setUsuarios] = useState<{ id: number; nombre: string }[]>([]);
+  const [titulo, setTitulo] = useState('');
+  const [asignado, setAsignado] = useState('');
+  const [vence, setVence] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const [errorAccion, setErrorAccion] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!puedeCrear) return;
+    let vigente = true;
+    seguimientoApi
+      .usuariosDeDependencia(expediente.dependenciaActualId)
+      .then((u) => vigente && setUsuarios(u))
+      .catch(() => vigente && setUsuarios([]));
+    return () => {
+      vigente = false;
+    };
+  }, [puedeCrear, expediente.dependenciaActualId]);
+
+  async function crear(ev: FormEvent) {
+    ev.preventDefault();
+    setErrorAccion(null);
+    setEnviando(true);
+    try {
+      await seguimientoApi.crearTarea(expediente.id, { titulo, asignadoAId: Number(asignado), vencimiento: finDelDia(vence) });
+      setTitulo('');
+      setVence('');
+      onCambio();
+    } catch (err) {
+      setErrorAccion(err instanceof ApiError ? (err.details[0]?.message ?? err.message) : 'No se pudo crear la tarea');
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  return (
+    <Seccion titulo="Tareas" id="titulo-tareas">
+      {error && <Alerta texto={error} />}
+      {tareas && tareas.length === 0 && <p className="text-sm text-slate-500">Sin tareas.</p>}
+      {tareas && tareas.length > 0 && (
+        <ul className="divide-y divide-slate-100" aria-label="Tareas del expediente">
+          {tareas.map((t) => (
+            <li key={t.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-slate-800">{t.titulo}</p>
+                <p className="text-xs text-slate-500">
+                  {t.asignadoA.nombre} · vence {soloFecha(t.vencimiento)}
+                </p>
+              </div>
+              <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${CLASE_TAREA[t.estado]}`}>{ETIQUETA_TAREA[t.estado]}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {puedeCrear && (
+        <form onSubmit={crear} className="mt-4 grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-[2fr_1fr_1fr_auto] sm:items-end">
+          {errorAccion && (
+            <div className="sm:col-span-4">
+              <Alerta texto={errorAccion} />
+            </div>
+          )}
+          <label className="text-sm">
+            <span className="mb-1 block font-medium text-slate-700">Nueva tarea</span>
+            <input
+              type="text"
+              value={titulo}
+              maxLength={160}
+              onChange={(e) => setTitulo(e.target.value)}
+              className="w-full rounded-md border border-slate-300 px-3 py-1.5"
+            />
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-medium text-slate-700">Asignar a</span>
+            <select value={asignado} onChange={(e) => setAsignado(e.target.value)} className="w-full rounded-md border border-slate-300 px-3 py-1.5">
+              <option value="">Elegir…</option>
+              {usuarios.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.nombre}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-medium text-slate-700">Vence</span>
+            <input type="date" value={vence} onChange={(e) => setVence(e.target.value)} className="w-full rounded-md border border-slate-300 px-3 py-1.5" />
+          </label>
+          <button
+            type="submit"
+            disabled={titulo.trim().length < 3 || !asignado || !vence || enviando}
+            className="rounded-md bg-marca-700 px-4 py-2 text-sm font-medium text-white hover:bg-marca-900 disabled:opacity-50"
+          >
+            Crear tarea
+          </button>
+        </form>
+      )}
+    </Seccion>
+  );
+}
+
+function HistorialSeccion({ expediente, version }: Pick<PropsSeccion, 'expediente' | 'version'>) {
   const { datos: eventos, error } = useCarga(() => anexosApi.historial(expediente.id), version);
   return (
     <Seccion titulo="Historial" id="titulo-historial">
@@ -313,16 +437,23 @@ function HistorialSeccion({ expediente, version }: Omit<Props, 'onCambio'>) {
 }
 
 interface Props {
-  expediente: Pick<Expediente, 'id' | 'estado'>;
+  expediente: Pick<Expediente, 'id' | 'estado' | 'paseEnTransito' | 'dependenciaActualId'>;
   version: number;
   onCambio: () => void;
 }
 
+interface PropsSeccion extends Props {
+  /** Archivado o en tránsito: no admite cargas nuevas (el servidor también lo impide). */
+  editable: boolean;
+}
+
 export function AnexosExpediente(props: Props) {
+  const editable = props.expediente.estado !== 'ARCHIVADO' && !props.expediente.paseEnTransito;
   return (
     <>
-      <DocumentosSeccion {...props} />
-      <ActuacionesSeccion {...props} />
+      <TareasSeccion {...props} editable={editable} />
+      <DocumentosSeccion {...props} editable={editable} />
+      <ActuacionesSeccion {...props} editable={editable} />
       <HistorialSeccion expediente={props.expediente} version={props.version} />
     </>
   );

@@ -8,6 +8,11 @@
  * GET  /:id/actuaciones                       → listar actuaciones           (expedientes.consultar)
  * POST /:id/actuaciones                       → registrar actuación          (actuaciones.registrar)
  * GET  /:id/historial                         → línea de tiempo              (expedientes.consultar)
+ * POST /:id/estado                            → cambiar estado (S5-03)       (estados.cambiar)
+ * POST /:id/responsable                       → asignar responsable (S5-01)  (responsables.asignar)
+ * POST /:id/pases                             → enviar a otra dependencia    (expedientes.enviar)
+ * GET  /:id/tareas                            → tareas del expediente        (expedientes.consultar)
+ * POST /:id/tareas                            → crear tarea (S5-02)          (tareas.gestionar)
  *
  * Subida sin multer (ADR-12): el cuerpo es el archivo tal cual; el nombre va en
  * X-Nombre-Archivo y la descripción opcional en X-Descripcion (ambos con encodeURIComponent).
@@ -17,17 +22,27 @@ import type { ActuacionesService } from '../../modules/actuaciones/actuaciones.s
 import type { DocumentosService } from '../../modules/documentos/documentos.service.js';
 import type { ExpedientesService } from '../../modules/expedientes/expedientes.service.js';
 import type { HistorialService } from '../../modules/historial/historial.service.js';
-import { ValidationError } from '../../shared/errors.js';
+import type { PasesService } from '../../modules/pases/pases.service.js';
+import type { TareasService } from '../../modules/tareas/tareas.service.js';
+import { ForbiddenError, ValidationError } from '../../shared/errors.js';
 import { sendData } from '../../shared/http.js';
 import { contexto, requierePermiso, usuarioActual } from '../middlewares/auth.js';
-import { crearActuacionSchema, encabezadosArchivoSchema, idDocumentoSchema } from '../schemas/anexos.schemas.js';
-import { idExpedienteSchema } from '../schemas/expedientes.schemas.js';
-import { expedienteVisible } from './expedientes.routes.js';
+import {
+  crearActuacionSchema,
+  crearTareaSchema,
+  encabezadosArchivoSchema,
+  enviarExpedienteSchema,
+  idDocumentoSchema,
+} from '../schemas/anexos.schemas.js';
+import { asignarResponsableSchema, cambiarEstadoSchema, idExpedienteSchema } from '../schemas/expedientes.schemas.js';
+import { expedienteVisible, puedeVerTodas } from './expedientes.routes.js';
 
 export interface AnexosDeps {
   documentos: DocumentosService;
   actuaciones: ActuacionesService;
   historial: HistorialService;
+  pases: PasesService;
+  tareas: TareasService;
   maxBytes: number;
 }
 
@@ -123,6 +138,45 @@ export function anexosRouter(expedientes: ExpedientesService, deps: AnexosDeps):
   router.get('/historial', requierePermiso('expedientes.consultar'), async (req, res) => {
     const expediente = await expedienteDe(req, res);
     sendData(res, await deps.historial.obtener(expediente));
+  });
+
+  // ── Sprint 5: estado, responsable, pases y tareas ───────────────
+
+  router.post('/estado', requierePermiso('estados.cambiar'), async (req, res) => {
+    const expediente = await expedienteDe(req, res);
+    const { estado, motivo } = cambiarEstadoSchema.parse(req.body);
+    const usuario = usuarioActual(res)!;
+    sendData(res, await expedientes.cambiarEstado(expediente, estado, motivo || null, usuario.id, contexto(req, res)));
+  });
+
+  router.post('/responsable', requierePermiso('responsables.asignar'), async (req, res) => {
+    const expediente = await expedienteDe(req, res);
+    const { responsableId } = asignarResponsableSchema.parse(req.body);
+    const usuario = usuarioActual(res)!;
+    sendData(res, await expedientes.asignarResponsable(expediente, responsableId, usuario.id, contexto(req, res)));
+  });
+
+  router.post('/pases', requierePermiso('expedientes.enviar'), async (req, res) => {
+    const expediente = await expedienteDe(req, res);
+    const usuario = usuarioActual(res)!;
+    // Envía quien está en la dependencia actual del expediente (o quien ve todas, como el administrador).
+    if (!puedeVerTodas(usuario) && expediente.dependenciaActualId !== usuario.dependencia.id) {
+      throw new ForbiddenError('Solo la dependencia donde está el expediente puede enviarlo');
+    }
+    const body = enviarExpedienteSchema.parse(req.body);
+    sendData(res, await deps.pases.enviar(expediente, body, usuario.id, contexto(req, res)), 201);
+  });
+
+  router.get('/tareas', requierePermiso('expedientes.consultar'), async (req, res) => {
+    const expediente = await expedienteDe(req, res);
+    sendData(res, await deps.tareas.listar(expediente.id));
+  });
+
+  router.post('/tareas', requierePermiso('tareas.gestionar'), async (req, res) => {
+    const expediente = await expedienteDe(req, res);
+    const body = crearTareaSchema.parse(req.body);
+    const usuario = usuarioActual(res)!;
+    sendData(res, await deps.tareas.crear(expediente, body, usuario.id, contexto(req, res)), 201);
   });
 
   return router;

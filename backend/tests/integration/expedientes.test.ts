@@ -81,11 +81,11 @@ describe('Expedientes (RF-04 a RF-07, S3-01 a S3-06)', () => {
       expect(res.status).toBe(400);
     });
 
-    it('rechaza un responsable inexistente con 400', async () => {
+    it('el estado y el responsable no se cambian por PATCH: tienen rutas propias (400)', async () => {
       const admin = await comoAdmin(e);
-      const res = await admin.post('/api/expedientes').send({ ...EXPEDIENTE_VALIDO, responsableId: 999 });
-      expect(res.status).toBe(400);
-      expect(res.body.error.details[0].field).toBe('responsableId');
+      const { body: { data: creado } } = await admin.post('/api/expedientes').send(EXPEDIENTE_VALIDO);
+      expect((await admin.patch(`/api/expedientes/${creado.id}`).send({ estado: 'EN_TRAMITE' })).status).toBe(400);
+      expect((await admin.patch(`/api/expedientes/${creado.id}`).send({ responsableId: 1 })).status).toBe(400);
     });
 
     it('crea con prioridad y fecha de vencimiento', async () => {
@@ -161,7 +161,7 @@ describe('Expedientes (RF-04 a RF-07, S3-01 a S3-06)', () => {
     it('permite transición BORRADOR → EN_TRAMITE', async () => {
       const admin = await comoAdmin(e);
       const { body: { data: creado } } = await admin.post('/api/expedientes').send(EXPEDIENTE_VALIDO);
-      const res = await admin.patch(`/api/expedientes/${creado.id}`).send({ estado: 'EN_TRAMITE' });
+      const res = await admin.post(`/api/expedientes/${creado.id}/estado`).send({ estado: 'EN_TRAMITE' });
       expect(res.status).toBe(200);
       expect(res.body.data.estado).toBe('EN_TRAMITE');
     });
@@ -169,7 +169,7 @@ describe('Expedientes (RF-04 a RF-07, S3-01 a S3-06)', () => {
     it('rechaza transición inválida BORRADOR → ARCHIVADO', async () => {
       const admin = await comoAdmin(e);
       const { body: { data: creado } } = await admin.post('/api/expedientes').send(EXPEDIENTE_VALIDO);
-      const res = await admin.patch(`/api/expedientes/${creado.id}`).send({ estado: 'ARCHIVADO' });
+      const res = await admin.post(`/api/expedientes/${creado.id}/estado`).send({ estado: 'ARCHIVADO' });
       expect(res.status).toBe(409);
       expect(res.body.error.code).toBe('CONFLICT');
     });
@@ -178,9 +178,9 @@ describe('Expedientes (RF-04 a RF-07, S3-01 a S3-06)', () => {
       const admin = await comoAdmin(e);
       const { body: { data: creado } } = await admin.post('/api/expedientes').send(EXPEDIENTE_VALIDO);
       // BORRADOR → EN_TRAMITE → RESUELTO → ARCHIVADO
-      await admin.patch(`/api/expedientes/${creado.id}`).send({ estado: 'EN_TRAMITE' });
-      await admin.patch(`/api/expedientes/${creado.id}`).send({ estado: 'RESUELTO' });
-      await admin.patch(`/api/expedientes/${creado.id}`).send({ estado: 'ARCHIVADO' });
+      await admin.post(`/api/expedientes/${creado.id}/estado`).send({ estado: 'EN_TRAMITE' });
+      await admin.post(`/api/expedientes/${creado.id}/estado`).send({ estado: 'RESUELTO' });
+      await admin.post(`/api/expedientes/${creado.id}/estado`).send({ estado: 'ARCHIVADO' });
       const res = await admin.patch(`/api/expedientes/${creado.id}`).send({ caratula: 'Intento' });
       expect(res.status).toBe(409);
     });
@@ -227,7 +227,7 @@ describe('Expedientes (RF-04 a RF-07, S3-01 a S3-06)', () => {
       await crearVarios(admin);
       // Cambiar uno a EN_TRAMITE
       const { body: { data: todos } } = await admin.get('/api/expedientes');
-      await admin.patch(`/api/expedientes/${todos[0].id}`).send({ estado: 'EN_TRAMITE' });
+      await admin.post(`/api/expedientes/${todos[0].id}/estado`).send({ estado: 'EN_TRAMITE' });
       const res = await admin.get('/api/expedientes?estado=EN_TRAMITE');
       expect(res.body.data).toHaveLength(1);
     });

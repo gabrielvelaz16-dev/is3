@@ -4,7 +4,7 @@
  */
 import type { ActuacionRecord, ExpedienteRecord, Repos, TipoActuacion } from '../../database/repositories.js';
 import type { AuditoriaService, Contexto } from '../auditoria/auditoria.service.js';
-import { verificarNoArchivado } from '../expedientes/expedientes.service.js';
+import { verificarEditable } from '../expedientes/expedientes.service.js';
 
 export const TIPOS_ACTUACION = ['ACTUACION', 'OBSERVACION'] as const satisfies readonly TipoActuacion[];
 
@@ -24,7 +24,7 @@ export class ActuacionesService {
     usuarioId: number,
     ctx: Contexto = {},
   ): Promise<ActuacionRecord> {
-    verificarNoArchivado(expediente, 'registrar actuaciones en');
+    verificarEditable(expediente, 'registrar actuaciones en');
 
     const actuacion = await this.repos.actuaciones.create({
       expedienteId: expediente.id,

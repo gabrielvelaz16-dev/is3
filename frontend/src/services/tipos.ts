@@ -55,6 +55,8 @@ export interface Expediente {
   dependenciaActual: Referencia & { codigo: string };
   creadoPor: { id: number; nombre: string; username: string };
   responsable: { id: number; nombre: string; username: string } | null;
+  /** Pase sin recibir (Sprint 5): mientras exista, el expediente está en tránsito. */
+  paseEnTransito: { id: number; destino: Referencia & { codigo: string }; enviadoEn: string } | null;
 }
 
 export type EstadoExpediente = 'BORRADOR' | 'EN_TRAMITE' | 'EN_REVISION' | 'RESUELTO' | 'ARCHIVADO';
