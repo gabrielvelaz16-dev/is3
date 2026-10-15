@@ -40,7 +40,14 @@ export const ADMIN: UsuarioSesion = {
   email: 'admin@institucion.test',
   nombre: 'Administrador del sistema',
   rol: { id: 1, clave: 'ADMINISTRADOR', nombre: 'Administrador' },
-  permisos: ['usuarios.gestionar', 'auditoria.consultar', 'expedientes.crear'],
+  permisos: [
+    'usuarios.gestionar',
+    'auditoria.consultar',
+    'expedientes.crear',
+    'expedientes.consultar',
+    'expedientes.consultar_todas',
+    'expedientes.modificar',
+  ],
 };
 
 export const FUNCIONARIO: UsuarioSesion = {
@@ -69,6 +76,7 @@ export function renderApp(path: string, opciones: { usuario?: UsuarioSesion | nu
       usuario ? { body: { data: { usuario } } } : { status: 401, body: { error: { code: 'UNAUTHORIZED', message: 'Debe iniciar sesión', requestId: 't' } } },
     'GET /api/health': () => ({ body: health }),
     'POST /api/auth/logout': () => ({ body: { data: { ok: true } } }),
+    'GET /api/expedientes': () => ({ body: { data: [], paginacion: { total: 0, pagina: 1, porPagina: 20, totalPaginas: 0 } } }),
     ...opciones.handlers,
   });
   const vista = render(

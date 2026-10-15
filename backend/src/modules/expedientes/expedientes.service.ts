@@ -1,17 +1,18 @@
 /**
- * Servicio de expedientes — Sprint 3 (S3-01 a S3-06).
+ * Servicio de expedientes — Sprint 3 (S3-01 a S3-06), corregido antes del Sprint 4 (D-04 a D-07).
  * Reglas de negocio para crear, consultar, modificar y listar expedientes.
  */
 import type {
   CambiosExpediente,
+  EstadoExpediente,
   ExpedienteRecord,
-  ExpedientesRepo,
   FiltrosExpediente,
   NuevoExpediente,
+  Prioridad,
   Repos,
-  SecuenciaRepo,
 } from '../../database/repositories.js';
-import type { AuditoriaService } from '../auditoria/auditoria.service.js';
+import { ConflictError, NotFoundError, ValidationError } from '../../shared/errors.js';
+import type { AuditoriaService, Contexto } from '../auditoria/auditoria.service.js';
 
 export const TIPOS_EXPEDIENTE = [
   'NOTA',
@@ -30,9 +31,25 @@ export const ESTADOS_EXPEDIENTE = [
   'EN_REVISION',
   'RESUELTO',
   'ARCHIVADO',
-] as const;
+] as const satisfies readonly EstadoExpediente[];
 
-export const PRIORIDADES = ['BAJA', 'MEDIA', 'ALTA'] as const;
+export const PRIORIDADES = ['BAJA', 'MEDIA', 'ALTA'] as const satisfies readonly Prioridad[];
+
+/** Transiciones válidas del expediente (máquina de estados, RF-14). */
+export const TRANSICIONES: Record<EstadoExpediente, readonly EstadoExpediente[]> = {
+  BORRADOR: ['EN_TRAMITE'],
+  EN_TRAMITE: ['EN_REVISION', 'RESUELTO'],
+  EN_REVISION: ['EN_TRAMITE', 'RESUELTO'],
+  RESUELTO: ['ARCHIVADO', 'EN_TRAMITE'],
+  ARCHIVADO: [],
+};
+
+/** Un expediente archivado no admite cambios, documentos ni actuaciones. */
+export function verificarNoArchivado(expediente: Pick<ExpedienteRecord, 'estado'>, accion: string): void {
+  if (expediente.estado === 'ARCHIVADO') {
+    throw new ConflictError(`No se puede ${accion} un expediente archivado`);
+  }
+}
 
 /** Formato: EXP-AAAA-NNNNNN */
 export function formatearNumero(anio: number, secuencial: number): string {
@@ -44,7 +61,7 @@ export interface CrearExpedienteInput {
   asunto: string;
   tipo: string;
   iniciador: string;
-  prioridad?: string;
+  prioridad?: Prioridad;
   descripcion?: string | null;
   fechaVencimiento?: string | null;
   responsableId?: number | null;
@@ -55,8 +72,8 @@ export interface ModificarExpedienteInput {
   asunto?: string;
   tipo?: string;
   iniciador?: string;
-  prioridad?: string;
-  estado?: string;
+  prioridad?: Prioridad;
+  estado?: EstadoExpediente;
   descripcion?: string | null;
   fechaVencimiento?: string | null;
   responsableId?: number | null;
@@ -77,15 +94,9 @@ export class ExpedientesService {
     input: CrearExpedienteInput,
     usuarioId: number,
     dependenciaId: number,
-    meta?: { ip?: string; requestId?: string },
+    ctx: Contexto = {},
   ): Promise<ExpedienteRecord> {
-    // Validar que el responsable, si se indica, sea un usuario activo
-    if (input.responsableId) {
-      const resp = await this.repos.usuarios.findById(input.responsableId);
-      if (!resp || !resp.activo) {
-        throw Object.assign(new Error('El responsable indicado no existe o está inactivo'), { statusCode: 400 });
-      }
-    }
+    if (input.responsableId) await this.verificarResponsable(input.responsableId);
 
     // Generar número único
     const anio = this.ahora().getFullYear();
@@ -108,15 +119,12 @@ export class ExpedientesService {
 
     const expediente = await this.repos.expedientes.create(data);
 
-    await this.auditoria.registrar({
-      usuarioId,
+    await this.auditoria.registrar({ ...ctx, usuarioId }, {
       accion: 'expediente.crear',
       resultado: 'EXITO',
       entidad: 'Expediente',
       entidadId: String(expediente.id),
       detalle: { numero },
-      ip: meta?.ip,
-      requestId: meta?.requestId,
     });
 
     return expediente;
@@ -134,24 +142,14 @@ export class ExpedientesService {
     id: number,
     input: ModificarExpedienteInput,
     usuarioId: number,
-    meta?: { ip?: string; requestId?: string },
+    ctx: Contexto = {},
   ): Promise<ExpedienteRecord> {
     const existente = await this.repos.expedientes.findById(id);
-    if (!existente) {
-      throw Object.assign(new Error('Expediente no encontrado'), { statusCode: 404 });
-    }
+    if (!existente) throw new NotFoundError('Expediente no encontrado');
+    verificarNoArchivado(existente, 'modificar');
 
-    // No se puede modificar un expediente archivado
-    if (existente.estado === 'ARCHIVADO') {
-      throw Object.assign(new Error('No se puede modificar un expediente archivado'), { statusCode: 400 });
-    }
-
-    // Validar responsable si se cambia
     if (input.responsableId !== undefined && input.responsableId !== null) {
-      const resp = await this.repos.usuarios.findById(input.responsableId);
-      if (!resp || !resp.activo) {
-        throw Object.assign(new Error('El responsable indicado no existe o está inactivo'), { statusCode: 400 });
-      }
+      await this.verificarResponsable(input.responsableId);
     }
 
     // Validar transiciones de estado
@@ -174,35 +172,31 @@ export class ExpedientesService {
 
     const actualizado = await this.repos.expedientes.update(id, cambios);
 
-    await this.auditoria.registrar({
-      usuarioId,
+    await this.auditoria.registrar({ ...ctx, usuarioId }, {
       accion: 'expediente.modificar',
       resultado: 'EXITO',
       entidad: 'Expediente',
       entidadId: String(id),
-      detalle: { cambios: Object.keys(cambios) },
-      ip: meta?.ip,
-      requestId: meta?.requestId,
+      detalle: { cambios: Object.keys(cambios), ...(cambios.estado ? { estado: `${existente.estado} → ${cambios.estado}` } : {}) },
     });
 
     return actualizado;
   }
 
-  /** Transiciones válidas del expediente. */
-  private validarTransicion(desde: string, hacia: string): void {
-    const transiciones: Record<string, string[]> = {
-      BORRADOR: ['EN_TRAMITE'],
-      EN_TRAMITE: ['EN_REVISION', 'RESUELTO'],
-      EN_REVISION: ['EN_TRAMITE', 'RESUELTO'],
-      RESUELTO: ['ARCHIVADO', 'EN_TRAMITE'],
-      ARCHIVADO: [],
-    };
-    const permitidas = transiciones[desde];
-    if (!permitidas?.includes(hacia)) {
-      throw Object.assign(
-        new Error(`Transición de estado no permitida: ${desde} → ${hacia}`),
-        { statusCode: 400 },
+  private async verificarResponsable(responsableId: number): Promise<void> {
+    const resp = await this.repos.usuarios.findById(responsableId);
+    if (!resp || !resp.activo) {
+      throw new ValidationError(
+        [{ field: 'responsableId', message: 'El responsable indicado no existe o está inactivo' }],
+        'El responsable indicado no existe o está inactivo',
       );
+    }
+  }
+
+  /** 409 si la transición no está permitida por la máquina de estados (contrato de la API). */
+  private validarTransicion(desde: EstadoExpediente, hacia: EstadoExpediente): void {
+    if (!TRANSICIONES[desde].includes(hacia)) {
+      throw new ConflictError(`Transición de estado no permitida: ${desde} → ${hacia}`);
     }
   }
 }

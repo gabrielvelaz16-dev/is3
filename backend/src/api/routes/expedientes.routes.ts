@@ -6,7 +6,11 @@
  * PATCH  /api/expedientes/:id  → modificar expediente
  */
 import { Router } from 'express';
+import type { ExpedienteRecord } from '../../database/repositories.js';
 import type { ExpedientesService } from '../../modules/expedientes/expedientes.service.js';
+import type { UsuarioSesion } from '../../modules/usuarios/usuario.dto.js';
+import { ForbiddenError, NotFoundError } from '../../shared/errors.js';
+import { sendData } from '../../shared/http.js';
 import { contexto, requierePermiso, requiereSesion, usuarioActual } from '../middlewares/auth.js';
 import {
   crearExpedienteSchema,
@@ -15,19 +19,40 @@ import {
   modificarExpedienteSchema,
 } from '../schemas/expedientes.schemas.js';
 
+/** Quien no tiene `expedientes.consultar_todas` solo ve los expedientes de su dependencia. */
+export function puedeVerTodas(usuario: UsuarioSesion): boolean {
+  return usuario.permisos.includes('expedientes.consultar_todas');
+}
+
+/**
+ * Busca un expediente y verifica que el usuario pueda verlo (RF-06, RNF-02).
+ * Lo reutilizan los módulos que cuelgan de un expediente (documentos, actuaciones, historial).
+ */
+export async function expedienteVisible(
+  expedientes: ExpedientesService,
+  id: number,
+  usuario: UsuarioSesion,
+): Promise<ExpedienteRecord> {
+  const expediente = await expedientes.obtener(id);
+  if (!expediente) throw new NotFoundError('Expediente no encontrado');
+  if (!puedeVerTodas(usuario) && expediente.dependenciaActualId !== usuario.dependencia.id) {
+    throw new ForbiddenError('No tiene permiso para ver este expediente');
+  }
+  return expediente;
+}
+
 export function expedientesRouter(expedientes: ExpedientesService): Router {
   const router = Router();
 
   // Todas las rutas requieren sesión
   router.use(requiereSesion);
 
-  // POST /expedientes — crear
+  // POST /expedientes — crear (queda en la dependencia del usuario)
   router.post('/', requierePermiso('expedientes.crear'), async (req, res) => {
     const body = crearExpedienteSchema.parse(req.body);
     const usuario = usuarioActual(res)!;
-    const { ip, requestId } = contexto(req, res);
-    const expediente = await expedientes.crear(body, usuario.id, usuario.dependenciaId, { ip, requestId });
-    res.status(201).json({ data: expediente });
+    const expediente = await expedientes.crear(body, usuario.id, usuario.dependencia.id, contexto(req, res));
+    sendData(res, expediente, 201);
   });
 
   // GET /expedientes — listar
@@ -35,14 +60,9 @@ export function expedientesRouter(expedientes: ExpedientesService): Router {
     const { pagina, porPagina, ...filtros } = listarExpedientesSchema.parse(req.query);
     const usuario = usuarioActual(res)!;
 
-    // Si no tiene permiso de consultar todas, solo ve los de su dependencia
-    const dependenciaId = usuario.permisos.includes('expedientes.consultar_todas')
-      ? filtros.dependenciaId
-      : (filtros.dependenciaId ?? usuario.dependenciaId);
-
     const resultado = await expedientes.listar({
       ...filtros,
-      dependenciaId: usuario.permisos.includes('expedientes.consultar_todas') ? dependenciaId : usuario.dependenciaId,
+      dependenciaId: puedeVerTodas(usuario) ? filtros.dependenciaId : usuario.dependencia.id,
       skip: (pagina - 1) * porPagina,
       take: porPagina,
     });
@@ -61,30 +81,16 @@ export function expedientesRouter(expedientes: ExpedientesService): Router {
   // GET /expedientes/:id — consultar
   router.get('/:id', requierePermiso('expedientes.consultar'), async (req, res) => {
     const { id } = idExpedienteSchema.parse(req.params);
-    const expediente = await expedientes.obtener(id);
-    if (!expediente) {
-      res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Expediente no encontrado', requestId: res.locals.requestId } });
-      return;
-    }
-
-    // Verificar que el usuario pueda ver este expediente (misma dependencia o consultar_todas)
-    const usuario = usuarioActual(res)!;
-    if (!usuario.permisos.includes('expedientes.consultar_todas') && expediente.dependenciaActualId !== usuario.dependenciaId) {
-      res.status(403).json({ error: { code: 'FORBIDDEN', message: 'No tiene permiso para ver este expediente', requestId: res.locals.requestId } });
-      return;
-    }
-
-    res.json({ data: expediente });
+    sendData(res, await expedienteVisible(expedientes, id, usuarioActual(res)!));
   });
 
-  // PATCH /expedientes/:id — modificar
+  // PATCH /expedientes/:id — modificar (solo expedientes que el usuario puede ver)
   router.patch('/:id', requierePermiso('expedientes.modificar'), async (req, res) => {
     const { id } = idExpedienteSchema.parse(req.params);
     const body = modificarExpedienteSchema.parse(req.body);
     const usuario = usuarioActual(res)!;
-    const { ip, requestId } = contexto(req, res);
-    const actualizado = await expedientes.modificar(id, body, usuario.id, { ip, requestId });
-    res.json({ data: actualizado });
+    await expedienteVisible(expedientes, id, usuario);
+    sendData(res, await expedientes.modificar(id, body, usuario.id, contexto(req, res)));
   });
 
   return router;

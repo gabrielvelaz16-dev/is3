@@ -75,10 +75,17 @@ describe('Expedientes (RF-04 a RF-07, S3-01 a S3-06)', () => {
       expect(r2.body.data.numero).toMatch(/000002$/);
     });
 
-    it('rechaza datos incompletos con 422', async () => {
+    it('rechaza datos incompletos con 400 (contrato de la API)', async () => {
       const admin = await comoAdmin(e);
       const res = await admin.post('/api/expedientes').send({ caratula: 'AB' }); // caratula muy corta, faltan campos
-      expect(res.status).toBe(422);
+      expect(res.status).toBe(400);
+    });
+
+    it('rechaza un responsable inexistente con 400', async () => {
+      const admin = await comoAdmin(e);
+      const res = await admin.post('/api/expedientes').send({ ...EXPEDIENTE_VALIDO, responsableId: 999 });
+      expect(res.status).toBe(400);
+      expect(res.body.error.details[0].field).toBe('responsableId');
     });
 
     it('crea con prioridad y fecha de vencimiento', async () => {
@@ -122,6 +129,17 @@ describe('Expedientes (RF-04 a RF-07, S3-01 a S3-06)', () => {
       expect(res.body.data.creadoPor).toBeDefined();
     });
 
+    it('un usuario de otra dependencia no puede ver ni modificar el expediente (403)', async () => {
+      const mesa = request.agent(e.app);
+      await mesa.post('/api/auth/login').send({ usuario: 'mesa', password: PASSWORD_USUARIO });
+      const { body: { data: creado } } = await mesa.post('/api/expedientes').send(EXPEDIENTE_VALIDO); // queda en Mesa de Entradas
+      const funcionario = await comoFuncionario(e); // Administración General, sin consultar_todas
+      expect((await funcionario.get(`/api/expedientes/${creado.id}`)).status).toBe(403);
+      expect((await funcionario.patch(`/api/expedientes/${creado.id}`).send({ caratula: 'Intrusión' })).status).toBe(403);
+      const lista = await funcionario.get('/api/expedientes');
+      expect(lista.body.data).toHaveLength(0);
+    });
+
     it('responde 404 para un id inexistente', async () => {
       const admin = await comoAdmin(e);
       const res = await admin.get('/api/expedientes/9999');
@@ -152,7 +170,8 @@ describe('Expedientes (RF-04 a RF-07, S3-01 a S3-06)', () => {
       const admin = await comoAdmin(e);
       const { body: { data: creado } } = await admin.post('/api/expedientes').send(EXPEDIENTE_VALIDO);
       const res = await admin.patch(`/api/expedientes/${creado.id}`).send({ estado: 'ARCHIVADO' });
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(409);
+      expect(res.body.error.code).toBe('CONFLICT');
     });
 
     it('no se puede modificar un expediente archivado', async () => {
@@ -163,7 +182,7 @@ describe('Expedientes (RF-04 a RF-07, S3-01 a S3-06)', () => {
       await admin.patch(`/api/expedientes/${creado.id}`).send({ estado: 'RESUELTO' });
       await admin.patch(`/api/expedientes/${creado.id}`).send({ estado: 'ARCHIVADO' });
       const res = await admin.patch(`/api/expedientes/${creado.id}`).send({ caratula: 'Intento' });
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(409);
     });
 
     it('registra la modificación en la auditoría', async () => {
@@ -178,7 +197,7 @@ describe('Expedientes (RF-04 a RF-07, S3-01 a S3-06)', () => {
   // ── Listado con búsqueda, filtros y paginación (S3-04) ─────────
 
   describe('listado con búsqueda, filtros y paginación (S3-04)', () => {
-    async function crearVarios(admin: request.SuperAgentTest) {
+    async function crearVarios(admin: Awaited<ReturnType<typeof comoAdmin>>) {
       await admin.post('/api/expedientes').send({ ...EXPEDIENTE_VALIDO, caratula: 'Licencia anual', tipo: 'SOLICITUD' });
       await admin.post('/api/expedientes').send({ ...EXPEDIENTE_VALIDO, caratula: 'Nota interna', tipo: 'NOTA', iniciador: 'María López' });
       await admin.post('/api/expedientes').send({ ...EXPEDIENTE_VALIDO, caratula: 'Resolución 123', tipo: 'RESOLUCION', iniciador: 'Director General' });
@@ -197,9 +216,10 @@ describe('Expedientes (RF-04 a RF-07, S3-01 a S3-06)', () => {
     it('busca por texto en carátula', async () => {
       const admin = await comoAdmin(e);
       await crearVarios(admin);
-      const res = await admin.get('/api/expedientes?q=licencia');
+      // "anual" solo aparece en una carátula ("licencia" también está en el asunto de los tres).
+      const res = await admin.get('/api/expedientes?q=ANUAL');
       expect(res.body.data).toHaveLength(1);
-      expect(res.body.data[0].caratula).toContain('Licencia');
+      expect(res.body.data[0].caratula).toBe('Licencia anual');
     });
 
     it('filtra por estado', async () => {
@@ -254,20 +274,20 @@ describe('Expedientes (RF-04 a RF-07, S3-01 a S3-06)', () => {
     it('rechaza tipo de expediente inválido', async () => {
       const admin = await comoAdmin(e);
       const res = await admin.post('/api/expedientes').send({ ...EXPEDIENTE_VALIDO, tipo: 'INVALIDO' });
-      expect(res.status).toBe(422);
+      expect(res.status).toBe(400);
     });
 
     it('rechaza prioridad inválida', async () => {
       const admin = await comoAdmin(e);
       const res = await admin.post('/api/expedientes').send({ ...EXPEDIENTE_VALIDO, prioridad: 'URGENTE' });
-      expect(res.status).toBe(422);
+      expect(res.status).toBe(400);
     });
 
     it('rechaza campos extra en la modificación (.strict())', async () => {
       const admin = await comoAdmin(e);
       const { body: { data: creado } } = await admin.post('/api/expedientes').send(EXPEDIENTE_VALIDO);
       const res = await admin.patch(`/api/expedientes/${creado.id}`).send({ campoInventado: 'valor' });
-      expect(res.status).toBe(422);
+      expect(res.status).toBe(400);
     });
   });
 });
