@@ -12,6 +12,7 @@ import type { UsuarioSesion } from '../../modules/usuarios/usuario.dto.js';
 import { ForbiddenError, NotFoundError } from '../../shared/errors.js';
 import { sendData } from '../../shared/http.js';
 import { contexto, requierePermiso, requiereSesion, usuarioActual } from '../middlewares/auth.js';
+import { type AnexosDeps, anexosRouter } from './anexos.routes.js';
 import {
   crearExpedienteSchema,
   idExpedienteSchema,
@@ -41,11 +42,14 @@ export async function expedienteVisible(
   return expediente;
 }
 
-export function expedientesRouter(expedientes: ExpedientesService): Router {
+export function expedientesRouter(expedientes: ExpedientesService, anexos: AnexosDeps): Router {
   const router = Router();
 
   // Todas las rutas requieren sesión
   router.use(requiereSesion);
+
+  // Documentos, actuaciones e historial de cada expediente (Sprint 4)
+  router.use('/:id', anexosRouter(expedientes, anexos));
 
   // POST /expedientes — crear (queda en la dependencia del usuario)
   router.post('/', requierePermiso('expedientes.crear'), async (req, res) => {

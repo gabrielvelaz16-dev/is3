@@ -8,7 +8,8 @@ import { z } from 'zod';
  */
 
 // src/config -> src -> backend -> raíz del repositorio (igual desde dist/config).
-const rootEnvFile = resolve(import.meta.dirname, '../../../.env');
+export const RAIZ_REPOSITORIO = resolve(import.meta.dirname, '../../..');
+const rootEnvFile = resolve(RAIZ_REPOSITORIO, '.env');
 if (process.env.NODE_ENV !== 'test' && existsSync(rootEnvFile)) {
   // No pisa variables que ya existan en el entorno (por ejemplo, en CI).
   process.loadEnvFile(rootEnvFile);
@@ -22,6 +23,10 @@ export const envSchema = z.object({
   SESSION_HOURS: z.coerce.number().min(1).max(24).default(8),
   /** true solo si se sirve por HTTPS; en local (http://localhost) debe ser false. */
   COOKIE_SECURE: z.stringbool().default(false),
+  /** Carpeta de documentos (S4-02). Si es relativa, se toma desde la raíz del repositorio. */
+  STORAGE_PATH: z.string().min(1).default('./storage/documentos'),
+  /** Tamaño máximo de un documento en MB (RF-08). */
+  MAX_UPLOAD_MB: z.coerce.number().min(1).max(50).default(10),
 });
 
 export type Env = z.infer<typeof envSchema>;

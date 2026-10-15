@@ -1,5 +1,8 @@
 import type {
+  ActuacionRecord,
+  CambioEstadoRecord,
   CambiosExpediente,
+  DocumentoRecord,
   DependenciaRecord,
   EventoAuditoria,
   ExpedienteRecord,
@@ -12,6 +15,7 @@ import type {
 } from '../../src/database/repositories.js';
 import { createApp } from '../../src/app.js';
 import type { ApiDeps } from '../../src/api/routes/index.js';
+import { AlmacenamientoEnMemoria } from '../../src/integrations/almacenamiento/almacenamiento.js';
 import { LocalIdentityProvider } from '../../src/integrations/identity/identity-provider.js';
 import { hashPassword } from '../../src/security/password.js';
 import { ROLES } from '../../src/security/permissions.js';
@@ -42,6 +46,18 @@ export function crearReposEnMemoria() {
   type FilaExp = Omit<ExpedienteRecord, 'dependenciaActual' | 'creadoPor' | 'responsable'>;
   const expedientes: FilaExp[] = [];
   const secuencias = new Map<number, number>();
+
+  // Sprint 4: documentos, actuaciones y cambios de estado en memoria
+  const documentos: DocumentoRecord[] = [];
+  const actuaciones: ActuacionRecord[] = [];
+  const cambiosEstado: CambioEstadoRecord[] = [];
+  const persona = (id: number) => {
+    const u = usuarios.find((x) => x.id === id)!;
+    return { id: u.id, nombre: u.nombre, username: u.username };
+  };
+  // Fechas estrictamente crecientes, para que el orden del historial sea determinista.
+  let reloj = Date.now();
+  const ahora = () => new Date(++reloj);
 
   const completarExp = (f: FilaExp): ExpedienteRecord => {
     const dep = dependencias.find((d) => d.id === f.dependenciaActualId)!;
@@ -148,7 +164,7 @@ export function crearReposEnMemoria() {
         return { items: filtrados.slice(filtros.skip, filtros.skip + filtros.take).map(completarExp), total: filtrados.length };
       },
       create: async (data: NuevoExpediente) => {
-        const now = new Date();
+        const now = ahora();
         const fila: FilaExp = {
           id: expedientes.length + 1,
           numero: data.numero,
@@ -177,6 +193,32 @@ export function crearReposEnMemoria() {
       },
     },
 
+    documentos: {
+      listByExpediente: async (expedienteId) => documentos.filter((d) => d.expedienteId === expedienteId),
+      findById: async (id) => documentos.find((d) => d.id === id) ?? null,
+      create: async ({ subidoPorId, ...data }) => {
+        const doc: DocumentoRecord = { ...data, id: documentos.length + 1, subidoEn: ahora(), subidoPor: persona(subidoPorId) };
+        documentos.push(doc);
+        return doc;
+      },
+    },
+
+    actuaciones: {
+      listByExpediente: async (expedienteId) => actuaciones.filter((a) => a.expedienteId === expedienteId),
+      create: async ({ autorId, ...data }) => {
+        const act: ActuacionRecord = { ...data, id: actuaciones.length + 1, fecha: ahora(), autor: persona(autorId) };
+        actuaciones.push(act);
+        return act;
+      },
+    },
+
+    cambiosEstado: {
+      listByExpediente: async (expedienteId) => cambiosEstado.filter((c) => c.expedienteId === expedienteId),
+      insert: async ({ usuarioId, ...data }) => {
+        cambiosEstado.push({ ...data, id: cambiosEstado.length + 1, fecha: ahora(), usuario: persona(usuarioId) });
+      },
+    },
+
     secuencia: {
       siguienteNumero: async (anio: number) => {
         const actual = secuencias.get(anio) ?? 0;
@@ -195,7 +237,7 @@ export function crearReposEnMemoria() {
     return repos.usuarios.create({ username, email, nombre: username, passwordHash: await hashPassword(password), rolId: rolId(rolClave), dependenciaId: 1, ...extra });
   }
 
-  return { repos, auditoria, sesiones, rolId, agregarUsuario };
+  return { repos, auditoria, sesiones, rolId, agregarUsuario, documentos, actuaciones, cambiosEstado };
 }
 
 export const PASSWORD_ADMIN = '12345';
@@ -206,12 +248,14 @@ export async function crearEntorno(overrides: Partial<ApiDeps> = {}) {
   const mem = crearReposEnMemoria();
   const admin = await mem.agregarUsuario('admin@institucion.test', PASSWORD_ADMIN, 'ADMINISTRADOR');
   const funcionario = await mem.agregarUsuario('funcionario@institucion.test', PASSWORD_USUARIO, 'FUNCIONARIO');
+  const almacenamiento = new AlmacenamientoEnMemoria();
   const app = createApp({
+    almacenamiento,
     dbCheck: async () => true,
     version: '0.1.0',
     repos: mem.repos,
     identity: new LocalIdentityProvider(mem.repos.usuarios),
     ...overrides,
   });
-  return { app, ...mem, admin, funcionario };
+  return { app, ...mem, admin, funcionario, almacenamiento };
 }

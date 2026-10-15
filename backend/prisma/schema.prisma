@@ -73,6 +73,9 @@ model Usuario {
 
   expedientesCreados     Expediente[] @relation("creadoPor")
   expedientesResponsable Expediente[] @relation("responsable")
+  documentosSubidos      Documento[]
+  actuaciones            Actuacion[]
+  cambiosEstado          CambioEstado[]
 
   @@index([rolId])
   @@index([dependenciaId])
@@ -151,6 +154,9 @@ model Expediente {
   dependenciaActual Dependencia @relation(fields: [dependenciaActualId], references: [id], onDelete: Restrict)
   creadoPor         Usuario     @relation("creadoPor", fields: [creadoPorId], references: [id], onDelete: Restrict)
   responsable       Usuario?    @relation("responsable", fields: [responsableId], references: [id], onDelete: Restrict)
+  documentos        Documento[]
+  actuaciones       Actuacion[]
+  cambiosEstado     CambioEstado[]
 
   @@index([estado])
   @@index([dependenciaActualId])
@@ -165,4 +171,65 @@ model Secuencia {
   ultimoNumero  Int @default(0) @map("ultimo_numero")
 
   @@map("secuencias")
+}
+
+// ── Sprint 4: Documentos y actuaciones ─────────────────────────────
+
+enum TipoActuacion {
+  ACTUACION
+  OBSERVACION
+}
+
+/// Documento adjunto a un expediente (RF-08, RNF-04, ADR-08, ADR-12).
+/// El archivo vive en STORAGE_PATH con un nombre aleatorio; aquí solo los metadatos y el hash.
+/// Solo inserción: un documento incorporado no se modifica ni se borra (historial completo).
+model Documento {
+  id               Int      @id @default(autoincrement())
+  expedienteId     Int      @map("expediente_id")
+  nombreOriginal   String   @map("nombre_original") @db.VarChar(255)
+  nombreAlmacenado String   @unique @map("nombre_almacenado") @db.VarChar(80)
+  tipoMime         String   @map("tipo_mime") @db.VarChar(120)
+  tamanoBytes      Int      @map("tamano_bytes")
+  hashSha256       String   @map("hash_sha256") @db.Char(64)
+  descripcion      String?  @db.VarChar(500)
+  subidoPorId      Int      @map("subido_por_id")
+  subidoEn         DateTime @default(now()) @map("subido_en")
+
+  expediente Expediente @relation(fields: [expedienteId], references: [id], onDelete: Restrict)
+  subidoPor  Usuario    @relation(fields: [subidoPorId], references: [id], onDelete: Restrict)
+
+  @@index([expedienteId])
+  @@map("documentos")
+}
+
+/// Actuación u observación registrada en un expediente (RF-10). Solo inserción.
+model Actuacion {
+  id           Int           @id @default(autoincrement())
+  expedienteId Int           @map("expediente_id")
+  tipo         TipoActuacion
+  texto        String        @db.Text
+  autorId      Int           @map("autor_id")
+  fecha        DateTime      @default(now())
+
+  expediente Expediente @relation(fields: [expedienteId], references: [id], onDelete: Restrict)
+  autor      Usuario    @relation(fields: [autorId], references: [id], onDelete: Restrict)
+
+  @@index([expedienteId])
+  @@map("actuaciones")
+}
+
+/// Cada cambio de estado del expediente, para el historial (RF-11). Solo inserción.
+model CambioEstado {
+  id             Int               @id @default(autoincrement())
+  expedienteId   Int               @map("expediente_id")
+  estadoAnterior EstadoExpediente? @map("estado_anterior")
+  estadoNuevo    EstadoExpediente  @map("estado_nuevo")
+  usuarioId      Int               @map("usuario_id")
+  fecha          DateTime          @default(now())
+
+  expediente Expediente @relation(fields: [expedienteId], references: [id], onDelete: Restrict)
+  usuario    Usuario    @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@index([expedienteId])
+  @@map("cambios_estado")
 }
