@@ -12,3 +12,15 @@ if (cobertura && existsSync(cobertura)) {
   msg += ` Cobertura: líneas ${t.lines.pct}%, sentencias ${t.statements.pct}%, funciones ${t.functions.pct}%, ramas ${t.branches.pct}%.`;
 }
 console.log(`::notice title=${etiqueta}::${msg}`);
+
+// Cada prueba fallida se publica como anotación "error" con su archivo y el
+// primer renglón del motivo, para diagnosticarla sin abrir el log completo.
+const limpiar = (t) => String(t).replace(/\u001b\[[0-9;]*m/g, '').replace(/%/g, '%25').replace(/\r?\n/g, ' ').slice(0, 400);
+for (const archivo of r.testResults ?? []) {
+  for (const prueba of archivo.assertionResults ?? []) {
+    if (prueba.status !== 'failed') continue;
+    const ruta = archivo.name.replace(/^.*?\/(backend|frontend)\//, '$1/');
+    const motivo = limpiar((prueba.failureMessages ?? [])[0]?.split('\n')[0] ?? 'sin detalle');
+    console.log(`::error file=${ruta},title=${etiqueta} · prueba fallida::${limpiar(prueba.fullName)} → ${motivo}`);
+  }
+}
