@@ -70,15 +70,19 @@ Ejemplo del TP: Sprint 1 = 18 SP, Sprint 2 = 20 SP, Sprint 3 = 22 SP → velocid
 
 | Sprint | SP comprometidos | SP terminados | Velocidad promedio acumulada | SP restantes | Pronóstico (sprints) |
 |---|---|---|---|---|---|
-| S1 | 3 | pendiente | — | — | — |
-| S2 | 12 | pendiente | — | — | — |
-| S3 | 16 | pendiente | — | — | — |
-| S4 | 11 | pendiente | — | — | — |
-| S5 | 29 (ver alerta) | pendiente | — | — | — |
-| S6 | 13 | pendiente | — | — | — |
+| S1 | 3 | 3 | 3 | 94 | — |
+| S2 | 12 | 12 | 7,5 | 82 | — |
+| S3 | 16 | 16 (con correcciones del 15/10) | 10,3 | 66 | 6,4 |
+| S4 | 11 | 11 | 13,0 | 55 | 4,2 |
+| S5 | 21 (29 antes de CR-03) | 21 | 16,0 | 34 | 2,1 → **3 sprints** |
+| S6 | 21 (13 + S5-06 por CR-03) | pendiente | — | — | — |
 | S7 | 13 | pendiente | — | — | — |
 
 Como los Sprints 1 y 8 tienen mayormente tareas técnicas sin SP, también se registran **horas reales por tarjeta** para no subestimar el esfuerzo.
+
+La velocidad promedio acumulada usa los últimos 3 sprints (por ejemplo, después del S5: (16 + 11 + 21) / 3 = 16 SP).
+
+**Lectura del pronóstico (15/10/2026):** quedan 34 SP (Sprints 6 y 7) y la velocidad promedio es 16 SP, así que el pronóstico es de 3 sprints contra 2 planificados: el Sprint 6 (21 SP) es el de mayor riesgo. **Limitación:** en el prototipo los sprints se ejecutaron en horas, con asistencia de IA, y no en las 2 semanas del plan institucional; la velocidad sirve para comparar sprints entre sí, no para estimar el calendario real del proyecto institucional.
 
 ## 5. Cronograma maestro (proyecto institucional)
 

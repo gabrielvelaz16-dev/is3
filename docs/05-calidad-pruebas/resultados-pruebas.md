@@ -13,7 +13,7 @@ Este documento registra **solo resultados reales** obtenidos de la ejecución de
 | S3 | 14/10/2026 | — | — | Falló la verificación de tipos (backend) y 4 pruebas (frontend) | — | [Run 38609784288](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38609784288) · defectos D-04 a D-07 |
 | S3 corregido | 15/10/2026 | Backend 76 · Frontend 20 | 96 (76 + 20) | 0 | Backend total: líneas 93,92 %, sentencias 91,85 %, funciones 93,39 %, ramas 86,57 % | [Run 38739999945](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38739999945) · commit `bd4cc9f` |
 | S4 | 15/10/2026 | Backend 99 · Frontend 26 | 125 (99 + 26) | 0 | Backend total: líneas 92,14 %, sentencias 90,43 %, funciones 92,95 %, ramas 84,56 % | [Run 38742104807](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38742104807) · commit `cbfd2ea` |
-| S5 | | | | | | |
+| S5 | 15/10/2026 | Backend 115 · Frontend 34 | 149 (115 + 34) | 0 | Backend total: líneas 93,46 %, sentencias 91,37 %, funciones 93,64 %, ramas 85,46 % | [Run 38745648399](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38745648399) · commit `5f2a500` |
 | S6 | | | | | | |
 | S7 | | | | | | |
 | S8 (regresión) | | | | | | |
@@ -34,6 +34,13 @@ Este documento registra **solo resultados reales** obtenidos de la ejecución de
 | PR-09 | 15/10/2026 | Aprobada | Descarga íntegra con `Content-Disposition` y `nosniff`; 403 para otra dependencia; 404 con id de otro expediente; archivo alterado → 500 genérico y auditoría `FALLO`. |
 | PR-10 | 15/10/2026 | Aprobada | Actuaciones y observaciones con fecha y autor del servidor; 400 para texto vacío, tipo inválido o `autorId` enviado por el cliente; sin rutas de edición ni borrado; 409 en expediente archivado. |
 | PR-11 | 15/10/2026 | Aprobada | Historial: creación, cambios de estado, documentos y observaciones en orden cronológico; una modificación sin cambio de estado no agrega eventos. Frontend `anexos.test.tsx` (6 casos). |
+| PR-12 | 15/10/2026 | Aprobada | `seguimiento.test.ts`: el jefe asigna y quita responsable (queda en el historial); 403 sin `responsables.asignar`; 400 para usuario de otra dependencia o inexistente. |
+| PR-13 | 15/10/2026 | Aprobada | Tarea con responsable y vencimiento; 400 sin vencimiento, con vencimiento pasado o asignada a otra dependencia; avance hasta completada con fecha de cierre; 409 al cambiar una tarea cerrada; 403 para usuarios ajenos. |
+| PR-14 | 15/10/2026 | Aprobada | Cambio de estado por ruta propia con motivo en el historial; 403 sin `estados.cambiar`; 409 transición inválida; el PATCH general rechaza `estado` y `responsableId` (400). |
+| PR-15 | 15/10/2026 | Aprobada | Envío: el borrador pasa a en trámite, el expediente queda en tránsito y no admite cambios ni actuaciones (409) ni un segundo envío; 400 destino igual, inactivo o inexistente y sin motivo; 403 desde otra dependencia. |
+| PR-16 | 15/10/2026 | Aprobada | Bandeja de la dependencia destino, consulta antes de recibir, 403 si recibe el origen, 409 al recibir dos veces; al recibir cambia la dependencia y se quita el responsable; historial con pase enviado y recibido. |
+| PR-17 | 15/10/2026 | Aprobada (parcial, CR-03) | Pendientes: tareas abiertas con alerta `POR_VENCER` que pasa a `VENCIDA` al avanzar el reloj, recibidos sin confirmar y expedientes por vencer. Las notificaciones internas quedan para el Sprint 6. Frontend `seguimiento.test.tsx` (8 casos). |
+| PR-20 (Sprint 5) | 15/10/2026 | Aprobada | En CI, `asignaciones` y `pases` rechazaron `DELETE`, `UPDATE` y `TRUNCATE`; `pases` rechazó modificar el motivo. |
 | PR-20 (Sprint 4) | 15/10/2026 | Aprobada | En CI, con una fila en cada tabla, `auditoria`, `documentos`, `actuaciones` y `cambios_estado` rechazaron `DELETE`, `UPDATE` y `TRUNCATE`. |
 
 **Defectos detectados por la CI:**
@@ -48,6 +55,7 @@ Este documento registra **solo resultados reales** obtenidos de la ejecución de
 | D-06 | Revisión de código (15/10/2026) | **Seguridad:** `PATCH /api/expedientes/:id` permitía modificar expedientes de otra dependencia | Misma verificación de visibilidad que la consulta (`expedienteVisible`) y prueba de 403 |
 | D-07 | Revisión de código | Las reglas de negocio lanzaban `Error` con `statusCode`, que el manejador central no reconoce: respondían 500. Las pruebas esperaban 422 para validaciones, distinto del contrato (400) | Errores tipados: 400 validación, 404 inexistente, 409 transición no permitida o expediente archivado (contrato de la API) |
 | D-09 | CI del Sprint 4 (run 38741786708) | La nueva verificación de solo inserción informó que `documentos` "permitió" un `DELETE`: la tabla estaba vacía y los triggers por fila no se disparan sin filas (falso resultado del paso de CI, no del sistema) | El paso inserta una fila en cada tabla antes de verificar y falla si alguna está vacía (commit `cbfd2ea`) |
+| — | CI del Sprint 5 (runs con 114/115 y 33/34) | Dos pruebas nuevas estaban mal escritas: un texto de actuación de 2 letras (la validación respondía 400 antes que la regla de tránsito) y una búsqueda ambigua de una opción en la pantalla. No eran defectos del sistema | Datos y consultas de las pruebas corregidos |
 | D-08 | CI de la corrección ([run 38739773468](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38739773468)) | La prueba "busca por texto en carátula" buscaba "licencia", palabra presente en el asunto de los 3 expedientes de prueba: el sistema devolvía 3 (correcto) y la prueba esperaba 1 | La prueba busca "ANUAL", que solo está en una carátula (y verifica que la búsqueda no distingue mayúsculas) |
 
 ## 3. Pruebas manuales

@@ -82,3 +82,17 @@ Migración `20261015120000_documentos_actuaciones`.
 - `cambios_estado` registra las transiciones desde el Sprint 4. Los expedientes de demostración creados antes muestran en su historial solo la creación y lo posterior.
 - La tabla `Pase` del diseño inicial se implementa en el Sprint 5 (envío y recepción entre dependencias).
 - El archivo del documento no está en la base: vive en `STORAGE_PATH` (por defecto `storage/documentos/` en la raíz del repositorio, fuera de Git) con el nombre UUID (ADR-08).
+
+## 8. Implementación del Sprint 5 (tareas, pases y asignaciones)
+
+Migración `20261015150000_tareas_pases`.
+
+| Tabla | Columnas principales | Restricciones |
+|---|---|---|
+| `tareas` | `expediente_id`, `titulo`, `descripcion`, `asignado_a_id`, `creado_por_id`, `vencimiento` (obligatorio), `estado`, `creada_en`, `cerrada_en` | Título no vacío; `cerrada_en` presente solo si está completada o cancelada (`CHECK`) |
+| `pases` | `expediente_id`, `origen_id`, `destino_id`, `motivo`, `enviado_por_id`, `enviado_en`, `recibido_por_id`, `recibido_en` | Origen ≠ destino; recepción completa o vacía; **índice único parcial: un solo pase sin recibir por expediente**; trigger que solo permite registrar la recepción una vez y nunca borrar |
+| `asignaciones` | `expediente_id`, `responsable_id` (nulo = se quitó), `usuario_id`, `fecha` | Solo inserción |
+| `cambios_estado` | + `motivo` | — |
+
+- La recepción de un pase y el cambio de dependencia del expediente se hacen en **una transacción**; la condición `recibido_en IS NULL` evita registrar dos veces la misma recepción.
+- "En tránsito" no es un estado del expediente: se deriva de la existencia de un pase sin recibir.

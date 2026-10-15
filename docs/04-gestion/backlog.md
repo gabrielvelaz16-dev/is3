@@ -92,7 +92,7 @@ SP = Story Points (escala 1-2-3-5-8-13). Las tareas técnicas y de documentació
 | S4-04 | Consultar historial del expediente | 3 | TP |
 | S4-05 | Control de acceso a documentos | — | Nueva (riesgo R06) |
 
-### Sprint 5 — Tareas y seguimiento (E5) · 29 SP
+### Sprint 5 — Tareas y seguimiento (E5) · 21 SP (29 antes de CR-03)
 
 | Código | Ítem | SP | Origen |
 |---|---|---|---|
@@ -101,7 +101,7 @@ SP = Story Points (escala 1-2-3-5-8-13). Las tareas técnicas y de documentació
 | S5-03 | Cambiar estado con transiciones válidas | 3 | TP |
 | S5-04 | Enviar expediente a otra dependencia | 5 | TP |
 | S5-05 | Recibir expediente | 5 | TP |
-| S5-06 | Pendientes, alertas y notificaciones internas | 8 | TP (Notificaciones) |
+| S5-06 | Notificaciones internas — **movida al Sprint 6 por CR-03** (los pendientes y alertas de vencimiento quedaron en el Sprint 5) | 8 | TP (Notificaciones) |
 
 ### Sprint 6 — Dashboard y reportes (E6) · 13 SP
 
@@ -149,6 +149,6 @@ Las 3 historias del Release 4 siguen en el plan del proyecto institucional (EDT 
 
 ## 5. Alertas de planificación
 
-- **Sprint 5 tiene 29 SP**, muy por encima de la velocidad de referencia del TP (≈ 20 SP). Propuesta para la planificación del Sprint 5: mover **S5-06 Notificaciones (8 SP)** al Sprint 6 (quedaría S5 = 21 SP, S6 = 21 SP). Se decide en la *sprint planning* con la velocidad real de los Sprints 1 a 4.
+- ~~Sprint 5 con 29 SP~~ → resuelto por **CR-03** (15/10/2026): S5-06 Notificaciones (8 SP) pasa al Sprint 6. Quedan S5 = 21 SP y S6 = 21 SP.
 - Los Story Points de las historias **nuevas** son estimaciones iniciales y deben validarse con Planning Poker antes de cada sprint.
 - La velocidad del TP (20 SP/sprint) fue supuesta para un equipo institucional de 6 personas; la velocidad del equipo del TP académico se medirá desde el Sprint 1.

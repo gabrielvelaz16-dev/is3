@@ -57,6 +57,7 @@ Artefactos actualizados:
 | CR-00 | Unificación del backlog del TP con el alcance del prototipo | 13/10/2026 | **Aprobado** 14/10/2026 | Gerente / Comité |
 | CR-01 | Evento de cambio: nuevo control documental + retraso del proveedor de identidad | — | Planificado para el piloto (R3) | Comité |
 | CR-02 | Adelantar login y gestión de usuarios (Sprint 2) en paralelo al cierre del Sprint 1; aclarar RNF-01 | 14/10/2026 | **Aprobado** 14/10/2026 | Product Owner / Gerente |
+| CR-03 | Mover S5-06 (notificaciones internas, 8 SP) del Sprint 5 al Sprint 6 | 15/10/2026 | **Aprobado** 15/10/2026 | Product Owner / Gerente |
 
 ### CR-00 · Unificación del backlog del TP con el alcance del prototipo
 
@@ -98,3 +99,12 @@ Artefactos actualizados:
 - **Decisión:** aprobado por el PO el 14/10/2026 (pedido directo en la sesión de trabajo).
 - **Artefactos actualizados:** [sprint-02.md](sprints/sprint-02.md), [decisiones-tecnicas.md](../02-arquitectura/decisiones-tecnicas.md) (ADR-05, ADR-10, ADR-11), [requisitos.md](../01-alcance-requisitos/requisitos.md), tablero Trello.
 - **Ampliación (14/10/2026, decisión del PO):** el login usa **nombre de usuario** (campo `username`) en lugar del correo, y la política de contraseñas se simplifica a mínimo 5 caracteres para facilitar la demostración (`admin` / `12345`). Se mantiene el hash scrypt (RNF-01 sigue cumpliéndose). Riesgo aceptado y documentado en ADR-10.
+
+### CR-03 · Mover las notificaciones internas al Sprint 6
+
+- **Solicitante:** Gerente de Proyecto · **Fecha:** 15/10/2026 · **Decisión:** aprobado por el PO el 15/10/2026.
+- **Descripción:** el Sprint 5 tenía 29 SP, contra una velocidad de referencia de 20 SP y una velocidad real de 11 a 16 SP en los Sprints 3 y 4. Se mueve **S5-06 Notificaciones internas (8 SP)** al Sprint 6.
+- **Qué queda en el Sprint 5:** los pendientes y las alertas de vencimiento (pantalla *Tareas y pendientes*), que cubren la parte de RF-17 sobre vencimientos. Se mueven solo los avisos internos de cambios (por ejemplo, "te asignaron un expediente").
+- **Impacto en plazo y SP:** Sprint 5 pasa de 29 a 21 SP; Sprint 6 de 13 a 21 SP. Total sin cambios (97 SP). No cambia el alcance ni la fecha del release R3 (Sprints 5 y 6).
+- **Impacto en riesgos:** reduce R13 (sobrecarga) en el Sprint 5.
+- **Artefactos actualizados:** [backlog.md](backlog.md), [estimacion-calendario.md](estimacion-calendario.md), tarjeta S5-06 en Trello, [sprint-05.md](sprints/sprint-05.md).
