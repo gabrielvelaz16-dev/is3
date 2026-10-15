@@ -180,7 +180,7 @@ describe('Tareas y seguimiento (Sprint 5: RF-12 a RF-17)', () => {
       const bloqueado = await funcionario.patch(`/api/expedientes/${expedienteId}`).send({ caratula: 'Cambio' });
       expect(bloqueado.status).toBe(409);
       expect(bloqueado.body.error.message).toContain('en tránsito');
-      expect((await funcionario.post(`/api/expedientes/${expedienteId}/actuaciones`).send({ tipo: 'ACTUACION', texto: 'No' })).status).toBe(409);
+      expect((await funcionario.post(`/api/expedientes/${expedienteId}/actuaciones`).send({ tipo: 'ACTUACION', texto: 'Intento en tránsito' })).status).toBe(409);
       expect((await enviar()).status).toBe(409); // ya está en tránsito
     });
 

@@ -7,6 +7,7 @@ import { ExpedientesPage } from './pages/ExpedientesPage';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { PendientesPage } from './pages/PendientesPage';
 import { SectionPage } from './pages/SectionPage';
 import { UsuariosPage } from './pages/UsuariosPage';
 import { sections } from './routes/navigation';
@@ -64,6 +65,7 @@ export function App() {
             </RequierePermiso>
           }
         />
+        <Route path="/tareas" element={<PendientesPage />} />
         <Route
           path="/administracion"
           element={

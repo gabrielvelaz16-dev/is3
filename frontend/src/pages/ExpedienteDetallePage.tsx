@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { useAuth } from '../auth/AuthContext';
+import { AccionesExpediente } from '../components/expediente/AccionesExpediente';
 import { AnexosExpediente } from '../components/expediente/AnexosExpediente';
 import { PageHeader } from '../components/PageHeader';
 import { ApiError } from '../services/api';
-import { expedientesApi, type ModificarExpediente } from '../services/expedientes';
+import { expedientesApi } from '../services/expedientes';
+import { seguimientoApi } from '../services/seguimiento';
 import type { Expediente, EstadoExpediente } from '../services/tipos';
 import { ESTADOS_EXPEDIENTE, ETIQUETA_TIPO } from '../services/tipos';
 
@@ -46,6 +48,8 @@ export function ExpedienteDetallePage() {
   /** Aumenta cuando cambia algo del expediente, para recargar documentos, actuaciones e historial. */
   const [version, setVersion] = useState(0);
 
+  const [motivo, setMotivo] = useState('');
+
   useEffect(() => {
     let vigente = true;
     expedientesApi.obtener(Number(id)).then((exp) => {
@@ -55,16 +59,21 @@ export function ExpedienteDetallePage() {
       setError(err instanceof ApiError ? err.message : 'No se pudo cargar el expediente');
     });
     return () => { vigente = false; };
-  }, [id]);
+  }, [id, version]);
+
+  /** Después de una acción: usa el expediente devuelto o lo vuelve a pedir, y recarga las secciones. */
+  function actualizado(exp?: Expediente) {
+    if (exp) setExpediente(exp);
+    setError(null);
+    setVersion((v) => v + 1);
+  }
 
   async function cambiarEstado(nuevoEstado: EstadoExpediente) {
     if (!expediente) return;
     setCambiando(true);
     try {
-      const actualizado = await expedientesApi.modificar(expediente.id, { estado: nuevoEstado } as ModificarExpediente);
-      setExpediente(actualizado);
-      setError(null);
-      setVersion((v) => v + 1);
+      actualizado(await seguimientoApi.cambiarEstado(expediente.id, nuevoEstado, motivo));
+      setMotivo('');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'No se pudo cambiar el estado');
     } finally {
@@ -89,13 +98,15 @@ export function ExpedienteDetallePage() {
   const etiquetaEstado = (e: EstadoExpediente) =>
     ESTADOS_EXPEDIENTE.find((x) => x.valor === e)?.etiqueta ?? e;
 
-  const transicionesDisponibles = TRANSICIONES[expediente.estado] ?? [];
+  const enTransito = expediente.paseEnTransito;
+  const editable = expediente.estado !== 'ARCHIVADO' && !enTransito;
+  const transicionesDisponibles = editable ? (TRANSICIONES[expediente.estado] ?? []) : [];
 
   return (
     <>
       <PageHeader title={expediente.numero} subtitle={expediente.caratula}>
         <div className="flex gap-2">
-          {puede('expedientes.modificar') && expediente.estado !== 'ARCHIVADO' && (
+          {puede('expedientes.modificar') && editable && (
             <button
               type="button"
               onClick={() => navigate(`/expedientes/${expediente.id}/editar`)}
@@ -114,13 +125,32 @@ export function ExpedienteDetallePage() {
         <p role="alert" className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p>
       )}
 
+      {enTransito && (
+        <p role="status" className="mb-4 rounded-md border border-violet-200 bg-violet-50 px-3 py-2 text-sm text-violet-900">
+          En tránsito hacia <strong>{enTransito.destino.nombre}</strong> desde el {fecha(enTransito.enviadoEn)}. No se puede
+          modificar hasta que la dependencia destino confirme la recepción.
+        </p>
+      )}
+
       {/* Estado y transiciones */}
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <span className={`rounded-full px-3 py-1 text-sm font-semibold ${claseEstado[expediente.estado]}`}>
           {etiquetaEstado(expediente.estado)}
         </span>
-        {puede('expedientes.modificar') && transicionesDisponibles.length > 0 && (
+        {puede('estados.cambiar') && transicionesDisponibles.length > 0 && (
           <>
+            <label htmlFor="motivo-estado" className="sr-only">
+              Motivo del cambio de estado
+            </label>
+            <input
+              id="motivo-estado"
+              type="text"
+              placeholder="Motivo (opcional)"
+              maxLength={500}
+              value={motivo}
+              onChange={(e) => setMotivo(e.target.value)}
+              className="rounded-md border border-slate-300 px-3 py-1 text-sm"
+            />
             <span className="text-sm text-slate-400">→</span>
             {transicionesDisponibles.map((t) => (
               <button
@@ -167,6 +197,7 @@ export function ExpedienteDetallePage() {
         )}
       </div>
 
+      <AccionesExpediente expediente={expediente} editable={editable} onActualizado={actualizado} />
       <AnexosExpediente expediente={expediente} version={version} onCambio={() => setVersion((v) => v + 1)} />
     </>
   );
