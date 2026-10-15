@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { useAuth } from '../auth/AuthContext';
+import { AnexosExpediente } from '../components/expediente/AnexosExpediente';
 import { PageHeader } from '../components/PageHeader';
 import { ApiError } from '../services/api';
 import { expedientesApi, type ModificarExpediente } from '../services/expedientes';
@@ -42,6 +43,8 @@ export function ExpedienteDetallePage() {
   const [expediente, setExpediente] = useState<Expediente | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cambiando, setCambiando] = useState(false);
+  /** Aumenta cuando cambia algo del expediente, para recargar documentos, actuaciones e historial. */
+  const [version, setVersion] = useState(0);
 
   useEffect(() => {
     let vigente = true;
@@ -61,6 +64,7 @@ export function ExpedienteDetallePage() {
       const actualizado = await expedientesApi.modificar(expediente.id, { estado: nuevoEstado } as ModificarExpediente);
       setExpediente(actualizado);
       setError(null);
+      setVersion((v) => v + 1);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'No se pudo cambiar el estado');
     } finally {
@@ -162,6 +166,8 @@ export function ExpedienteDetallePage() {
           </div>
         )}
       </div>
+
+      <AnexosExpediente expediente={expediente} version={version} onCambio={() => setVersion((v) => v + 1)} />
     </>
   );
 }

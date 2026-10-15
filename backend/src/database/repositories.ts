@@ -175,6 +175,66 @@ export interface SecuenciaRepo {
   siguienteNumero(anio: number): Promise<number>;
 }
 
+// ── Sprint 4: Documentos, actuaciones y cambios de estado ─────────
+
+export interface PersonaRef {
+  id: number;
+  nombre: string;
+  username: string;
+}
+
+export interface DocumentoRecord {
+  id: number;
+  expedienteId: number;
+  nombreOriginal: string;
+  /** Nombre aleatorio en el almacenamiento; no sale por la API. */
+  nombreAlmacenado: string;
+  tipoMime: string;
+  tamanoBytes: number;
+  hashSha256: string;
+  descripcion: string | null;
+  subidoEn: Date;
+  subidoPor: PersonaRef;
+}
+
+export type NuevoDocumento = Omit<DocumentoRecord, 'id' | 'subidoEn' | 'subidoPor'> & { subidoPorId: number };
+
+export interface DocumentosRepo {
+  listByExpediente(expedienteId: number): Promise<DocumentoRecord[]>;
+  findById(id: number): Promise<DocumentoRecord | null>;
+  create(data: NuevoDocumento): Promise<DocumentoRecord>;
+}
+
+export type TipoActuacion = 'ACTUACION' | 'OBSERVACION';
+
+export interface ActuacionRecord {
+  id: number;
+  expedienteId: number;
+  tipo: TipoActuacion;
+  texto: string;
+  fecha: Date;
+  autor: PersonaRef;
+}
+
+export interface ActuacionesRepo {
+  listByExpediente(expedienteId: number): Promise<ActuacionRecord[]>;
+  create(data: { expedienteId: number; tipo: TipoActuacion; texto: string; autorId: number }): Promise<ActuacionRecord>;
+}
+
+export interface CambioEstadoRecord {
+  id: number;
+  expedienteId: number;
+  estadoAnterior: EstadoExpediente | null;
+  estadoNuevo: EstadoExpediente;
+  fecha: Date;
+  usuario: PersonaRef;
+}
+
+export interface CambiosEstadoRepo {
+  listByExpediente(expedienteId: number): Promise<CambioEstadoRecord[]>;
+  insert(data: { expedienteId: number; estadoAnterior: EstadoExpediente | null; estadoNuevo: EstadoExpediente; usuarioId: number }): Promise<void>;
+}
+
 export interface Repos {
   usuarios: UsuariosRepo;
   roles: RolesRepo;
@@ -183,4 +243,7 @@ export interface Repos {
   auditoria: AuditoriaRepo;
   expedientes: ExpedientesRepo;
   secuencia: SecuenciaRepo;
+  documentos: DocumentosRepo;
+  actuaciones: ActuacionesRepo;
+  cambiosEstado: CambiosEstadoRepo;
 }

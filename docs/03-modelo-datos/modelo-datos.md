@@ -67,3 +67,18 @@ Solo datos ficticios: dependencias como "Mesa de Entradas", "Asesoría Jurídica
 - Tablas en plural y `snake_case` (`usuarios`, `roles_permisos`, `auditoria`) mediante `@@map`/`@map`; en el código se usan los nombres del modelo (`Usuario`, `rolId`).
 - El correo se guarda en minúsculas; la búsqueda de usuarios no distingue mayúsculas.
 - Baja lógica de usuarios con `activo = false`: un usuario nunca se borra porque la auditoría lo referencia (`ON DELETE RESTRICT`).
+
+## 7. Implementación del Sprint 4 (documentos, actuaciones e historial)
+
+Migración `20261015120000_documentos_actuaciones`.
+
+| Tabla | Columnas principales | Restricciones |
+|---|---|---|
+| `documentos` | `expediente_id`, `nombre_original`, `nombre_almacenado` (UUID), `tipo_mime`, `tamano_bytes`, `hash_sha256`, `descripcion`, `subido_por_id`, `subido_en` | `nombre_almacenado` único; `tamano_bytes > 0`; FK `RESTRICT` |
+| `actuaciones` | `expediente_id`, `tipo` (`ACTUACION`/`OBSERVACION`), `texto`, `autor_id`, `fecha` | Texto no vacío (`CHECK`); FK `RESTRICT` |
+| `cambios_estado` | `expediente_id`, `estado_anterior` (nulo en el primero), `estado_nuevo`, `usuario_id`, `fecha` | FK `RESTRICT` |
+
+- Las tres tablas son de **solo inserción**: la función `historial_solo_insercion()` y sus triggers rechazan `UPDATE`, `DELETE` y `TRUNCATE` (mismo criterio que la auditoría, ADR-07). El CI lo verifica en cada ejecución.
+- `cambios_estado` registra las transiciones desde el Sprint 4. Los expedientes de demostración creados antes muestran en su historial solo la creación y lo posterior.
+- La tabla `Pase` del diseño inicial se implementa en el Sprint 5 (envío y recepción entre dependencias).
+- El archivo del documento no está en la base: vive en `STORAGE_PATH` (por defecto `storage/documentos/` en la raíz del repositorio, fuera de Git) con el nombre UUID (ADR-08).

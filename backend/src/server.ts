@@ -1,8 +1,10 @@
 import { createApp } from './app.js';
-import { loadEnv } from './config/env.js';
+import { resolve } from 'node:path';
+import { loadEnv, RAIZ_REPOSITORIO } from './config/env.js';
 import { createDbCheck } from './database/db-check.js';
 import { createPrismaClient } from './database/prisma/client.js';
 import { createPrismaRepos } from './database/prisma/repos.js';
+import { AlmacenamientoLocal } from './integrations/almacenamiento/almacenamiento.js';
 import { LocalIdentityProvider } from './integrations/identity/identity-provider.js';
 import { logger } from './shared/logger.js';
 
@@ -19,6 +21,8 @@ const app = createApp({
   identity: new LocalIdentityProvider(repos.usuarios),
   sesionHoras: env.SESSION_HOURS,
   cookieSecure: env.COOKIE_SECURE,
+  almacenamiento: new AlmacenamientoLocal(resolve(RAIZ_REPOSITORIO, env.STORAGE_PATH)),
+  maxUploadBytes: env.MAX_UPLOAD_MB * 1024 * 1024,
 });
 
 const server = app.listen(env.PORT, () => {

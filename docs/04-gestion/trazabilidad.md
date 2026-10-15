@@ -13,14 +13,14 @@ Cadena: **Paquete de trabajo → Épica → Historia → Requisito → Prueba �
 | 1.2.1 Definición de roles | E2 | S2-05 Gestionar usuarios | RF-03 | PR-03 | R1 | pendiente |
 | 1.5.1 / riesgo R01 | E2 | S2-04 Adaptador de identidad | RF-23 | PR-23 | R1 | pendiente |
 | 1.5.2 Validaciones de seguridad | E2 | S2-07 Auditoría base | RF-20, RNF-03 | PR-20 | R1 | pendiente |
-| 1.7 Desarrollo | E3 Expedientes | S3-01 Crear expediente | RF-04 | PR-04 | R2 | pendiente |
-| 1.7 Desarrollo | E3 | S3-05 Número único | RF-05 | PR-05 | R2 | pendiente |
-| 1.7 Desarrollo | E3 | S3-02 / S3-03 Consultar y modificar | RF-06 | PR-06 | R2 | pendiente |
-| 1.7 Desarrollo | E3 | S3-04 Listado con filtros | RF-07, RNF-09 | PR-07 | R2 | pendiente |
-| 1.7 Desarrollo | E4 Documentos | S4-01 / S4-02 Registrar documento | RF-08, RNF-04 | PR-08 | R2 | pendiente |
-| 1.5.1 / riesgo R06 | E4 | S4-05 Control de acceso a documentos | RF-09 | PR-09 | R2 | pendiente |
-| 1.7 Desarrollo | E4 | S4-03 Actuaciones | RF-10 | PR-10 | R2 | pendiente |
-| 1.7 Desarrollo | E4 | S4-04 Historial | RF-11 | PR-11 | R2 | pendiente |
+| 1.7 Desarrollo | E3 Expedientes | S3-01 Crear expediente | RF-04 | PR-04 | R2 | PR #9 + correcciones PR #10 |
+| 1.7 Desarrollo | E3 | S3-05 Número único | RF-05 | PR-05 | R2 | PR #9 + correcciones PR #10 |
+| 1.7 Desarrollo | E3 | S3-02 / S3-03 Consultar y modificar | RF-06 | PR-06 | R2 | PR #9 + correcciones PR #10 |
+| 1.7 Desarrollo | E3 | S3-04 Listado con filtros | RF-07, RNF-09 | PR-07 | R2 | PR #9 + correcciones PR #10 |
+| 1.7 Desarrollo | E4 Documentos | S4-01 / S4-02 Registrar documento | RF-08, RNF-04 | PR-08 | R2 | PR #11 (`feature/S4-documentos-actuaciones`) |
+| 1.5.1 / riesgo R06 | E4 | S4-05 Control de acceso a documentos | RF-09 | PR-09 | R2 | PR #11 (`feature/S4-documentos-actuaciones`) |
+| 1.7 Desarrollo | E4 | S4-03 Actuaciones | RF-10 | PR-10 | R2 | PR #11 (`feature/S4-documentos-actuaciones`) |
+| 1.7 Desarrollo | E4 | S4-04 Historial | RF-11 | PR-11 | R2 | PR #11 (`feature/S4-documentos-actuaciones`) |
 | 1.7 Desarrollo | E5 Flujo documental | S5-01 Asignar responsables | RF-12 | PR-12 | R3 | pendiente |
 | 1.7 Desarrollo | E5 | S5-02 Tareas y vencimientos | RF-13 | PR-13 | R3 | pendiente |
 | 1.7 Desarrollo / CR-01 | E5 | S5-03 Cambiar estado | RF-14 | PR-14 | R3 | pendiente |

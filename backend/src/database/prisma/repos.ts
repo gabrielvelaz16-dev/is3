@@ -3,6 +3,7 @@ import type {
   CambiosExpediente,
   DependenciaRecord,
   ExpedienteRecord,
+  DocumentoRecord,
   FiltrosExpediente,
   NuevoExpediente,
   Repos,
@@ -38,6 +39,26 @@ function aExpediente(e: ExpedienteCompleto): ExpedienteRecord {
     dependenciaActual: e.dependenciaActual satisfies DependenciaRecord,
     creadoPor: e.creadoPor,
     responsable: e.responsable,
+  };
+}
+
+const persona = { select: { id: true, nombre: true, username: true } } as const;
+
+const incluirDocumento = { subidoPor: persona } satisfies Prisma.DocumentoInclude;
+type DocumentoCompleto = Prisma.DocumentoGetPayload<{ include: typeof incluirDocumento }>;
+
+function aDocumento(d: DocumentoCompleto): DocumentoRecord {
+  return {
+    id: d.id,
+    expedienteId: d.expedienteId,
+    nombreOriginal: d.nombreOriginal,
+    nombreAlmacenado: d.nombreAlmacenado,
+    tipoMime: d.tipoMime,
+    tamanoBytes: d.tamanoBytes,
+    hashSha256: d.hashSha256,
+    descripcion: d.descripcion,
+    subidoEn: d.subidoEn,
+    subidoPor: d.subidoPor,
   };
 }
 
@@ -204,6 +225,53 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
       },
       async update(id, data: CambiosExpediente) {
         return aExpediente(await prisma.expediente.update({ where: { id }, data, include: incluirExpediente }));
+      },
+    },
+
+    documentos: {
+      async listByExpediente(expedienteId) {
+        const filas = await prisma.documento.findMany({
+          where: { expedienteId },
+          include: incluirDocumento,
+          orderBy: { subidoEn: 'asc' },
+        });
+        return filas.map(aDocumento);
+      },
+      async findById(id) {
+        const d = await prisma.documento.findUnique({ where: { id }, include: incluirDocumento });
+        return d ? aDocumento(d) : null;
+      },
+      async create(data) {
+        return aDocumento(await prisma.documento.create({ data, include: incluirDocumento }));
+      },
+    },
+
+    actuaciones: {
+      async listByExpediente(expedienteId) {
+        const filas = await prisma.actuacion.findMany({
+          where: { expedienteId },
+          include: { autor: persona },
+          orderBy: { fecha: 'asc' },
+        });
+        return filas.map(({ autorId: _a, ...a }) => a);
+      },
+      async create(data) {
+        const { autorId: _a, ...a } = await prisma.actuacion.create({ data, include: { autor: persona } });
+        return a;
+      },
+    },
+
+    cambiosEstado: {
+      async listByExpediente(expedienteId) {
+        const filas = await prisma.cambioEstado.findMany({
+          where: { expedienteId },
+          include: { usuario: persona },
+          orderBy: { fecha: 'asc' },
+        });
+        return filas.map(({ usuarioId: _u, ...c }) => c);
+      },
+      async insert(data) {
+        await prisma.cambioEstado.create({ data });
       },
     },
 

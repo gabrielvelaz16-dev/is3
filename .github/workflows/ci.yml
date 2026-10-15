@@ -60,13 +60,29 @@ jobs:
         run: npx prisma migrate deploy
       - name: Seed (usuarios, roles y permisos)
         run: npm run db:seed
-      - name: Verificar que la auditoría rechaza modificaciones (ADR-07)
+      - name: Verificar tablas de solo inserción (ADR-07, historial del Sprint 4)
         run: |
-          if PGPASSWORD=ci psql -h localhost -U ci -d expediente_ci -v ON_ERROR_STOP=1 -c "DELETE FROM auditoria;"; then
-            echo "ERROR: la auditoría permitió un DELETE"; exit 1
-          else
-            echo "OK: la base rechazó el DELETE sobre auditoria"
-          fi
+          # Una fila por tabla: en una tabla vacía un DELETE no dispara los triggers por fila
+          # y la verificación daría un falso "OK".
+          PGPASSWORD=ci psql -h localhost -U ci -d expediente_ci -v ON_ERROR_STOP=1 <<'SQL'
+          INSERT INTO auditoria (accion, resultado) VALUES ('ci.verificacion', 'EXITO');
+          INSERT INTO documentos (expediente_id, nombre_original, nombre_almacenado, tipo_mime, tamano_bytes, hash_sha256, subido_por_id)
+            SELECT (SELECT min(id) FROM expedientes), 'ci.pdf', gen_random_uuid()::text, 'application/pdf', 1, repeat('0', 64), (SELECT min(id) FROM usuarios);
+          INSERT INTO actuaciones (expediente_id, tipo, texto, autor_id)
+            SELECT (SELECT min(id) FROM expedientes), 'ACTUACION', 'Fila de verificación de CI', (SELECT min(id) FROM usuarios);
+          INSERT INTO cambios_estado (expediente_id, estado_anterior, estado_nuevo, usuario_id)
+            SELECT (SELECT min(id) FROM expedientes), NULL, 'BORRADOR', (SELECT min(id) FROM usuarios);
+          SQL
+          for tabla in auditoria documentos actuaciones cambios_estado; do
+            filas=$(PGPASSWORD=ci psql -h localhost -U ci -d expediente_ci -tAc "SELECT count(*) FROM $tabla")
+            if [ "$filas" -eq 0 ]; then echo "::error title=Solo inserción::$tabla está vacía; la verificación no sería válida"; exit 1; fi
+            for sql in "DELETE FROM $tabla;" "UPDATE $tabla SET id = id;" "TRUNCATE $tabla;"; do
+              if PGPASSWORD=ci psql -h localhost -U ci -d expediente_ci -v ON_ERROR_STOP=1 -c "$sql" >/dev/null 2>&1; then
+                echo "::error title=Solo inserción::$tabla permitió: $sql"; exit 1
+              fi
+            done
+            echo "OK: $tabla rechazó DELETE, UPDATE y TRUNCATE"
+          done
       - name: Build
         run: npm run build
       - name: Auditoría de dependencias de producción

@@ -172,6 +172,16 @@ export class ExpedientesService {
 
     const actualizado = await this.repos.expedientes.update(id, cambios);
 
+    // Historial (S4-04): cada transición queda en una tabla de solo inserción.
+    if (cambios.estado && cambios.estado !== existente.estado) {
+      await this.repos.cambiosEstado.insert({
+        expedienteId: id,
+        estadoAnterior: existente.estado,
+        estadoNuevo: cambios.estado,
+        usuarioId,
+      });
+    }
+
     await this.auditoria.registrar({ ...ctx, usuarioId }, {
       accion: 'expediente.modificar',
       resultado: 'EXITO',
