@@ -1,6 +1,6 @@
 # Monitoreo, control y mejora
 
-**Estado:** Plan inicial — se alimenta con datos reales desde el Sprint 1 · **Unidad:** 9 · **Tarjeta:** S6-05
+**Estado:** Vivo — primera medición real el 15/10/2026 (ver §6) · **Unidad:** 9 · **Tarjeta:** S6-05 · **TP:** [Unidades 8 y 9](../08-trabajos-practicos/tp-unidades-8-9.md)
 
 > No confundir con el *dashboard del sistema* (S6-01), que muestra estadísticas de expedientes para los usuarios. Este tablero mide el **proyecto**.
 
@@ -88,6 +88,10 @@
 | Fecha | Métrica | Valor observado | Interpretación | Decisión | Evidencia |
 |---|---|---|---|---|---|
 | 13/10/2026 | SP por sprint (plan) | S5 = 29 SP vs referencia 20 | Sobrecarga planificada en S5 | Proponer mover S5-06 a S6; confirmar en planning con velocidad real | [backlog.md](backlog.md#5-alertas-de-planificación) |
+| 15/10/2026 | Pronóstico | 34 SP / 16 SP = 3 sprints vs 2 disponibles | El alcance restante no entra en el plan | Abrir un CR para priorizar con MoSCoW lo que entra en v1.0.0, sin modificar la línea base en silencio | §6 |
+| 15/10/2026 | Tasa de fallos del pipeline | 8 de 19 ejecuciones (42 %) vs umbral < 20 % | Se sube código sin verificarlo antes en local; la recuperación es rápida (2 a 8 min) | Ejecutar tipos y pruebas antes de cada push | §6 · historial de GitHub Actions |
+| 15/10/2026 | PR integrados a `develop` | 0 de 12 vs ≥ 2 por semana | No hay versión estable ni etiquetas | Revisar e integrar los PR #1 a #12 en orden y crear `v0.2.0` antes del Sprint 6 | §6 |
+| 15/10/2026 | Riesgos materializados | R15 (errores de IA) | El Sprint 3 se cerró con la CI en rojo | La DoD exige CI en verde para cerrar una historia | [riesgos.md](riesgos.md) |
 
 ## 5. De mejora local a estándar institucional
 
@@ -97,4 +101,33 @@ Cuando una acción de retrospectiva funciona en dos sprints seguidos (por ejempl
 
 | Fecha | Lección | Origen | Acción / estándar resultante |
 |---|---|---|---|
-| — | *pendiente (primera retrospectiva al cierre del Sprint 1)* | | |
+| 15/10/2026 | Un sprint no se cierra sin CI en verde | Sprint 3 (D-04 a D-08) | Regla agregada a la Definition of Done |
+| 15/10/2026 | Una verificación puede dar un falso OK | CI del Sprint 4 (D-09) | Las verificaciones de la base insertan datos antes de comprobar |
+| 15/10/2026 | Al cambiar de rama, el cliente de Prisma quedó desactualizado | Prueba manual del 15/10 (D-10) | Propuesta: `npm run dev` regenera el cliente (`predev`) |
+| 15/10/2026 | Un sprint muy cargado no se cumple | Planificación del Sprint 5 (CR-03) | Comparar el compromiso con la velocidad antes de aceptarlo |
+
+## 6. Medición al 15/10/2026 (después del Sprint 5)
+
+Valores reales del prototipo. Lo que no se midió queda como *pendiente*; no se completa con estimaciones.
+
+| Dimensión | Métrica | Umbral | Valor | Estado | Fuente |
+|---|---|---|---|---|---|
+| Alcance | SP terminados / línea base | Según plan | 63 de 97 SP (65 %) | En curso | [estimacion-calendario.md](estimacion-calendario.md) |
+| Alcance | Solicitudes de cambio aprobadas | — | 4 (CR-00 a CR-03) | Controlado | [control-cambios.md](control-cambios.md) |
+| Cronograma | Pronóstico vs sprints disponibles | ≤ 2 sprints | 34 / 16 = 3 sprints | Alerta | Cálculo |
+| Hitos | Puertas aprobadas | Sin atraso | G1 aprobada | OK | [acta G1](../07-evidencias/fase0/acta-puerta-g1.md) |
+| Costo / esfuerzo | Horas reales vs estimadas | Desvío ≤ 20 % | No registrado | Pendiente | — |
+| Velocidad | SP por sprint (S1 a S5) | ± 20 % | 3, 12, 16, 11, 21 | Inestable | Trello |
+| Flujo | Lead time por tarjeta | Descendente | Sin medir | Pendiente | — |
+| Riesgos | Riesgos materializados | 0 | R15 | Alerta | [riesgos.md](riesgos.md) |
+| Calidad | Pruebas aprobadas | 100 % | 149 / 149 (115 + 34) | OK | [run 38745648399](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38745648399) |
+| Calidad | Cobertura del backend (líneas) | ≥ 70 % | 93,46 % | OK | Mismo run |
+| Calidad | Defectos abiertos / cerrados | 0 críticos | 1 abierto (D-10) / 9 cerrados | OK | [resultados-pruebas.md](../05-calidad-pruebas/resultados-pruebas.md) |
+| Adopción | Tareas de usabilidad sin ayuda | ≥ 80 % | Se mide en el Sprint 7 | Pendiente | — |
+| DevOps | Tasa de fallos del pipeline | < 20 % | 8 de 19 (42 %) | Alerta | GitHub Actions |
+| DevOps | Tiempo de recuperación | < 1 día | 2 a 8 min; uno de 19 h (Sprint 3) | OK | GitHub Actions |
+| DevOps | PR integrados a `develop` | ≥ 2 por semana | 0 de 12 | Alerta | GitHub |
+
+**Cómo se calcularon los datos de DevOps:** historial de GitHub Actions del 14/10 al 15/10/2026: 21 ejecuciones, 2 canceladas (no cuentan), 11 exitosas y 8 fallidas. El tiempo de recuperación es la diferencia entre la primera ejecución roja y la siguiente verde de la misma rama. El caso de 19 h corresponde al Sprint 3 (run 38609784288 → run 38739999945), que se dio por terminado con la CI en rojo (R15).
+
+**Limitación:** los sprints del prototipo se ejecutaron en horas y con asistencia de IA; las métricas sirven para comparar sprints entre sí y justificar decisiones, no para estimar el calendario real del proyecto institucional.

@@ -1,6 +1,6 @@
 # Plan de configuración y DevOps
 
-**Estado:** Plan inicial (Fase 0) · **Unidad:** 8 · **Tarjetas:** CF-07, F0-06, S1-06
+**Estado:** Vigente — CI en funcionamiento desde el Sprint 1; etiquetas pendientes hasta integrar los PR · **Unidad:** 8 · **Tarjetas:** CF-07, F0-06, S1-06 · **TP:** [Unidades 8 y 9](../08-trabajos-practicos/tp-unidades-8-9.md)
 
 ## 1. Elementos de configuración (EC)
 
@@ -25,6 +25,8 @@
 | Funcional | Requisitos + alcance + backlog aprobados | `baseline-v1` | Fin de Fase 0 (puerta G1) |
 | Releases | Código + docs de cada release | `v0.1.0` (R1), `v0.2.0` (R2), `v0.3.0` (R3) | Fin de cada release (G4) |
 | Producto | Versión estable de entrega | `v1.0.0` | Sprint 8 (G5) |
+
+**Estado al 15/10/2026:** todavía no hay etiquetas creadas porque ningún PR se integró a `develop` (0 de 12). Las etiquetas `baseline-v1` y `v0.1.0`/`v0.2.0` se crean al integrar los PR en orden (decisión registrada en [monitoreo-metricas.md](../04-gestion/monitoreo-metricas.md#4-registro-de-decisiones-basadas-en-métricas)).
 
 Versionado semántico `MAYOR.MENOR.PARCHE`. Un cambio en una línea base genera una nueva etiqueta (`baseline-v2`), nunca se mueve una etiqueta existente.
 

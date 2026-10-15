@@ -81,6 +81,17 @@ Fecha: 15/10/2026 · Release: R3 · Detalle: [sprint-05.md](../04-gestion/sprint
 | Velocidad y pronóstico actualizados | 4, 9 | [estimacion-calendario.md](../04-gestion/estimacion-calendario.md) | Hecho |
 | Prueba manual en la PC (enviar, recibir, tareas, pendientes) | 7 | — | Pendiente (requiere `npm run db:migrate`) |
 
+## TP de las Unidades 8 y 9
+
+Fecha: 15/10/2026
+
+| Evidencia | Unidad | Artefacto | Estado |
+|---|---|---|---|
+| Documento del TP (Word y Markdown) | 8, 9 | [tp-unidades-8-9.md](../08-trabajos-practicos/tp-unidades-8-9.md) | Hecho; revisión del responsable pendiente |
+| Tablero integrado con datos reales (pruebas, cobertura, velocidad, fallos del pipeline, recuperación, PR integrados) | 9 | [monitoreo-metricas.md §6](../04-gestion/monitoreo-metricas.md#6-medición-al-15102026-después-del-sprint-5) | Hecho |
+| Cuatro decisiones basadas en métricas y lecciones aprendidas | 9 | [monitoreo-metricas.md §4 y §5](../04-gestion/monitoreo-metricas.md) | Hecho |
+| Defecto D-10 detectado en la prueba manual | 7, 8 | [resultados-pruebas.md](../05-calidad-pruebas/resultados-pruebas.md) | Abierto |
+
 ## Plantilla por sprint
 
 ```
