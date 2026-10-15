@@ -216,9 +216,10 @@ describe('Expedientes (RF-04 a RF-07, S3-01 a S3-06)', () => {
     it('busca por texto en carátula', async () => {
       const admin = await comoAdmin(e);
       await crearVarios(admin);
-      const res = await admin.get('/api/expedientes?q=licencia');
+      // "anual" solo aparece en una carátula ("licencia" también está en el asunto de los tres).
+      const res = await admin.get('/api/expedientes?q=ANUAL');
       expect(res.body.data).toHaveLength(1);
-      expect(res.body.data[0].caratula).toContain('Licencia');
+      expect(res.body.data[0].caratula).toBe('Licencia anual');
     });
 
     it('filtra por estado', async () => {

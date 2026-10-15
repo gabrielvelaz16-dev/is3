@@ -40,6 +40,7 @@ Este documento registra **solo resultados reales** obtenidos de la ejecución de
 | D-05 | Misma ejecución | 4 pruebas del frontend fallaban: el administrador de prueba no tenía `expedientes.consultar` y la API simulada no respondía `/api/expedientes` | Permisos completos para el administrador de prueba y respuesta simulada del listado |
 | D-06 | Revisión de código (15/10/2026) | **Seguridad:** `PATCH /api/expedientes/:id` permitía modificar expedientes de otra dependencia | Misma verificación de visibilidad que la consulta (`expedienteVisible`) y prueba de 403 |
 | D-07 | Revisión de código | Las reglas de negocio lanzaban `Error` con `statusCode`, que el manejador central no reconoce: respondían 500. Las pruebas esperaban 422 para validaciones, distinto del contrato (400) | Errores tipados: 400 validación, 404 inexistente, 409 transición no permitida o expediente archivado (contrato de la API) |
+| D-08 | CI de la corrección ([run 38739773468](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38739773468)) | La prueba "busca por texto en carátula" buscaba "licencia", palabra presente en el asunto de los 3 expedientes de prueba: el sistema devolvía 3 (correcto) y la prueba esperaba 1 | La prueba busca "ANUAL", que solo está en una carátula (y verifica que la búsqueda no distingue mayúsculas) |
 
 ## 3. Pruebas manuales
 
