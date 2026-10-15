@@ -51,5 +51,5 @@ Ejemplos originales del TP (Unidad 3):
 | 5 | Roles, RACI, comunicación, capacitación, conflicto | [personas-comunicacion.md](personas-comunicacion.md) | Cada actividad con un único "A" |
 | 6 | Registro de riesgos con responsables en dos niveles | [riesgos.md](riesgos.md) | ≥ 15 riesgos/oportunidades; revisión registrada por sprint |
 | 7 | Plan de calidad, DoD, pruebas | [plan-calidad.md](../05-calidad-pruebas/plan-calidad.md), [plan-pruebas.md](../05-calidad-pruebas/plan-pruebas.md) | Matriz de calidad con métrica y evidencia; pruebas en CI |
-| 8 | Ramas, etiquetas, CI, ambientes | [plan-configuracion.md](../06-configuracion-devops/plan-configuracion.md), GitHub | Cambio trazable desde tarjeta → commit → PR → tag |
-| 9 | Tablero integrado y revisiones | [monitoreo-metricas.md](monitoreo-metricas.md) | Métricas con línea base, umbral y una decisión tomada |
+| 8 | Ramas, etiquetas, CI, ambientes | [plan-configuracion.md](../06-configuracion-devops/plan-configuracion.md), [TP Unidades 8 y 9](../08-trabajos-practicos/tp-unidades-8-9.md), GitHub | Cambio trazable desde tarjeta → commit → PR → tag |
+| 9 | Tablero integrado y revisiones | [monitoreo-metricas.md](monitoreo-metricas.md), [TP Unidades 8 y 9](../08-trabajos-practicos/tp-unidades-8-9.md) | Métricas con línea base, umbral y una decisión tomada |
