@@ -105,3 +105,12 @@ Registro breve de decisiones de arquitectura (*Architecture Decision Records*). 
 - **Estado:** Aceptada (Sprint 2)
 - **Decisión:** los servicios dependen de interfaces (`database/repositories.ts`); la implementación real usa Prisma (`database/prisma/repos.ts`) y las pruebas usan repositorios en memoria.
 - **Consecuencias:** `npm test` no necesita base de datos y corre en segundos. Las consultas de Prisma se verifican con la ejecución manual y, en el Sprint 7, con pruebas contra la base `expediente_test`.
+
+## ADR-12 · Subida de documentos sin multer
+
+- **Estado:** Aceptada (Sprint 4, 15/10/2026, decisión del PO)
+- **Contexto:** RF-08 exige adjuntar documentos. Lo habitual en Express es la librería `multer`, que interpreta formularios `multipart/form-data`. Las versiones 1.x de multer tuvieron vulnerabilidades de denegación de servicio (corregidas en 2.x) y el CI falla con vulnerabilidades altas (`npm audit`); además, la versión de cualquier dependencia nueva debe verificarse antes de instalarla (ADR-01).
+- **Decisión:** el archivo viaja **tal cual** como cuerpo de la petición (`POST /api/expedientes/:id/documentos`), leído con `express.raw()` (incluido en Express) con límite `MAX_UPLOAD_MB`. El tipo va en `Content-Type`, el nombre en `X-Nombre-Archivo` y la descripción opcional en `X-Descripcion`, ambos con `encodeURIComponent`.
+- **Validaciones (RNF-04):** lista blanca de tipos (PDF, PNG, JPG, DOCX, XLSX) verificada tres veces: tipo declarado, extensión del nombre y **firma del contenido** (primeros bytes), para rechazar, por ejemplo, un ejecutable renombrado como `.pdf`. Se descartan rutas en el nombre. El archivo se guarda con nombre UUID y hash SHA-256 (ADR-08); al descargar se recalcula el hash y, si no coincide, no se entrega y se registra un fallo en auditoría.
+- **Alternativas:** multer 2.x (estándar y conocido; conveniente para subir varios archivos juntos o mezclar archivos con muchos campos de formulario).
+- **Consecuencias:** sin dependencias nuevas; las reglas de validación quedan visibles en `documentos.service.ts`. Se sube **un archivo por petición**. Si más adelante se necesitan subidas múltiples, conviene adoptar multer 2.x con una nueva ADR.

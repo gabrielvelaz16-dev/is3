@@ -83,6 +83,7 @@ El registro es vivo: los riesgos pueden cerrarse, materializarse, cambiar de pri
 | Fecha | Tipo | Riesgos revisados | Cambios | Evidencia |
 |---|---|---|---|---|
 | 13/10/2026 | Operativo (Fase 0) | Todos | Se agregan R13–R16. R01: contingencia diseñada como adaptador de identidad (ADR-06, S2-04). | Este documento; tarjetas Trello CF-03 y S2-04 |
+| 15/10/2026 | Operativo (inicio del Sprint 4) | R10, R13, R15, R06 | **R15 se materializó:** el código del Sprint 3, generado con IA, se dio por terminado sin que la CI estuviera en verde (no compilaba). La contingencia funcionó: la CI lo detectó y se corrigió antes de continuar (D-04 a D-08). Acción: una tarjeta solo pasa a *Hecho* con el enlace a una ejecución de CI en verde (refuerza la DoD). **R06:** se detectó y corrigió una falla de acceso entre dependencias (D-06). | [resultados-pruebas.md](../05-calidad-pruebas/resultados-pruebas.md) · [run 38609784288](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38609784288) |
 
 ## 8. Relación con el enfoque híbrido
 

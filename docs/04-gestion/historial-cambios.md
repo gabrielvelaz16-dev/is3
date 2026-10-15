@@ -18,3 +18,5 @@ Registro cronológico de cambios relevantes en el proyecto, su documentación y 
 | 14/10/2026 | — | Cambio de alcance | CR-02 aprobado: se adelanta el Sprint 2 (login y usuarios). | CR-02 |
 | 14/10/2026 | — | Desarrollo | Sprint 2: modelo Prisma, sesiones en servidor, roles y permisos, gestión de usuarios, auditoría base, pantallas de login y usuarios. Rama `feature/S2-login-usuarios`. ADR-05, ADR-10, ADR-11. | S2-01 a S2-07 |
 | 14/10/2026 | — | Configuración | Pipeline CI en GitHub Actions en verde: backend 50/50 y frontend 20/20 pruebas, cobertura backend 92,99 %, migraciones y seed sobre PostgreSQL de CI. DT-05 registrada. | S1-06 |
+| 15/10/2026 | — | Calidad | Corrección del Sprint 3: la CI estaba en rojo (el backend no compilaba y fallaban 4 pruebas del frontend). Defectos D-04 a D-08 corregidos, incluido uno de seguridad (D-06). CI en verde: 76/76 + 20/20. Rama `feature/S3-correcciones`. | D-04 a D-08 |
+| 15/10/2026 | — | Desarrollo | Sprint 4: documentos (subida sin multer, ADR-12), actuaciones y observaciones, historial del expediente; tablas de solo inserción. CI en verde: 99/99 + 26/26. Rama `feature/S4-documentos-actuaciones`. | S4-01 a S4-05 |

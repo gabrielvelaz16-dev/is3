@@ -45,6 +45,29 @@ Fechas: 14/10/2026 · Release: R1 · Sprint 2 adelantado por CR-02
 | Deuda técnica DT-05 (vulnerabilidades en la CLI de Prisma) | 7, 8 | [plan-calidad.md](../05-calidad-pruebas/plan-calidad.md) | Registrada |
 | Pull requests hacia `develop` | 8 | https://github.com/gabrielvelaz16-dev/is3/pulls | Pendiente de integración |
 
+## Corrección del Sprint 3
+
+Fecha: 15/10/2026 · Release: R2
+
+| Evidencia | Unidad | Artefacto | Estado |
+|---|---|---|---|
+| CI del Sprint 3 en rojo (el backend no compilaba, 4 pruebas del frontend fallaban) | 7, 9 | [Run 38609784288](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38609784288) | Detectado |
+| Defectos D-04 a D-08 (incluida una falla de acceso entre dependencias, D-06) | 7 | [resultados-pruebas.md](../05-calidad-pruebas/resultados-pruebas.md) | Corregidos |
+| CI en verde después de la corrección: 76/76 + 20/20 | 7, 8 | [Run 38739999945](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38739999945) · rama `feature/S3-correcciones` | Hecho |
+| La CI publica cada prueba fallida como anotación con su motivo | 8, 9 | `scripts/ci/resumen-pruebas.mjs` | Hecho |
+
+## Sprint 4 — Documentos y actuaciones
+
+Fecha: 15/10/2026 · Release: R2 · Detalle: [sprint-04.md](../04-gestion/sprints/sprint-04.md)
+
+| Evidencia | Unidad | Artefacto | Estado |
+|---|---|---|---|
+| Migración con tablas de solo inserción (`documentos`, `actuaciones`, `cambios_estado`) aplicada en PostgreSQL de CI | 3, 8 | `backend/prisma/migrations/20261015120000_documentos_actuaciones` · [Run 38742104807](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38742104807) | Hecho |
+| CI en verde: backend 99/99, frontend 26/26, cobertura 92,14 % | 7, 8 | [Run 38742104807](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38742104807) | Hecho |
+| Verificación automática de solo inserción en 4 tablas | 7, 8 | Paso "Verificar tablas de solo inserción" en [Run 38742104807](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38742104807) | Hecho |
+| Decisión de subir archivos sin multer | 8 | [ADR-12](../02-arquitectura/decisiones-tecnicas.md#adr-12--subida-de-documentos-sin-multer) | Aprobada por el PO |
+| Prueba manual en la PC (adjuntar, descargar, registrar, ver historial) | 7 | — | Pendiente (requiere `npm run db:migrate`) |
+
 ## Plantilla por sprint
 
 ```

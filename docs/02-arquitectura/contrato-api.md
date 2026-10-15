@@ -99,6 +99,35 @@ La sesión viaja en la cookie `is3_sid` (`httpOnly`, `SameSite=Strict`, `Path=/a
 
 `permisos` solo aparece en el usuario de la sesión (`login` y `me`).
 
+## 5 bis. Expedientes, documentos, actuaciones e historial (Sprints 3 y 4)
+
+Todas requieren sesión. Las rutas de un expediente verifican además que el usuario pueda verlo: si no tiene `expedientes.consultar_todas`, solo los de su dependencia (403 en otro caso).
+
+| Método y ruta | Permiso | Entrada | Respuesta |
+|---|---|---|---|
+| `GET /api/expedientes` | `expedientes.consultar` | `?q=&estado=&prioridad=&dependenciaId=&pagina=1&porPagina=20` | 200 `{ data: [expediente], paginacion: { total, pagina, porPagina, totalPaginas } }` |
+| `POST /api/expedientes` | `expedientes.crear` | `{ caratula, asunto, tipo, iniciador, prioridad?, descripcion?, fechaVencimiento?, responsableId? }` | 201 · 400 (incluye responsable inexistente) |
+| `GET /api/expedientes/:id` | `expedientes.consultar` | — | 200 · 403 · 404 |
+| `PATCH /api/expedientes/:id` | `expedientes.modificar` | Campos a cambiar, incluido `estado` | 200 · 400 · 403 · 404 · **409** transición no permitida o expediente archivado |
+| `GET /api/expedientes/:id/documentos` | `expedientes.consultar` | — | 200 `{ data: [documento] }` |
+| `POST /api/expedientes/:id/documentos` | `documentos.adjuntar` | **Cuerpo = archivo** (ADR-12). Encabezados: `Content-Type`, `X-Nombre-Archivo`, `X-Descripcion` opcional (codificados con `encodeURIComponent`) | 201 `{ data: documento }` · 400 tipo no permitido, vacío o sin nombre · 409 archivado · **413** supera `MAX_UPLOAD_MB` |
+| `GET /api/expedientes/:id/documentos/:documentoId/descarga` | `documentos.descargar` | — | 200 con el archivo (`Content-Disposition: attachment`, `X-Content-Type-Options: nosniff`, `Cache-Control: no-store`) · 404 si el documento no es de ese expediente · 500 genérico si el archivo falta o fue alterado (hash) |
+| `GET /api/expedientes/:id/actuaciones` | `expedientes.consultar` | — | 200 `{ data: [actuacion] }` en orden cronológico |
+| `POST /api/expedientes/:id/actuaciones` | `actuaciones.registrar` | `{ tipo: "ACTUACION" \| "OBSERVACION", texto }` (3 a 5000 caracteres; fecha y autor los pone el servidor) | 201 · 400 · 409 archivado |
+| `GET /api/expedientes/:id/historial` | `expedientes.consultar` | — | 200 `{ data: [evento] }` ordenado por fecha |
+
+No existen rutas para modificar ni borrar documentos, actuaciones o cambios de estado: son de solo inserción también en la base (triggers).
+
+**Documento** (sin el nombre interno del almacenamiento):
+
+```json
+{ "id": 3, "expedienteId": 7, "nombreOriginal": "informe.pdf", "tipoMime": "application/pdf", "tamanoBytes": 2048,
+  "hashSha256": "e3b0…", "descripcion": "Informe inicial", "subidoEn": "2026-10-15T11:00:00.000Z",
+  "subidoPor": { "id": 1, "nombre": "Administrador del sistema", "username": "admin" } }
+```
+
+**Evento del historial:** `{ tipo: "CREACION" | "CAMBIO_ESTADO" | "DOCUMENTO" | "ACTUACION" | "OBSERVACION", fecha, usuario, descripcion, referenciaId?, estadoAnterior?, estadoNuevo? }`.
+
 ## 6. Encabezados
 
 | Encabezado | Uso |
