@@ -60,7 +60,7 @@ jobs:
         run: npx prisma migrate deploy
       - name: Seed (usuarios, roles y permisos)
         run: npm run db:seed
-      - name: Verificar tablas de solo inserción (ADR-07, historial del Sprint 4)
+      - name: Verificar tablas de solo inserción (ADR-07, historial de los Sprints 4 y 5)
         run: |
           # Una fila por tabla: en una tabla vacía un DELETE no dispara los triggers por fila
           # y la verificación daría un falso "OK".
@@ -72,8 +72,17 @@ jobs:
             SELECT (SELECT min(id) FROM expedientes), 'ACTUACION', 'Fila de verificación de CI', (SELECT min(id) FROM usuarios);
           INSERT INTO cambios_estado (expediente_id, estado_anterior, estado_nuevo, usuario_id)
             SELECT (SELECT min(id) FROM expedientes), NULL, 'BORRADOR', (SELECT min(id) FROM usuarios);
+          INSERT INTO asignaciones (expediente_id, responsable_id, usuario_id)
+            SELECT (SELECT min(id) FROM expedientes), NULL, (SELECT min(id) FROM usuarios);
+          INSERT INTO pases (expediente_id, origen_id, destino_id, motivo, enviado_por_id)
+            SELECT (SELECT min(id) FROM expedientes), (SELECT min(id) FROM dependencias), (SELECT max(id) FROM dependencias),
+                   'Fila de verificación de CI', (SELECT min(id) FROM usuarios);
           SQL
-          for tabla in auditoria documentos actuaciones cambios_estado; do
+          # Un pase solo admite registrar su recepción: cambiar el destino debe fallar.
+          if PGPASSWORD=ci psql -h localhost -U ci -d expediente_ci -v ON_ERROR_STOP=1 -c "UPDATE pases SET motivo = 'otro';" >/dev/null 2>&1; then
+            echo "::error title=Solo inserción::pases permitió modificar el motivo"; exit 1
+          fi
+          for tabla in auditoria documentos actuaciones cambios_estado asignaciones pases; do
             filas=$(PGPASSWORD=ci psql -h localhost -U ci -d expediente_ci -tAc "SELECT count(*) FROM $tabla")
             if [ "$filas" -eq 0 ]; then echo "::error title=Solo inserción::$tabla está vacía; la verificación no sería válida"; exit 1; fi
             for sql in "DELETE FROM $tabla;" "UPDATE $tabla SET id = id;" "TRUNCATE $tabla;"; do

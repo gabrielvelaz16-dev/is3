@@ -36,7 +36,9 @@ export async function expedienteVisible(
 ): Promise<ExpedienteRecord> {
   const expediente = await expedientes.obtener(id);
   if (!expediente) throw new NotFoundError('Expediente no encontrado');
-  if (!puedeVerTodas(usuario) && expediente.dependenciaActualId !== usuario.dependencia.id) {
+  // La dependencia destino de un pase sin recibir también lo ve, para decidir si lo recibe (S5-05).
+  const esDestino = expediente.paseEnTransito?.destino.id === usuario.dependencia.id;
+  if (!puedeVerTodas(usuario) && expediente.dependenciaActualId !== usuario.dependencia.id && !esDestino) {
     throw new ForbiddenError('No tiene permiso para ver este expediente');
   }
   return expediente;

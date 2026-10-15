@@ -1,5 +1,8 @@
 import type {
   ActuacionRecord,
+  AsignacionRecord,
+  PaseRecord,
+  TareaRecord,
   CambioEstadoRecord,
   CambiosExpediente,
   DocumentoRecord,
@@ -43,7 +46,7 @@ export function crearReposEnMemoria() {
   const auditoria: EventoAuditoria[] = [];
 
   // Sprint 3: expedientes en memoria
-  type FilaExp = Omit<ExpedienteRecord, 'dependenciaActual' | 'creadoPor' | 'responsable'>;
+  type FilaExp = Omit<ExpedienteRecord, 'dependenciaActual' | 'creadoPor' | 'responsable' | 'paseEnTransito'>;
   const expedientes: FilaExp[] = [];
   const secuencias = new Map<number, number>();
 
@@ -55,6 +58,39 @@ export function crearReposEnMemoria() {
     const u = usuarios.find((x) => x.id === id)!;
     return { id: u.id, nombre: u.nombre, username: u.username };
   };
+  // Sprint 5: tareas, pases y asignaciones
+  const tareas: (Omit<TareaRecord, 'asignadoA' | 'creadoPor' | 'expediente'> & { asignadoAId: number; creadoPorId: number })[] = [];
+  const pases: (Omit<PaseRecord, 'origen' | 'destino' | 'enviadoPor' | 'recibidoPor' | 'expediente'> & {
+    origenId: number;
+    destinoId: number;
+    enviadoPorId: number;
+    recibidoPorId: number | null;
+  })[] = [];
+  const asignaciones: AsignacionRecord[] = [];
+  const depRef = (id: number) => {
+    const d = dependencias.find((x) => x.id === id)!;
+    return { id: d.id, codigo: d.codigo, nombre: d.nombre };
+  };
+  const expRef = (id: number) => {
+    const e = expedientes.find((x) => x.id === id)!;
+    return { id: e.id, numero: e.numero, caratula: e.caratula };
+  };
+  const completarTarea = (t: (typeof tareas)[number]): TareaRecord => {
+    const { asignadoAId, creadoPorId, ...resto } = t;
+    return { ...resto, asignadoA: persona(asignadoAId), creadoPor: persona(creadoPorId), expediente: expRef(t.expedienteId) };
+  };
+  const completarPase = (p: (typeof pases)[number]): PaseRecord => {
+    const { origenId, destinoId, enviadoPorId, recibidoPorId, ...resto } = p;
+    return {
+      ...resto,
+      origen: depRef(origenId),
+      destino: depRef(destinoId),
+      enviadoPor: persona(enviadoPorId),
+      recibidoPor: recibidoPorId ? persona(recibidoPorId) : null,
+      expediente: expRef(p.expedienteId),
+    };
+  };
+
   // Fechas estrictamente crecientes, para que el orden del historial sea determinista.
   let reloj = Date.now();
   const ahora = () => new Date(++reloj);
@@ -68,6 +104,10 @@ export function crearReposEnMemoria() {
       dependenciaActual: dep,
       creadoPor: creador ? { id: creador.id, nombre: creador.nombre, username: creador.username } : { id: f.creadoPorId, nombre: '', username: '' },
       responsable: resp ? { id: resp.id, nombre: resp.nombre, username: resp.username } : null,
+      paseEnTransito: (() => {
+        const p = pases.find((x) => x.expedienteId === f.id && !x.recibidoEn);
+        return p ? { id: p.id, enviadoEn: p.enviadoEn, destino: depRef(p.destinoId) } : null;
+      })(),
     };
   };
 
@@ -107,6 +147,10 @@ export function crearReposEnMemoria() {
         Object.assign(fila, data);
         return completar(fila);
       },
+      listActivosDeDependencia: async (dependenciaId) =>
+        usuarios
+          .filter((u) => u.activo && u.dependenciaId === dependenciaId)
+          .map((u) => ({ id: u.id, nombre: u.nombre, username: u.username })),
       countActivosConRol: async (clave, excluirId) =>
         usuarios.filter((u) => u.activo && u.id !== excluirId && roles.find((r) => r.id === u.rolId)?.clave === clave).length,
     },
@@ -137,6 +181,17 @@ export function crearReposEnMemoria() {
     },
 
     expedientes: {
+      listPorVencer: async ({ dependenciaId, hasta }) =>
+        expedientes
+          .filter(
+            (e) =>
+              e.fechaVencimiento &&
+              e.fechaVencimiento.getTime() <= hasta.getTime() &&
+              !['RESUELTO', 'ARCHIVADO'].includes(e.estado) &&
+              (!dependenciaId || e.dependenciaActualId === dependenciaId),
+          )
+          .sort((a, b) => a.fechaVencimiento!.getTime() - b.fechaVencimiento!.getTime())
+          .map(completarExp),
       findById: async (id) => {
         const f = expedientes.find((e) => e.id === id);
         return f ? completarExp(f) : null;
@@ -214,8 +269,70 @@ export function crearReposEnMemoria() {
 
     cambiosEstado: {
       listByExpediente: async (expedienteId) => cambiosEstado.filter((c) => c.expedienteId === expedienteId),
-      insert: async ({ usuarioId, ...data }) => {
-        cambiosEstado.push({ ...data, id: cambiosEstado.length + 1, fecha: ahora(), usuario: persona(usuarioId) });
+      insert: async ({ usuarioId, motivo, ...data }) => {
+        cambiosEstado.push({ ...data, motivo: motivo ?? null, id: cambiosEstado.length + 1, fecha: ahora(), usuario: persona(usuarioId) });
+      },
+    },
+
+    tareas: {
+      listByExpediente: async (expedienteId) => tareas.filter((t) => t.expedienteId === expedienteId).map(completarTarea),
+      listAbiertasDe: async (usuarioId) =>
+        tareas
+          .filter((t) => t.asignadoAId === usuarioId && (t.estado === 'PENDIENTE' || t.estado === 'EN_CURSO'))
+          .sort((a, b) => a.vencimiento.getTime() - b.vencimiento.getTime())
+          .map(completarTarea),
+      findById: async (id) => {
+        const t = tareas.find((x) => x.id === id);
+        return t ? completarTarea(t) : null;
+      },
+      create: async (data) => {
+        const t = { ...data, id: tareas.length + 1, estado: 'PENDIENTE' as const, creadaEn: ahora(), cerradaEn: null };
+        tareas.push(t);
+        return completarTarea(t);
+      },
+      actualizarEstado: async (id, estado, cerradaEn) => {
+        const t = tareas.find((x) => x.id === id)!;
+        Object.assign(t, { estado, cerradaEn });
+        return completarTarea(t);
+      },
+    },
+
+    pases: {
+      listByExpediente: async (expedienteId) => pases.filter((p) => p.expedienteId === expedienteId).map(completarPase),
+      listPendientesHacia: async (dependenciaId) => pases.filter((p) => p.destinoId === dependenciaId && !p.recibidoEn).map(completarPase),
+      findById: async (id) => {
+        const p = pases.find((x) => x.id === id);
+        return p ? completarPase(p) : null;
+      },
+      create: async (data) => {
+        // Igual que el índice único parcial de la base: un solo pase sin recibir por expediente.
+        if (pases.some((p) => p.expedienteId === data.expedienteId && !p.recibidoEn)) {
+          throw Object.assign(new Error('Unique constraint failed'), { code: 'P2002' });
+        }
+        const p = { ...data, id: pases.length + 1, enviadoEn: ahora(), recibidoEn: null, recibidoPorId: null };
+        pases.push(p);
+        return completarPase(p);
+      },
+      recibir: async (id, usuarioId) => {
+        const p = pases.find((x) => x.id === id);
+        if (!p || p.recibidoEn) return null;
+        Object.assign(p, { recibidoEn: ahora(), recibidoPorId: usuarioId });
+        const e = expedientes.find((x) => x.id === p.expedienteId)!;
+        Object.assign(e, { dependenciaActualId: p.destinoId, responsableId: null });
+        return completarPase(p);
+      },
+    },
+
+    asignaciones: {
+      listByExpediente: async (expedienteId) => asignaciones.filter((a) => a.expedienteId === expedienteId),
+      insert: async ({ responsableId, usuarioId, expedienteId }) => {
+        asignaciones.push({
+          id: asignaciones.length + 1,
+          expedienteId,
+          responsable: responsableId ? persona(responsableId) : null,
+          usuario: persona(usuarioId),
+          fecha: ahora(),
+        });
       },
     },
 
@@ -237,7 +354,7 @@ export function crearReposEnMemoria() {
     return repos.usuarios.create({ username, email, nombre: username, passwordHash: await hashPassword(password), rolId: rolId(rolClave), dependenciaId: 1, ...extra });
   }
 
-  return { repos, auditoria, sesiones, rolId, agregarUsuario, documentos, actuaciones, cambiosEstado };
+  return { repos, auditoria, sesiones, rolId, agregarUsuario, documentos, actuaciones, cambiosEstado, tareas, pases, asignaciones, expedientes };
 }
 
 export const PASSWORD_ADMIN = '12345';

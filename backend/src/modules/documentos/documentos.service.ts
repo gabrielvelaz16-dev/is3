@@ -9,7 +9,7 @@ import { sha256 } from '../../integrations/almacenamiento/almacenamiento.js';
 import { AppError, NotFoundError, ValidationError } from '../../shared/errors.js';
 import { logger } from '../../shared/logger.js';
 import type { AuditoriaService, Contexto } from '../auditoria/auditoria.service.js';
-import { verificarNoArchivado } from '../expedientes/expedientes.service.js';
+import { verificarEditable } from '../expedientes/expedientes.service.js';
 
 interface TipoPermitido {
   mime: string;
@@ -86,7 +86,7 @@ export class DocumentosService {
     usuarioId: number,
     ctx: Contexto = {},
   ): Promise<DocumentoPublico> {
-    verificarNoArchivado(expediente, 'adjuntar documentos a');
+    verificarEditable(expediente, 'adjuntar documentos a');
 
     const nombre = limpiarNombre(archivo.nombre);
     if (!nombre) {
