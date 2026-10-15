@@ -11,6 +11,7 @@ Este documento registra **solo resultados reales** obtenidos de la ejecución de
 | Fase 0 | 13/10/2026 | 0 | — | — | — | No hay código todavía |
 | S1 + S2 (CR-02) | 14/10/2026 | Backend 50 · Frontend 20 | 70 (50 + 20) | 0 | Backend total: líneas 92,99 %, sentencias 92,28 %, funciones 92,13 %, ramas 89,09 % (meta RNF-10: ≥ 70 %) | [Run 38596214215](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38596214215) · commit `49f0933` |
 | S3 | 14/10/2026 | — | — | Falló la verificación de tipos (backend) y 4 pruebas (frontend) | — | [Run 38609784288](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38609784288) · defectos D-04 a D-07 |
+| S3 corregido | 15/10/2026 | Backend 76 · Frontend 20 | 96 (76 + 20) | 0 | Backend total: líneas 93,92 %, sentencias 91,85 %, funciones 93,39 %, ramas 86,57 % | [Run 38739999945](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38739999945) · commit `bd4cc9f` |
 | S4 | | | | | | |
 | S5 | | | | | | |
 | S6 | | | | | | |
