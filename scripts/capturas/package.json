@@ -1,0 +1,9 @@
+{
+  "name": "is3-capturas",
+  "private": true,
+  "type": "module",
+  "description": "Capturas automáticas de la interfaz (CR-05). Se instala solo en el workflow de capturas.",
+  "dependencies": {
+    "playwright": "1.56.0"
+  }
+}

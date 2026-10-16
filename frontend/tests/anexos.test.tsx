@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { FUNCIONARIO, renderApp } from './support';
@@ -60,13 +60,16 @@ function handlers(extra: Record<string, (body: unknown) => { status?: number; bo
 
 describe('Detalle del expediente: documentos, actuaciones e historial (Sprint 4)', () => {
   it('muestra los documentos con tamaño y autor, y el historial en orden', async () => {
-    renderApp('/expedientes/7', { handlers: handlers() });
+    renderApp('/expedientes/7?pestana=documentos', { handlers: handlers() });
 
     const docs = await screen.findByRole('list', { name: 'Documentos del expediente' });
     expect(within(docs).getByText('informe.pdf')).toBeInTheDocument();
     expect(within(docs).getByText(/2\.0 KB/)).toBeInTheDocument();
     expect(within(docs).getByRole('button', { name: 'Descargar informe.pdf' })).toBeInTheDocument();
 
+    // CR-05: cada sección está en su pestaña.
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    expect(screen.getByRole('tab', { name: 'Historial' })).toHaveAttribute('aria-selected', 'true');
     const historial = await screen.findByRole('list', { name: 'Historial del expediente' });
     const items = within(historial).getAllByRole('listitem');
     expect(items).toHaveLength(3);
@@ -77,7 +80,7 @@ describe('Detalle del expediente: documentos, actuaciones e historial (Sprint 4)
 
   it('adjunta un archivo enviándolo como cuerpo con su nombre codificado en el encabezado', async () => {
     const user = userEvent.setup();
-    const { fetchMock } = renderApp('/expedientes/7', {
+    const { fetchMock } = renderApp('/expedientes/7?pestana=documentos', {
       handlers: handlers({ 'POST /api/expedientes/7/documentos': ok({ ...DOCUMENTO, id: 4, nombreOriginal: 'Acta Nº 1.pdf' }, 201) }),
     });
 
@@ -99,7 +102,7 @@ describe('Detalle del expediente: documentos, actuaciones e historial (Sprint 4)
 
   it('muestra el motivo cuando el servidor rechaza el tipo de archivo', async () => {
     const user = userEvent.setup();
-    renderApp('/expedientes/7', {
+    renderApp('/expedientes/7?pestana=documentos', {
       handlers: handlers({
         'POST /api/expedientes/7/documentos': () => ({
           status: 400,
@@ -124,7 +127,7 @@ describe('Detalle del expediente: documentos, actuaciones e historial (Sprint 4)
   it('registra una observación y recarga las actuaciones y el historial', async () => {
     const user = userEvent.setup();
     const registradas: unknown[] = [];
-    const { fetchMock } = renderApp('/expedientes/7', {
+    const { fetchMock } = renderApp('/expedientes/7?pestana=actuaciones', {
       handlers: handlers({
         'GET /api/expedientes/7/actuaciones': () => ({ body: { data: registradas } }),
         'POST /api/expedientes/7/actuaciones': (body) => {
@@ -148,24 +151,30 @@ describe('Detalle del expediente: documentos, actuaciones e historial (Sprint 4)
     expect(within(lista).getByText('Observación')).toBeInTheDocument();
     const post = fetchMock.mock.calls.find(([url, init]) => url === '/api/expedientes/7/actuaciones' && init?.method === 'POST')!;
     expect(JSON.parse(String(post[1]!.body))).toEqual({ tipo: 'OBSERVACION', texto: 'Falta la firma del director' });
-    // El historial se volvió a pedir después del registro.
-    expect(fetchMock.mock.calls.filter(([url]) => url === '/api/expedientes/7/historial').length).toBeGreaterThan(1);
+    // Al abrir el historial se pide de nuevo, con la observación incluida.
+    await user.click(screen.getByRole('tab', { name: 'Historial' }));
+    await screen.findByRole('list', { name: 'Historial del expediente' });
+    expect(fetchMock.mock.calls.some(([url]) => url === '/api/expedientes/7/historial')).toBe(true);
   });
 
   it('sin permisos de carga no muestra los formularios de adjuntar ni de registrar', async () => {
-    renderApp('/expedientes/7', { usuario: FUNCIONARIO, handlers: handlers() });
+    renderApp('/expedientes/7?pestana=documentos', { usuario: FUNCIONARIO, handlers: handlers() });
 
     expect(await screen.findByRole('list', { name: 'Documentos del expediente' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Adjuntar' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Registrar' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Descargar/ })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Actuaciones' }));
+    expect(await screen.findByRole('heading', { name: 'Actuaciones y observaciones' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Registrar' })).not.toBeInTheDocument();
   });
 
   it('un expediente archivado no muestra los formularios aunque el usuario tenga permisos', async () => {
-    renderApp('/expedientes/7', { handlers: handlers({ 'GET /api/expedientes/7': ok({ ...EXPEDIENTE, estado: 'ARCHIVADO' }) }) });
+    renderApp('/expedientes/7?pestana=documentos', { handlers: handlers({ 'GET /api/expedientes/7': ok({ ...EXPEDIENTE, estado: 'ARCHIVADO' }) }) });
 
     expect(await screen.findByRole('list', { name: 'Documentos del expediente' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Adjuntar' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Actuaciones' }));
+    expect(await screen.findByRole('heading', { name: 'Actuaciones y observaciones' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Registrar' })).not.toBeInTheDocument();
   });
 });

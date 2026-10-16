@@ -6,7 +6,7 @@ type Estado = { tipo: 'cargando' } | { tipo: 'ok'; health: Health } | { tipo: 'e
 
 const ETIQUETA: Record<'ok' | 'down', string> = { ok: 'Disponible', down: 'Sin conexión' };
 
-/** Estado de la API y de la base de datos, leído de /api/health (S1-03). */
+/** Estado de la API y de la base de datos, leído de /api/health (S1-03). Franja discreta al pie del inicio. */
 export function SystemStatus() {
   const [estado, setEstado] = useState<Estado>({ tipo: 'cargando' });
 
@@ -23,26 +23,27 @@ export function SystemStatus() {
   }, []);
 
   return (
-    <section aria-labelledby="titulo-estado" className="mb-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-      <h2 id="titulo-estado" className="text-sm font-semibold text-slate-700">
+    <section aria-labelledby="titulo-estado" className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-dashed border-slate-300 px-4 py-3 text-sm">
+      <h2 id="titulo-estado" className="font-medium text-slate-600">
         Estado del sistema
       </h2>
-      {estado.tipo === 'cargando' && <p className="mt-2 text-sm text-slate-500">Consultando…</p>}
+      {estado.tipo === 'cargando' && <p className="text-slate-500">Consultando…</p>}
       {estado.tipo === 'error' && (
-        <p role="alert" className="mt-2 text-sm text-red-700">
-          API: Sin conexión — {estado.mensaje}
+        <p role="alert" className="text-red-700">
+          API: Sin conexión. {estado.mensaje}
         </p>
       )}
       {estado.tipo === 'ok' && (
-        <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-4">
+        <dl className="flex flex-wrap gap-x-6 gap-y-1">
           {(['api', 'database'] as const).map((k) => (
-            <div key={k}>
-              <dt className="text-slate-500">{k === 'api' ? 'API' : 'Base de datos'}</dt>
-              <dd className={estado.health[k] === 'ok' ? 'font-medium text-green-700' : 'font-medium text-red-700'}>{ETIQUETA[estado.health[k]]}</dd>
+            <div key={k} className="flex items-center gap-1.5">
+              <span aria-hidden="true" className={`h-2 w-2 rounded-full ${estado.health[k] === 'ok' ? 'bg-emerald-500' : 'bg-sello'}`} />
+              <dt className="text-slate-500">{k === 'api' ? 'API' : 'Base de datos'}:</dt>
+              <dd className={estado.health[k] === 'ok' ? 'font-medium text-emerald-800' : 'font-medium text-sello'}>{ETIQUETA[estado.health[k]]}</dd>
             </div>
           ))}
-          <div>
-            <dt className="text-slate-500">Versión</dt>
+          <div className="flex items-center gap-1.5">
+            <dt className="text-slate-500">Versión:</dt>
             <dd className="font-medium text-slate-700">{estado.health.version}</dd>
           </div>
         </dl>

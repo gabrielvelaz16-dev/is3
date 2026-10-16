@@ -12,9 +12,9 @@ import { ESTADOS_EXPEDIENTE, ETIQUETA_TIPO, PRIORIDADES } from '../services/tipo
 
 function Tarjeta({ titulo, valor, detalle, alerta = false }: { titulo: string; valor: number; detalle?: string; alerta?: boolean }) {
   return (
-    <div className={`rounded-lg border bg-white p-4 shadow-sm ${alerta && valor > 0 ? 'border-red-300' : 'border-slate-200'}`}>
+    <div className={`rounded-lg border bg-white p-4 ${alerta && valor > 0 ? 'border-l-4 border-sello/40 border-l-sello' : 'border-slate-200'}`}>
       <dt className="text-sm text-slate-600">{titulo}</dt>
-      <dd className={`mt-1 text-3xl font-semibold ${alerta && valor > 0 ? 'text-red-700' : 'text-slate-900'}`}>{valor}</dd>
+      <dd className={`mt-1 text-3xl font-semibold tracking-tight ${alerta && valor > 0 ? 'text-sello' : 'text-tinta'}`}>{valor}</dd>
       {detalle && <dd className="mt-1 text-xs text-slate-500">{detalle}</dd>}
     </div>
   );
@@ -24,8 +24,8 @@ function Tarjeta({ titulo, valor, detalle, alerta = false }: { titulo: string; v
 export function Distribucion({ titulo, filas, total }: { titulo: string; filas: { etiqueta: string; valor: number }[]; total: number }) {
   const id = `dist-${titulo.toLowerCase().replace(/\s+/g, '-')}`;
   return (
-    <section aria-labelledby={id} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-      <h3 id={id} className="mb-3 text-sm font-semibold text-slate-800">
+    <section aria-labelledby={id} className="rounded-lg border border-slate-200 bg-white p-4">
+      <h3 id={id} className="mb-3 text-sm font-semibold text-tinta">
         {titulo}
       </h3>
       <table className="w-full text-sm">
@@ -76,13 +76,13 @@ export function Dashboard() {
   if (!datos) return <p className="mb-6 text-sm text-slate-500">Cargando estadísticas…</p>;
 
   const { resumen, seguimiento } = datos;
-  const alcance = datos.alcance.tipo === 'INSTITUCION' ? 'Toda la institución' : datos.alcance.dependencia.nombre;
+  const alcance = datos.alcance.tipo === 'INSTITUCION' ? 'toda la institución' : datos.alcance.dependencia.nombre;
 
   return (
     <section aria-labelledby="titulo-dashboard" className="mb-8">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="titulo-dashboard" className="text-lg font-semibold text-slate-800">
-          Estadísticas · {alcance}
+        <h2 id="titulo-dashboard" className="text-base font-semibold text-tinta">
+          Situación de {alcance}
         </h2>
         {puede('reportes.consultar') && (
           <Link to="/reportes" className="text-sm font-medium text-marca-700 hover:underline">

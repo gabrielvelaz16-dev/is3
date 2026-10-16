@@ -13,6 +13,8 @@ export interface Section {
   permiso?: string;
   /** true si la sección ya tiene funcionalidad (no muestra "en construcción"). */
   implementada?: boolean;
+  /** Grupo del menú lateral (CR-05). */
+  grupo: 'Trabajo diario' | 'Control' | 'Sistema';
 }
 
 export const sections: Section[] = [
@@ -24,6 +26,7 @@ export const sections: Section[] = [
     requisitos: 'RF-04 a RF-11',
     permiso: 'expedientes.consultar',
     implementada: true,
+    grupo: 'Trabajo diario',
   },
   {
     path: '/tareas',
@@ -32,6 +35,7 @@ export const sections: Section[] = [
     sprint: 5,
     requisitos: 'RF-12 a RF-17',
     implementada: true,
+    grupo: 'Trabajo diario',
   },
   {
     path: '/reportes',
@@ -41,6 +45,7 @@ export const sections: Section[] = [
     requisitos: 'RF-18 y RF-19',
     permiso: 'reportes.consultar',
     implementada: true,
+    grupo: 'Control',
   },
   {
     path: '/auditoria',
@@ -50,6 +55,7 @@ export const sections: Section[] = [
     requisitos: 'RF-20 y RF-21',
     permiso: 'auditoria.consultar',
     implementada: true,
+    grupo: 'Control',
   },
   {
     path: '/administracion',
@@ -59,5 +65,6 @@ export const sections: Section[] = [
     requisitos: 'RF-01 a RF-03, RF-20 a RF-22',
     permiso: 'usuarios.gestionar',
     implementada: true,
+    grupo: 'Sistema',
   },
 ];

@@ -11,6 +11,7 @@ import { api, ApiError } from '../services/api';
 import { type FiltrosReporte, type Reporte, reportesApi, validarRango } from '../services/reportes';
 import type { Dependencia, EstadoExpediente, Prioridad } from '../services/tipos';
 import { ESTADOS_EXPEDIENTE, ETIQUETA_TIPO, PRIORIDADES, TIPOS_EXPEDIENTE } from '../services/tipos';
+import { useAviso } from '../components/ui/Avisos';
 
 const POR_PAGINA = 20;
 const campo = 'mt-1 block w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-marca-500';
@@ -62,7 +63,7 @@ export function ReportesPage() {
   const [dependencias, setDependencias] = useState<Dependencia[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [errorRango, setErrorRango] = useState<string | null>(null);
-  const [aviso, setAviso] = useState<string | null>(null);
+  const avisar = useAviso();
   const [exportando, setExportando] = useState(false);
 
   const cargar = useCallback(async () => {
@@ -92,7 +93,6 @@ export function ReportesPage() {
     const problema = validarRango(form.desde, form.hasta);
     setErrorRango(problema);
     if (problema) return;
-    setAviso(null);
     setPagina(1);
     setAplicados(aFiltros(form));
   }
@@ -106,12 +106,11 @@ export function ReportesPage() {
 
   async function exportar() {
     setError(null);
-    setAviso(null);
     setExportando(true);
     try {
       const { archivo, nombre } = await reportesApi.exportar(aplicados);
       descargar(archivo, nombre);
-      setAviso(`Se descargó ${nombre}`);
+      avisar(`Se descargó ${nombre}`);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'No se pudo exportar el reporte');
     } finally {
@@ -125,7 +124,7 @@ export function ReportesPage() {
     <>
       <PageHeader title="Reportes" subtitle="Expedientes por fecha, estado, prioridad, tipo y dependencia, con exportación a CSV." />
 
-      <form onSubmit={aplicar} noValidate aria-label="Filtros del reporte" className="mb-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+      <form onSubmit={aplicar} noValidate aria-label="Filtros del reporte" className="mb-6 rounded-lg border border-slate-200 bg-white p-4">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <div>
             <label htmlFor="desde" className="text-sm font-medium text-slate-700">Creados desde</label>
@@ -210,11 +209,6 @@ export function ReportesPage() {
           {error}
         </p>
       )}
-      {aviso && (
-        <p role="status" className="mb-4 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
-          {aviso}
-        </p>
-      )}
 
       {!reporte && !error && <p className="text-sm text-slate-500">Generando reporte…</p>}
 
@@ -241,10 +235,10 @@ export function ReportesPage() {
             />
           </div>
 
-          <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
             <table className="min-w-full divide-y divide-slate-200 text-sm">
               <caption className="sr-only">Expedientes del reporte</caption>
-              <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+              <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-600">
                 <tr>
                   <th scope="col" className="px-4 py-3">Número</th>
                   <th scope="col" className="px-4 py-3">Carátula</th>
@@ -259,7 +253,7 @@ export function ReportesPage() {
               <tbody className="divide-y divide-slate-100">
                 {reporte.items.map((x) => (
                   <tr key={x.id}>
-                    <td className="px-4 py-2 font-mono text-marca-700">
+                    <td className="px-4 py-2 font-semibold whitespace-nowrap text-marca-700">
                       <Link to={`/expedientes/${x.id}`} className="hover:underline">{x.numero}</Link>
                     </td>
                     <td className="max-w-xs truncate px-4 py-2 text-slate-800" title={x.caratula}>{x.caratula}</td>

@@ -71,7 +71,7 @@ export function AuditoriaPage() {
     <>
       <PageHeader title="Auditoría" subtitle="Registro de las operaciones importantes. Es de solo lectura: no se puede modificar ni borrar." />
 
-      <form onSubmit={aplicar} noValidate aria-label="Filtros de auditoría" className="mb-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+      <form onSubmit={aplicar} noValidate aria-label="Filtros de auditoría" className="mb-6 rounded-lg border border-slate-200 bg-white p-4">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <label htmlFor="aud-desde" className="text-sm font-medium text-slate-700">Desde</label>
@@ -123,10 +123,10 @@ export function AuditoriaPage() {
 
       {datos && (
         <>
-          <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
             <table className="min-w-full divide-y divide-slate-200 text-sm">
               <caption className="sr-only">Eventos de auditoría</caption>
-              <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+              <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-600">
                 <tr>
                   <th scope="col" className="px-4 py-3">Fecha</th>
                   <th scope="col" className="px-4 py-3">Usuario</th>

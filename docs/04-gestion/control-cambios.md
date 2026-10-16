@@ -59,6 +59,7 @@ Artefactos actualizados:
 | CR-02 | Adelantar login y gestión de usuarios (Sprint 2) en paralelo al cierre del Sprint 1; aclarar RNF-01 | 14/10/2026 | **Aprobado** 14/10/2026 | Product Owner / Gerente |
 | CR-03 | Mover S5-06 (notificaciones internas, 8 SP) del Sprint 5 al Sprint 6 | 15/10/2026 | **Aprobado** 15/10/2026 | Product Owner / Gerente |
 | CR-04 | Orden de recorte del Sprint 6: si se atrasa, S6-03 (exportar, 3 SP) pasa al Sprint 7 | 16/10/2026 | **Aprobado** 16/10/2026 · no fue necesario aplicarlo | Product Owner / Gerente |
+| CR-05 | Mejora de la interfaz: menú lateral, detalle en pestañas y componentes comunes | 16/10/2026 | **Aprobado** 16/10/2026 | Product Owner |
 
 ### CR-00 · Unificación del backlog del TP con el alcance del prototipo
 
@@ -117,3 +118,13 @@ Artefactos actualizados:
 - **Descripción:** se decidió de antemano qué se recortaría: **S6-03 Exportar reportes (3 SP)** pasaría al Sprint 7. Así el recorte no se hace en silencio a último momento.
 - **Resultado:** el Sprint 6 terminó los 21 SP con la CI en verde, así que **el recorte no se aplicó**. La línea base no cambia.
 - **Artefactos:** [sprint-06.md](sprints/sprint-06.md), [estimacion-calendario.md](estimacion-calendario.md).
+
+### CR-05 · Mejora de la interfaz
+
+- **Solicitante:** Product Owner · **Fecha:** 16/10/2026 · **Decisión:** aprobado por el PO al pedir "mejoremos la interfaz" y elegir los frentes.
+- **Motivo:** la interfaz de los sprints 1 a 7 funcionaba pero cada pantalla tenía su propio estilo, el menú superior ya no entraba con 6 secciones y el detalle del expediente era una página muy larga.
+- **Descripción:** menú lateral agrupado, carátula tipo carpeta con secciones en pestañas, componentes `ui/` reutilizables, avisos flotantes y capturas antes/después generadas en la CI.
+- **Impacto en alcance:** no agrega requisitos funcionales; mejora RNF de usabilidad y accesibilidad. No cambia la API ni la base de datos.
+- **Impacto en plazo:** se hace antes del Sprint 8, en una rama propia. Sin cambio de fecha de entrega.
+- **Impacto en riesgos:** riesgo de romper pruebas de interfaz (controlado: se ajustaron 4 archivos de prueba y la CI quedó en verde).
+- **Artefactos:** [cr-05-interfaz.md](sprints/cr-05-interfaz.md).
