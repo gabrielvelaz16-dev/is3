@@ -40,7 +40,9 @@ describe('Tareas y seguimiento (Sprint 5: RF-12 a RF-17)', () => {
     funcionario = await sesion('funcionario');
     jefe = await sesion('jefe');
     mesa = await sesion('mesa');
-    expedienteId = (await admin.post('/api/expedientes').send(EXPEDIENTE)).body.data.id; // queda en la dependencia 1
+    const creado = await admin.post('/api/expedientes').send(EXPEDIENTE);
+    expect(creado.status, JSON.stringify(creado.body)).toBe(201);
+    expedienteId = creado.body.data.id; // queda en la dependencia 1
   });
 
   it('sin sesión, las rutas nuevas responden 401', async () => {
