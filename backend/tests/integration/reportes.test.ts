@@ -34,7 +34,9 @@ describe('Sprint 6: notificaciones, dashboard y reportes (RF-17 a RF-19)', () =>
   const usuarioId = async (username: string) => (await e.repos.usuarios.findByUsername(username))!.id;
 
   beforeEach(async () => {
-    reloj = Date.parse('2026-10-16T12:00:00.000Z');
+    // El reloj parte de la hora real: la cookie de sesión vence según el reloj real del agente
+    // de pruebas, y con una fecha fija pasada las pruebas fallarían al día siguiente (D-11).
+    reloj = Date.now();
     e = await crearEntorno({ now: () => new Date(reloj) });
     await e.agregarUsuario('jefe@institucion.test', PASSWORD_USUARIO, 'JEFE_DEPENDENCIA');
     await e.agregarUsuario('mesa@institucion.test', PASSWORD_USUARIO, 'MESA_ENTRADAS', { dependenciaId: 2 });
