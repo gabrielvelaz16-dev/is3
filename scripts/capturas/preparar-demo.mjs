@@ -54,7 +54,7 @@ const nota = await crear({
   fechaVencimiento: enDias(15),
 });
 
-// Documento y actuación en la licitación, y envío a Asesoría Jurídica.
+// Documento en la licitación y envío a Asesoría Jurídica (Mesa de Entradas no registra actuaciones).
 await mesa('POST', `/expedientes/${licitacion.id}/documentos`, Buffer.from('%PDF-1.4\n% Documento de demostración (ficticio)\n'), {
   crudo: true,
   headers: {
@@ -63,7 +63,6 @@ await mesa('POST', `/expedientes/${licitacion.id}/documentos`, Buffer.from('%PDF
     'X-Descripcion': encodeURIComponent('Pliego de bases y condiciones'),
   },
 });
-await mesa('POST', `/expedientes/${licitacion.id}/actuaciones`, { tipo: 'ACTUACION', texto: 'Se verificó que la solicitud incluye el pliego de bases firmado.' });
 await mesa('POST', `/expedientes/${licitacion.id}/pases`, { destinoId: ajur.id, motivo: 'Para dictamen jurídico sobre el llamado' });
 await mesa('POST', `/expedientes/${reclamo.id}/pases`, { destinoId: ajur.id, motivo: 'Para responder el reclamo' });
 
@@ -80,6 +79,7 @@ await jefe('POST', `/expedientes/${licitacion.id}/tareas`, {
   vencimiento: enDias(1),
   descripcion: 'Revisar plazos y garantías.',
 });
+await jefe('POST', `/expedientes/${licitacion.id}/actuaciones`, { tipo: 'ACTUACION', texto: 'Se verificó que la solicitud incluye el pliego de bases firmado.' });
 await jefe('POST', `/expedientes/${licitacion.id}/actuaciones`, { tipo: 'OBSERVACION', texto: 'Falta la constancia de disponibilidad presupuestaria.' });
 
 console.log(JSON.stringify({ licitacion: licitacion.id, reclamo: reclamo.id, nota: nota.id }));
