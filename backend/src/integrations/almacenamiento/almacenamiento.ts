@@ -12,6 +12,8 @@ export interface AlmacenamientoDocumentos {
   guardar(contenido: Buffer): Promise<{ nombreAlmacenado: string; hashSha256: string }>;
   /** Devuelve el contenido, o null si el archivo no existe. */
   leer(nombreAlmacenado: string): Promise<Buffer | null>;
+  /** Restauración (S7-04): escribe un archivo con su nombre interno original (un UUID). */
+  escribir(nombreAlmacenado: string, contenido: Buffer): Promise<void>;
 }
 
 export function sha256(contenido: Buffer): string {
@@ -19,7 +21,7 @@ export function sha256(contenido: Buffer): string {
 }
 
 /** El nombre interno es siempre un UUID: nunca se arma una ruta con datos del usuario. */
-const NOMBRE_VALIDO = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+export const NOMBRE_VALIDO = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 /** Carpeta local fuera de la carpeta pública y fuera de Git (STORAGE_PATH). */
 export class AlmacenamientoLocal implements AlmacenamientoDocumentos {
@@ -38,6 +40,15 @@ export class AlmacenamientoLocal implements AlmacenamientoDocumentos {
     await writeFile(temporal, contenido, { flag: 'wx' });
     await rename(temporal, destino);
     return { nombreAlmacenado, hashSha256: sha256(contenido) };
+  }
+
+  async escribir(nombreAlmacenado: string, contenido: Buffer) {
+    if (!NOMBRE_VALIDO.test(nombreAlmacenado)) throw new Error('Nombre interno de documento inválido');
+    await mkdir(this.carpeta, { recursive: true });
+    const destino = join(this.carpeta, nombreAlmacenado);
+    const temporal = `${destino}.tmp`;
+    await writeFile(temporal, contenido);
+    await rename(temporal, destino);
   }
 
   async leer(nombreAlmacenado: string) {
@@ -63,5 +74,9 @@ export class AlmacenamientoEnMemoria implements AlmacenamientoDocumentos {
 
   async leer(nombreAlmacenado: string) {
     return this.archivos.get(nombreAlmacenado) ?? null;
+  }
+
+  async escribir(nombreAlmacenado: string, contenido: Buffer) {
+    this.archivos.set(nombreAlmacenado, Buffer.from(contenido));
   }
 }

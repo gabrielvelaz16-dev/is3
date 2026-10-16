@@ -127,9 +127,34 @@ cd backend && npm test
 cd frontend && npm test
 ```
 
-## 7. Copia de seguridad y restauración (Sprint 7)
+## 7. Copia de seguridad y restauración (Sprint 7, ADR-13)
 
-Se documentará con el script de `scripts/backup/` (S7-04).
+**Crear un respaldo:** desde *Administración → Copias de seguridad* (usuario `admin`) o por consola:
+
+```powershell
+cd backend
+npm run respaldo:crear        # crea backups\respaldo-AAAAMMDD-HHMMSS\
+npm run respaldo:verificar -- ..\backups\respaldo-AAAAMMDD-HHMMSS
+```
+
+La carpeta `backups/` (variable `BACKUP_PATH`) está fuera de Git. Contiene los datos y los hashes de las contraseñas, así que no debe compartirse.
+
+**Restaurar** (reemplaza todos los datos):
+
+1. Detener el backend (`Ctrl+C`).
+2. Dejar la base vacía y migrada. En desarrollo:
+   ```powershell
+   docker compose --env-file .env -f infra/docker/docker-compose.yml down -v
+   docker compose --env-file .env -f infra/docker/docker-compose.yml up -d
+   cd backend; npx prisma migrate deploy
+   ```
+   **No** ejecutar el seed: la restauración exige una base sin datos.
+3. Restaurar:
+   ```powershell
+   npm run respaldo:restaurar -- ..\backups\respaldo-AAAAMMDD-HHMMSS --confirmar
+   ```
+   Si el respaldo fue alterado, si la base no está vacía o si las migraciones no coinciden, el comando lo informa y no cambia nada. Al terminar muestra cuántas filas y documentos se verificaron.
+4. Volver a levantar el backend (`npm run dev`). Las sesiones no se respaldan: cada usuario inicia sesión de nuevo.
 
 ## 8. Problemas frecuentes
 

@@ -113,7 +113,7 @@ SP = Story Points (escala 1-2-3-5-8-13). Las tareas técnicas y de documentació
 | S6-04 | Verificar indicadores contra la base de datos | — | Nueva |
 | S6-05 | Tablero de métricas del proyecto (Unidad 9) | — | Nueva (Unidad 9) |
 
-### Sprint 7 — Calidad y seguridad (E7) · 13 SP
+### Sprint 7 — Calidad y seguridad (E7) · 13 SP · terminado el 16/10/2026 ([sprint-07.md](sprints/sprint-07.md))
 
 | Código | Ítem | SP | Origen |
 |---|---|---|---|

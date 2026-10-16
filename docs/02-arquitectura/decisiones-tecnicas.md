@@ -114,3 +114,31 @@ Registro breve de decisiones de arquitectura (*Architecture Decision Records*). 
 - **Validaciones (RNF-04):** lista blanca de tipos (PDF, PNG, JPG, DOCX, XLSX) verificada tres veces: tipo declarado, extensión del nombre y **firma del contenido** (primeros bytes), para rechazar, por ejemplo, un ejecutable renombrado como `.pdf`. Se descartan rutas en el nombre. El archivo se guarda con nombre UUID y hash SHA-256 (ADR-08); al descargar se recalcula el hash y, si no coincide, no se entrega y se registra un fallo en auditoría.
 - **Alternativas:** multer 2.x (estándar y conocido; conveniente para subir varios archivos juntos o mezclar archivos con muchos campos de formulario).
 - **Consecuencias:** sin dependencias nuevas; las reglas de validación quedan visibles en `documentos.service.ts`. Se sube **un archivo por petición**. Si más adelante se necesitan subidas múltiples, conviene adoptar multer 2.x con una nueva ADR.
+
+## ADR-13 · Respaldo desde la pantalla, restauración solo por línea de comandos
+
+- **Estado:** Aceptada (Sprint 7, 16/10/2026, decisión del PO)
+- **Contexto:** RF-22 y RNF-07 exigen generar copias de seguridad y restaurarlas con evidencia. Restaurar reemplaza todos los datos y no se puede deshacer. Además, las tablas de historial son de solo inserción (ADR-07): no se pueden vaciar para volver a llenarlas.
+- **Decisión:**
+  - **Generar** un respaldo se puede desde la pantalla de Administración (`POST /api/respaldos`, permiso `respaldo.gestionar`, auditado) o con `npm run respaldo:crear`.
+  - **Restaurar** solo con `npm run respaldo:restaurar -- <carpeta> --confirmar`, con el backend detenido y sobre una **base vacía con las mismas migraciones**.
+  - Sin `--confirmar`, el comando solo verifica el respaldo y explica los pasos.
+- **Formato:** carpeta `respaldo-AAAAMMDD-HHMMSS/` con:
+  - `datos.json`: todas las tablas salvo `sesiones`;
+  - `documentos/`: los archivos con su nombre UUID;
+  - `manifiesto.json`: migraciones, filas por tabla y SHA-256 de `datos.json` y de cada archivo.
+
+  No usa `pg_dump`: funciona igual en la PC con Windows (PostgreSQL en Docker) y en la CI. Los ids se conservan y cada secuencia sigue desde el máximo restaurado.
+- **Controles:**
+  - antes de restaurar se verifica el manifiesto: si un archivo fue alterado o falta, se informa y no se restaura nada;
+  - no se restaura sobre una base con datos ni con otras migraciones;
+  - todo se carga en una sola transacción;
+  - al terminar se vuelven a contar las filas y a verificar los documentos;
+  - la creación y la restauración quedan en la auditoría.
+- **Alternativas:**
+  - restaurar desde la pantalla: más cómodo para la demo, pero puede mezclar sesiones y datos con el sistema en uso;
+  - `pg_dump`/`pg_restore`: exige las herramientas de PostgreSQL en la PC y no incluye los archivos.
+- **Consecuencias:**
+  - la carpeta `backups/` está fuera de Git (`.gitignore`) y contiene hashes de contraseñas, así que no debe compartirse;
+  - la CI respalda, restaura en otra base y compara las 15 tablas y un documento en cada ejecución.
+

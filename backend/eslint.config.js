@@ -16,8 +16,8 @@ export default defineConfig([
     },
   },
   {
-    // El seed y la verificación de indicadores (S6-04) son scripts de consola.
-    files: ['prisma/seed.ts', 'prisma/verificar-indicadores.ts'],
+    // Scripts de consola: seed, verificación de indicadores (S6-04), rendimiento y respaldos (S7).
+    files: ['prisma/seed.ts', 'prisma/verificar-indicadores.ts', 'prisma/medir-rendimiento.ts', 'src/cli/**/*.ts'],
     rules: { 'no-console': 'off' },
   },
 ]);

@@ -107,6 +107,21 @@ Fecha: 16/10/2026 · Release: R3 · Detalle: [sprint-06.md](../04-gestion/sprint
 | PR #14 | 8 | https://github.com/gabrielvelaz16-dev/is3/pull/14 | Abierto; integración por el responsable |
 | Prueba manual en la PC (dashboard, reportes, CSV, campana) | 7 | — | Pendiente |
 
+## Sprint 7 — Calidad y seguridad
+
+Fecha: 16/10/2026 · Release: R4 · Detalle: [sprint-07.md](../04-gestion/sprints/sprint-07.md)
+
+| Evidencia | Unidad | Artefacto | Estado |
+|---|---|---|---|
+| ADR-13 (respaldo desde la pantalla, restauración por consola) aprobada por el PO | 7, 8 | [decisiones-tecnicas.md](../02-arquitectura/decisiones-tecnicas.md) | Hecho |
+| CI en verde: backend 221/221, frontend 51/51, cobertura 94 % | 7, 8 | [run 38909943384](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38909943384) | Hecho |
+| Respaldo y restauración verificados en la CI (99 filas, 1 documento, 15 tablas iguales; rechazo de respaldo alterado y de base con datos) | 7, 8 | Paso "Respaldo y restauración en una base nueva" en [run 38909943384](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38909943384) | Hecho |
+| Matriz de permisos: 40 rutas × 5 roles + sin sesión | 7 | `backend/tests/integration/permisos.test.ts` · [run 38909943384](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38909943384) | Hecho |
+| Rendimiento con 1000 expedientes (p95 ≤ 34 ms) | 7, 9 | Paso "Medir rendimiento" en [run 38909943384](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38909943384) | Hecho |
+| PR #15 | 8 | https://github.com/gabrielvelaz16-dev/is3/pull/15 | Abierto; integración por el responsable |
+| Prueba de usabilidad con 3 personas (PR-27) | 7 | [guia-usabilidad.md](../05-calidad-pruebas/guia-usabilidad.md) | Pendiente |
+| Prueba manual de respaldo y restauración en la PC | 7 | — | Pendiente |
+
 ## Plantilla por sprint
 
 ```

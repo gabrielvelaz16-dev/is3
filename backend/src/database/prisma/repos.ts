@@ -1,4 +1,5 @@
 import type { Prisma, PrismaClient } from '../../generated/prisma/client.js';
+import { createPrismaRespaldoRepo } from './respaldo-repo.js';
 import type {
   CambiosExpediente,
   EstadoExpediente,
@@ -269,6 +270,26 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
     },
 
     auditoria: {
+      async list({ desde, hasta, usuarioId, accion, resultado, skip, take }) {
+        const where: Prisma.AuditoriaWhereInput = {
+          ...(desde || hasta ? { fecha: { ...(desde ? { gte: desde } : {}), ...(hasta ? { lte: hasta } : {}) } } : {}),
+          ...(usuarioId ? { usuarioId } : {}),
+          ...(accion ? { accion } : {}),
+          ...(resultado ? { resultado } : {}),
+        };
+        const [filas, total] = await prisma.$transaction([
+          prisma.auditoria.findMany({ where, include: { usuario: persona }, orderBy: [{ fecha: 'desc' }, { id: 'desc' }], skip, take }),
+          prisma.auditoria.count({ where }),
+        ]);
+        return {
+          items: filas.map(({ usuarioId: _u, ...a }) => ({ ...a, resultado: a.resultado as 'EXITO' | 'FALLO' })),
+          total,
+        };
+      },
+      async acciones() {
+        const filas = await prisma.auditoria.findMany({ distinct: ['accion'], select: { accion: true }, orderBy: { accion: 'asc' } });
+        return filas.map((f) => f.accion);
+      },
       async insert(e) {
         await prisma.auditoria.create({
           data: {
@@ -530,6 +551,8 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
         return { vencidos, porVencer, enTransito, porRecibir, tareasAbiertas, tareasVencidas };
       },
     },
+
+    respaldo: createPrismaRespaldoRepo(prisma),
 
     secuencia: {
       async siguienteNumero(anio: number) {

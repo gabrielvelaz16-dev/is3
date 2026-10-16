@@ -64,7 +64,7 @@ Asociados a las características de ISO/IEC 25010 seleccionadas en el [plan de c
 | RNF-12 | Portabilidad — instalabilidad | El sistema se instala siguiendo el README. | Instalación desde cero en una máquina limpia sin pasos no documentados. |
 | RNF-13 | Integridad de datos | Relaciones y restricciones en la base (FK, únicos, NOT NULL). | Revisión del esquema y pruebas de restricción. |
 
-*Los umbrales numéricos (RNF-09, RNF-10) son supuestos iniciales y se revisan en el Sprint 7.*
+*Los umbrales numéricos (RNF-09, RNF-10) eran supuestos iniciales. Se revisaron en el Sprint 7 y se mantienen: el p95 medido con 1000 expedientes fue de 34 ms como máximo, y la cobertura del backend, del 94 % ([resultados-pruebas.md](../05-calidad-pruebas/resultados-pruebas.md)).*
 
 ## 4. Requisitos de gestión derivados del caso
 

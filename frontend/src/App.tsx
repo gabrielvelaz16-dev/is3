@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router';
 import { RequierePermiso, RequiereSesion } from './auth/guards';
 import { MainLayout } from './layouts/MainLayout';
+import { AuditoriaPage } from './pages/AuditoriaPage';
 import { ExpedienteDetallePage } from './pages/ExpedienteDetallePage';
 import { ExpedienteFormPage } from './pages/ExpedienteFormPage';
 import { ExpedientesPage } from './pages/ExpedientesPage';
@@ -72,6 +73,14 @@ export function App() {
           element={
             <RequierePermiso permiso="reportes.consultar">
               <ReportesPage />
+            </RequierePermiso>
+          }
+        />
+        <Route
+          path="/auditoria"
+          element={
+            <RequierePermiso permiso="auditoria.consultar">
+              <AuditoriaPage />
             </RequierePermiso>
           }
         />

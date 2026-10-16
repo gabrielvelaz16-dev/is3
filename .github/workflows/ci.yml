@@ -95,6 +95,48 @@ jobs:
           done
       - name: Verificar indicadores del dashboard contra la base (S6-04)
         run: npx tsx prisma/verificar-indicadores.ts
+      - name: Respaldo y restauración en una base nueva (S7-04, RNF-07)
+        run: |
+          set -o pipefail
+          # Un documento real (archivo + fila con su hash) para comprobar que viaja en el respaldo.
+          UUID=$(cat /proc/sys/kernel/random/uuid)
+          mkdir -p ../storage/documentos
+          printf '%%PDF-1.4 documento de verificacion de respaldo' > "../storage/documentos/$UUID"
+          HASH=$(sha256sum "../storage/documentos/$UUID" | cut -d' ' -f1)
+          PGPASSWORD=ci psql -h localhost -U ci -d expediente_ci -v ON_ERROR_STOP=1 -c \
+            "INSERT INTO documentos (expediente_id, nombre_original, nombre_almacenado, tipo_mime, tamano_bytes, hash_sha256, subido_por_id)
+             SELECT min(e.id), 'respaldo-ci.pdf', '$UUID', 'application/pdf', 46, '$HASH', (SELECT min(id) FROM usuarios) FROM expedientes e;"
+          npm run respaldo:crear | tee respaldo.log
+          DIR=$(sed -n 's/^Respaldo creado: //p' respaldo.log)
+          [ -d "$DIR" ] || { echo "::error title=Respaldo::no se creó la carpeta del respaldo"; exit 1; }
+          PGPASSWORD=ci psql -h localhost -U ci -d expediente_ci -v ON_ERROR_STOP=1 -c "CREATE DATABASE expediente_restaurada;"
+          export RESTAURADA="postgresql://ci:ci@localhost:5432/expediente_restaurada?schema=public"
+          DATABASE_URL="$RESTAURADA" npx prisma migrate deploy
+          # Sin --confirmar solo verifica; con --confirmar restaura y compara filas y documentos.
+          DATABASE_URL="$RESTAURADA" STORAGE_PATH=/tmp/storage-restaurado npm run respaldo:restaurar -- "$DIR"
+          DATABASE_URL="$RESTAURADA" STORAGE_PATH=/tmp/storage-restaurado npm run respaldo:restaurar -- "$DIR" --confirmar | tee restauracion.log
+          # El documento quedó en el almacenamiento restaurado con el mismo contenido.
+          [ "$(sha256sum "/tmp/storage-restaurado/$UUID" | cut -d' ' -f1)" = "$HASH" ] || { echo "::error title=Respaldo::el documento restaurado no coincide"; exit 1; }
+          # Restaurar otra vez sobre la base ya restaurada debe fallar (no está vacía).
+          if DATABASE_URL="$RESTAURADA" STORAGE_PATH=/tmp/storage-restaurado npm run respaldo:restaurar -- "$DIR" --confirmar; then
+            echo "::error title=Respaldo::se pudo restaurar sobre una base con datos"; exit 1
+          fi
+          # Un respaldo alterado debe rechazarse.
+          cp -r "$DIR" /tmp/respaldo-alterado
+          sed -i 's/Administración General/Administracion alterada/' /tmp/respaldo-alterado/datos.json
+          if npm run respaldo:verificar -- /tmp/respaldo-alterado; then
+            echo "::error title=Respaldo::se aceptó un respaldo alterado"; exit 1
+          fi
+          # Comparación independiente: las dos bases tienen las mismas filas por tabla
+          # (cada una suma un evento de auditoría: respaldo.crear en el origen y respaldo.restaurar en la copia).
+          for tabla in dependencias roles permisos roles_permisos usuarios auditoria secuencias expedientes documentos actuaciones cambios_estado tareas pases asignaciones notificaciones; do
+            origen=$(PGPASSWORD=ci psql -h localhost -U ci -d expediente_ci -tAc "SELECT count(*) FROM $tabla")
+            copia=$(PGPASSWORD=ci psql -h localhost -U ci -d expediente_restaurada -tAc "SELECT count(*) FROM $tabla")
+            if [ "$origen" != "$copia" ]; then echo "::error title=Respaldo::$tabla: origen $origen, restaurada $copia"; exit 1; fi
+          done
+          echo "::notice title=Respaldo y restauración (S7-04)::$(tail -n 1 restauracion.log) Las 15 tablas coinciden con el origen; se rechazó restaurar sobre una base con datos y un respaldo alterado."
+      - name: Medir rendimiento con 1000 expedientes (S7-05)
+        run: npx tsx prisma/medir-rendimiento.ts
       - name: Build
         run: npm run build
       - name: Auditoría de dependencias de producción

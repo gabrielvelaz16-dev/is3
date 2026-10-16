@@ -23,6 +23,7 @@ const app = createApp({
   cookieSecure: env.COOKIE_SECURE,
   almacenamiento: new AlmacenamientoLocal(resolve(RAIZ_REPOSITORIO, env.STORAGE_PATH)),
   maxUploadBytes: env.MAX_UPLOAD_MB * 1024 * 1024,
+  carpetaRespaldos: resolve(RAIZ_REPOSITORIO, env.BACKUP_PATH),
 });
 
 const server = app.listen(env.PORT, () => {
