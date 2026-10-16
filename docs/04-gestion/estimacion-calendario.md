@@ -75,14 +75,16 @@ Ejemplo del TP: Sprint 1 = 18 SP, Sprint 2 = 20 SP, Sprint 3 = 22 SP → velocid
 | S3 | 16 | 16 (con correcciones del 15/10) | 10,3 | 66 | 6,4 |
 | S4 | 11 | 11 | 13,0 | 55 | 4,2 |
 | S5 | 21 (29 antes de CR-03) | 21 | 16,0 | 34 | 2,1 → **3 sprints** |
-| S6 | 21 (13 + S5-06 por CR-03) | pendiente | — | — | — |
+| S6 | 21 (13 + S5-06 por CR-03) | 21 | 17,7 | 13 | 0,7 → **1 sprint** |
 | S7 | 13 | pendiente | — | — | — |
 
 Como los Sprints 1 y 8 tienen mayormente tareas técnicas sin SP, también se registran **horas reales por tarjeta** para no subestimar el esfuerzo.
 
 La velocidad promedio acumulada usa los últimos 3 sprints (por ejemplo, después del S5: (16 + 11 + 21) / 3 = 16 SP).
 
-**Lectura del pronóstico (15/10/2026):** quedan 34 SP (Sprints 6 y 7) y la velocidad promedio es 16 SP, así que el pronóstico es de 3 sprints contra 2 planificados: el Sprint 6 (21 SP) es el de mayor riesgo. **Limitación:** en el prototipo los sprints se ejecutaron en horas, con asistencia de IA, y no en las 2 semanas del plan institucional; la velocidad sirve para comparar sprints entre sí, no para estimar el calendario real del proyecto institucional.
+**Lectura del pronóstico (16/10/2026, después del Sprint 6):** quedan 13 SP (Sprint 7) con una velocidad promedio de 17,7 SP ((11 + 21 + 21) / 3): el pronóstico es de 1 sprint, igual que lo planificado. La alerta del 15/10 se resolvió sin recortar alcance (CR-04 no fue necesario). El Sprint 8 tiene tareas técnicas sin SP (regresión, demo, documentación), que se controlan por horas y no por velocidad.
+
+**Lectura anterior (15/10/2026):** quedan 34 SP (Sprints 6 y 7) y la velocidad promedio es 16 SP, así que el pronóstico es de 3 sprints contra 2 planificados: el Sprint 6 (21 SP) es el de mayor riesgo. **Limitación:** en el prototipo los sprints se ejecutaron en horas, con asistencia de IA, y no en las 2 semanas del plan institucional; la velocidad sirve para comparar sprints entre sí, no para estimar el calendario real del proyecto institucional.
 
 ## 5. Cronograma maestro (proyecto institucional)
 

@@ -30,7 +30,9 @@ describe('Tareas y seguimiento (Sprint 5: RF-12 a RF-17)', () => {
   const enDias = (dias: number) => new Date(reloj + dias * DIA).toISOString();
 
   beforeEach(async () => {
-    reloj = Date.parse('2026-10-15T12:00:00.000Z');
+    // El reloj parte de la hora real: la cookie de sesión vence según el reloj real del agente
+    // de pruebas, y con una fecha fija pasada las pruebas fallarían al día siguiente (D-11).
+    reloj = Date.now();
     e = await crearEntorno({ now: () => new Date(reloj) });
     await e.agregarUsuario('jefe@institucion.test', PASSWORD_USUARIO, 'JEFE_DEPENDENCIA');
     await e.agregarUsuario('mesa@institucion.test', PASSWORD_USUARIO, 'MESA_ENTRADAS', { dependenciaId: 2 });
@@ -40,7 +42,9 @@ describe('Tareas y seguimiento (Sprint 5: RF-12 a RF-17)', () => {
     funcionario = await sesion('funcionario');
     jefe = await sesion('jefe');
     mesa = await sesion('mesa');
-    expedienteId = (await admin.post('/api/expedientes').send(EXPEDIENTE)).body.data.id; // queda en la dependencia 1
+    const creado = await admin.post('/api/expedientes').send(EXPEDIENTE);
+    expect(creado.status, JSON.stringify(creado.body)).toBe(201);
+    expedienteId = creado.body.data.id; // queda en la dependencia 1
   });
 
   it('sin sesión, las rutas nuevas responden 401', async () => {

@@ -14,6 +14,7 @@ import type {
 } from '../../database/repositories.js';
 import { ConflictError, NotFoundError, ValidationError } from '../../shared/errors.js';
 import type { AuditoriaService, Contexto } from '../auditoria/auditoria.service.js';
+import type { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 
 export const TIPOS_EXPEDIENTE = [
   'NOTA',
@@ -93,7 +94,7 @@ export class ExpedientesService {
   constructor(
     private repos: Repos,
     private auditoria: AuditoriaService,
-    private opciones: { now?: () => Date } = {},
+    private opciones: { now?: () => Date; notificaciones?: NotificacionesService } = {},
   ) {}
 
   private ahora() {
@@ -237,6 +238,15 @@ export class ExpedientesService {
       entidadId: String(expediente.id),
       detalle: { anterior: expediente.responsableId, nuevo: responsableId },
     });
+    if (responsableId !== null && responsableId !== expediente.responsableId) {
+      await this.opciones.notificaciones?.notificar({
+        usuarioIds: [responsableId],
+        tipo: 'EXPEDIENTE_ASIGNADO',
+        mensaje: `Le asignaron el expediente ${expediente.numero}: ${expediente.caratula}`,
+        expedienteId: expediente.id,
+        autorId: usuarioId,
+      });
+    }
     return actualizado;
   }
 

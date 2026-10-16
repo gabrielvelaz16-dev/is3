@@ -50,6 +50,7 @@ export const ADMIN: UsuarioSesion = {
     'documentos.adjuntar',
     'documentos.descargar',
     'actuaciones.registrar',
+    'reportes.consultar',
   ],
 };
 
@@ -69,6 +70,23 @@ export const sinPermisos = (u: UsuarioSesion): Usuario => {
   return copia as Usuario;
 };
 
+const resumenVacio = {
+  total: 0,
+  porEstado: { BORRADOR: 0, EN_TRAMITE: 0, EN_REVISION: 0, RESUELTO: 0, ARCHIVADO: 0 },
+  porPrioridad: { BAJA: 0, MEDIA: 0, ALTA: 0 },
+  porTipo: [],
+  porDependencia: [],
+};
+
+/** Dashboard vacío de la institución (Sprint 6). */
+export const DASHBOARD_VACIO = {
+  alcance: { tipo: 'INSTITUCION' },
+  generadoEn: '2026-10-16T12:00:00.000Z',
+  diasAviso: 3,
+  resumen: resumenVacio,
+  seguimiento: { vencidos: 0, porVencer: 0, enTransito: 0, porRecibir: 0, tareasAbiertas: 0, tareasVencidas: 0 },
+};
+
 const health = { data: { status: 'ok', api: 'ok', database: 'ok', version: '0.1.0', uptimeSeconds: 1, timestamp: '2026-10-14T10:00:00Z' } };
 
 /** Monta la app completa en una ruta, con o sin sesión. Agrega handlers propios de cada prueba. */
@@ -80,6 +98,8 @@ export function renderApp(path: string, opciones: { usuario?: UsuarioSesion | nu
     'GET /api/health': () => ({ body: health }),
     'POST /api/auth/logout': () => ({ body: { data: { ok: true } } }),
     'GET /api/pendientes': () => ({ body: { data: { tareas: [], recibidos: [], expedientesPorVencer: [] } } }),
+    'GET /api/notificaciones': () => ({ body: { data: { items: [], noLeidas: 0 } } }),
+    'GET /api/estadisticas/dashboard': () => ({ body: { data: DASHBOARD_VACIO } }),
     'GET /api/expedientes': () => ({ body: { data: [], paginacion: { total: 0, pagina: 1, porPagina: 20, totalPaginas: 0 } } }),
     ...opciones.handlers,
   });

@@ -26,9 +26,9 @@ Cadena: **Paquete de trabajo → Épica → Historia → Requisito → Prueba �
 | 1.7 Desarrollo / CR-01 | E5 | S5-03 Cambiar estado | RF-14 | PR-14 | R3 | PR #12 (`feature/S5-tareas-seguimiento`) |
 | 1.6.2 Despliegue por dependencias | E5 | S5-04 Enviar expediente | RF-15 | PR-15 | R3 | PR #12 (`feature/S5-tareas-seguimiento`) |
 | 1.6.2 Despliegue por dependencias | E5 | S5-05 Recibir expediente | RF-16 | PR-16 | R3 | PR #12 (`feature/S5-tareas-seguimiento`) |
-| 1.7 Desarrollo | E5 | S5-06 Notificaciones | RF-17 | PR-17 | R3 | Sprint 6 (CR-03) |
-| 1.7 Desarrollo | E6 Reportes | S6-01 Dashboard | RF-18, RNF-08 | PR-18 | R3 | pendiente |
-| 1.7 Desarrollo | E6 | S6-02 / S6-03 Reportes | RF-19 | PR-19 | R3 | pendiente |
+| 1.7 Desarrollo | E5 | S5-06 Notificaciones | RF-17 | PR-17 | R3 | PR #14 (`feature/S6-dashboard-reportes`, CR-03) |
+| 1.7 Desarrollo | E6 Reportes | S6-01 Dashboard (+ S6-04 verificación) | RF-18, RNF-08 | PR-18 | R3 | PR #14 (`feature/S6-dashboard-reportes`) |
+| 1.7 Desarrollo | E6 | S6-02 / S6-03 Reportes | RF-19 | PR-19 | R3 | PR #14 (`feature/S6-dashboard-reportes`) |
 | 1.5.2 Validaciones de seguridad | E7 Calidad | S7-03 Auditoría | RF-21, RNF-03 | PR-21 | R4 | pendiente |
 | 1.4 Migración (preservación) | E7 | S7-04 Backup y restauración | RF-22, RNF-07 | PR-22 | R4 | pendiente |
 | 1.6 Despliegue | E8 Entrega | S8-04 Versión v1.0.0 | RNF-12 | PR-24 (regresión) | R4 | pendiente |

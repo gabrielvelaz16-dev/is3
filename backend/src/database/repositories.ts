@@ -61,6 +61,8 @@ export interface UsuariosRepo {
   countActivosConRol(rolClave: string, excluirId?: number): Promise<number>;
   /** Usuarios activos de una dependencia (para asignar responsables y tareas, Sprint 5). */
   listActivosDeDependencia(dependenciaId: number): Promise<{ id: number; nombre: string; username: string }[]>;
+  /** Ids de usuarios activos de una dependencia cuyo rol tiene un permiso (avisos, Sprint 6). */
+  listIdsConPermiso(dependenciaId: number, permiso: string): Promise<number[]>;
 }
 
 export interface RolesRepo {
@@ -159,11 +161,20 @@ export type CambiosExpediente = Partial<{
   descripcion: string | null;
 }>;
 
-export interface FiltrosExpediente {
-  q?: string;
+/** Filtros comunes del listado y de los reportes (Sprint 6: tipo y rango de fechas de creación). */
+export interface FiltrosReporte {
   estado?: EstadoExpediente;
   prioridad?: Prioridad;
   dependenciaId?: number;
+  tipo?: string;
+  /** Creados desde esta fecha (inclusive). */
+  desde?: Date;
+  /** Creados hasta esta fecha (inclusive). */
+  hasta?: Date;
+}
+
+export interface FiltrosExpediente extends FiltrosReporte {
+  q?: string;
   skip: number;
   take: number;
 }
@@ -329,6 +340,58 @@ export interface AsignacionesRepo {
   insert(data: { expedienteId: number; responsableId: number | null; usuarioId: number }): Promise<void>;
 }
 
+// ── Sprint 6: Notificaciones, estadísticas y reportes ─────────────
+
+export type TipoNotificacion = 'EXPEDIENTE_ASIGNADO' | 'TAREA_ASIGNADA' | 'PASE_ENTRANTE';
+
+export interface NotificacionRecord {
+  id: number;
+  usuarioId: number;
+  tipo: TipoNotificacion;
+  mensaje: string;
+  expediente: ExpedienteRef | null;
+  creadaEn: Date;
+  leidaEn: Date | null;
+}
+
+export interface NotificacionesRepo {
+  crear(data: { usuarioIds: number[]; tipo: TipoNotificacion; mensaje: string; expedienteId: number | null }): Promise<void>;
+  /** Las más recientes primero. */
+  listDe(usuarioId: number, params: { soloNoLeidas: boolean; take: number }): Promise<NotificacionRecord[]>;
+  contarNoLeidas(usuarioId: number): Promise<number>;
+  /** false si la notificación no existe o es de otro usuario. */
+  marcarLeida(id: number, usuarioId: number, fecha: Date): Promise<boolean>;
+  marcarTodasLeidas(usuarioId: number, fecha: Date): Promise<number>;
+}
+
+export interface ResumenExpedientes {
+  total: number;
+  porEstado: Record<EstadoExpediente, number>;
+  porPrioridad: Record<Prioridad, number>;
+  porTipo: { tipo: string; total: number }[];
+  porDependencia: { dependencia: DependenciaRef; total: number }[];
+}
+
+export interface IndicadoresSeguimiento {
+  /** Abiertos (no resueltos ni archivados) con vencimiento anterior a ahora. */
+  vencidos: number;
+  /** Abiertos que vencen entre ahora y `hasta`. */
+  porVencer: number;
+  /** Expedientes del alcance con un pase sin recibir (salieron y todavía no llegaron). */
+  enTransito: number;
+  /** Pases sin recibir hacia la dependencia (sin dependencia: todos los pases sin recibir). */
+  porRecibir: number;
+  /** Tareas pendientes o en curso de expedientes del alcance. */
+  tareasAbiertas: number;
+  /** De esas, las que ya vencieron. */
+  tareasVencidas: number;
+}
+
+export interface EstadisticasRepo {
+  resumen(filtros: FiltrosReporte): Promise<ResumenExpedientes>;
+  seguimiento(params: { dependenciaId?: number; ahora: Date; hasta: Date }): Promise<IndicadoresSeguimiento>;
+}
+
 export interface Repos {
   usuarios: UsuariosRepo;
   roles: RolesRepo;
@@ -343,4 +406,6 @@ export interface Repos {
   tareas: TareasRepo;
   pases: PasesRepo;
   asignaciones: AsignacionesRepo;
+  notificaciones: NotificacionesRepo;
+  estadisticas: EstadisticasRepo;
 }

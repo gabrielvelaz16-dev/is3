@@ -1,6 +1,10 @@
 import type { Prisma, PrismaClient } from '../../generated/prisma/client.js';
 import type {
   CambiosExpediente,
+  EstadoExpediente,
+  FiltrosReporte,
+  NotificacionRecord,
+  Prioridad,
   DependenciaRecord,
   ExpedienteRecord,
   DocumentoRecord,
@@ -118,6 +122,31 @@ function aPase(p: PaseCompleto): PaseRecord {
   };
 }
 
+/** Condición común del listado, el dashboard y los reportes (Sprint 6). */
+function whereReporte(f: FiltrosReporte): Prisma.ExpedienteWhereInput {
+  const where: Prisma.ExpedienteWhereInput = {};
+  if (f.estado) where.estado = f.estado;
+  if (f.prioridad) where.prioridad = f.prioridad;
+  if (f.dependenciaId) where.dependenciaActualId = f.dependenciaId;
+  if (f.tipo) where.tipo = f.tipo;
+  if (f.desde || f.hasta) where.creadoEn = { ...(f.desde ? { gte: f.desde } : {}), ...(f.hasta ? { lte: f.hasta } : {}) };
+  return where;
+}
+
+const ABIERTO: Prisma.ExpedienteWhereInput = { estado: { notIn: ['RESUELTO', 'ARCHIVADO'] } };
+
+function aNotificacion(n: Prisma.NotificacionGetPayload<{ include: { expediente: typeof expedienteRef } }>): NotificacionRecord {
+  return {
+    id: n.id,
+    usuarioId: n.usuarioId,
+    tipo: n.tipo,
+    mensaje: n.mensaje,
+    expediente: n.expediente,
+    creadaEn: n.creadaEn,
+    leidaEn: n.leidaEn,
+  };
+}
+
 const incluirUsuario = {
   dependencia: true,
   rol: { include: { permisos: { include: { permiso: true } } } },
@@ -193,6 +222,13 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
         return prisma.usuario.count({
           where: { activo: true, rol: { clave: rolClave }, ...(excluirId ? { id: { not: excluirId } } : {}) },
         });
+      },
+      async listIdsConPermiso(dependenciaId, permiso) {
+        const filas = await prisma.usuario.findMany({
+          where: { dependenciaId, activo: true, rol: { permisos: { some: { permiso: { clave: permiso } } } } },
+          select: { id: true },
+        });
+        return filas.map((f) => f.id);
       },
       listActivosDeDependencia(dependenciaId) {
         return prisma.usuario.findMany({
@@ -272,7 +308,7 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
         return e ? aExpediente(e) : null;
       },
       async list(filtros: FiltrosExpediente) {
-        const where: Prisma.ExpedienteWhereInput = {};
+        const where = whereReporte(filtros);
         if (filtros.q) {
           where.OR = [
             { caratula: { contains: filtros.q, mode: 'insensitive' } },
@@ -281,9 +317,6 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
             { iniciador: { contains: filtros.q, mode: 'insensitive' } },
           ];
         }
-        if (filtros.estado) where.estado = filtros.estado;
-        if (filtros.prioridad) where.prioridad = filtros.prioridad;
-        if (filtros.dependenciaId) where.dependenciaActualId = filtros.dependenciaId;
         const [items, total] = await prisma.$transaction([
           prisma.expediente.findMany({
             where,
@@ -426,6 +459,75 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
       },
       async insert(data) {
         await prisma.asignacion.create({ data });
+      },
+    },
+
+    notificaciones: {
+      async crear({ usuarioIds, tipo, mensaje, expedienteId }) {
+        if (usuarioIds.length === 0) return;
+        await prisma.notificacion.createMany({
+          data: usuarioIds.map((usuarioId) => ({ usuarioId, tipo, mensaje: mensaje.slice(0, 300), expedienteId })),
+        });
+      },
+      async listDe(usuarioId, { soloNoLeidas, take }) {
+        const filas = await prisma.notificacion.findMany({
+          where: { usuarioId, ...(soloNoLeidas ? { leidaEn: null } : {}) },
+          include: { expediente: expedienteRef },
+          orderBy: [{ creadaEn: 'desc' }, { id: 'desc' }],
+          take,
+        });
+        return filas.map(aNotificacion);
+      },
+      contarNoLeidas: (usuarioId) => prisma.notificacion.count({ where: { usuarioId, leidaEn: null } }),
+      async marcarLeida(id, usuarioId, fecha) {
+        const n = await prisma.notificacion.findFirst({ where: { id, usuarioId }, select: { id: true } });
+        if (!n) return false;
+        await prisma.notificacion.updateMany({ where: { id, leidaEn: null }, data: { leidaEn: fecha } });
+        return true;
+      },
+      async marcarTodasLeidas(usuarioId, fecha) {
+        const { count } = await prisma.notificacion.updateMany({ where: { usuarioId, leidaEn: null }, data: { leidaEn: fecha } });
+        return count;
+      },
+    },
+
+    estadisticas: {
+      async resumen(filtros) {
+        const where = whereReporte(filtros);
+        const [total, estados, prioridades, tipos, deps] = await Promise.all([
+          prisma.expediente.count({ where }),
+          prisma.expediente.groupBy({ by: ['estado'], where, _count: { _all: true } }),
+          prisma.expediente.groupBy({ by: ['prioridad'], where, _count: { _all: true } }),
+          prisma.expediente.groupBy({ by: ['tipo'], where, _count: { _all: true } }),
+          prisma.expediente.groupBy({ by: ['dependenciaActualId'], where, _count: { _all: true } }),
+        ]);
+        const dependencias = await prisma.dependencia.findMany({ where: { id: { in: deps.map((d) => d.dependenciaActualId) } } });
+        const porEstado = { BORRADOR: 0, EN_TRAMITE: 0, EN_REVISION: 0, RESUELTO: 0, ARCHIVADO: 0 } satisfies Record<EstadoExpediente, number>;
+        for (const e of estados) porEstado[e.estado] = e._count._all;
+        const porPrioridad = { BAJA: 0, MEDIA: 0, ALTA: 0 } satisfies Record<Prioridad, number>;
+        for (const p of prioridades) porPrioridad[p.prioridad] = p._count._all;
+        return {
+          total,
+          porEstado,
+          porPrioridad,
+          porTipo: tipos.map((t) => ({ tipo: t.tipo, total: t._count._all })).sort((a, b) => b.total - a.total || a.tipo.localeCompare(b.tipo)),
+          porDependencia: deps
+            .map((d) => ({ dependencia: aDependenciaRef(dependencias.find((x) => x.id === d.dependenciaActualId)!), total: d._count._all }))
+            .sort((a, b) => b.total - a.total || a.dependencia.nombre.localeCompare(b.dependencia.nombre)),
+        };
+      },
+      async seguimiento({ dependenciaId, ahora, hasta }) {
+        const alcance: Prisma.ExpedienteWhereInput = dependenciaId ? { dependenciaActualId: dependenciaId } : {};
+        const tareaAbierta: Prisma.TareaWhereInput = { estado: { in: ['PENDIENTE', 'EN_CURSO'] }, expediente: alcance };
+        const [vencidos, porVencer, enTransito, porRecibir, tareasAbiertas, tareasVencidas] = await Promise.all([
+          prisma.expediente.count({ where: { ...alcance, ...ABIERTO, fechaVencimiento: { lt: ahora } } }),
+          prisma.expediente.count({ where: { ...alcance, ...ABIERTO, fechaVencimiento: { gte: ahora, lte: hasta } } }),
+          prisma.expediente.count({ where: { ...alcance, pases: { some: { recibidoEn: null } } } }),
+          prisma.pase.count({ where: { recibidoEn: null, ...(dependenciaId ? { destinoId: dependenciaId } : {}) } }),
+          prisma.tarea.count({ where: tareaAbierta }),
+          prisma.tarea.count({ where: { ...tareaAbierta, vencimiento: { lt: ahora } } }),
+        ]);
+        return { vencidos, porVencer, enTransito, porRecibir, tareasAbiertas, tareasVencidas };
       },
     },
 

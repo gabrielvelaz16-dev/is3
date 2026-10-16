@@ -7,12 +7,14 @@ import type { ExpedienteRecord, PaseRecord, Repos } from '../../database/reposit
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../shared/errors.js';
 import type { AuditoriaService, Contexto } from '../auditoria/auditoria.service.js';
 import { type ExpedientesService, verificarEditable } from '../expedientes/expedientes.service.js';
+import type { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 
 export class PasesService {
   constructor(
     private readonly repos: Repos,
     private readonly expedientes: ExpedientesService,
     private readonly auditoria: AuditoriaService,
+    private readonly notificaciones?: NotificacionesService,
   ) {}
 
   async enviar(
@@ -57,6 +59,13 @@ export class PasesService {
       entidad: 'Pase',
       entidadId: String(pase.id),
       detalle: { expediente: expediente.numero, origen: pase.origen.codigo, destino: pase.destino.codigo },
+    });
+    // Aviso a quienes pueden confirmar la recepción en la dependencia destino (S5-06).
+    await this.notificaciones?.notificarDependencia(destino.id, 'expedientes.recibir', {
+      tipo: 'PASE_ENTRANTE',
+      mensaje: `Llegó el expediente ${expediente.numero} desde ${pase.origen.nombre}: confirme la recepción`,
+      expedienteId: expediente.id,
+      autorId: usuarioId,
     });
     return pase;
   }

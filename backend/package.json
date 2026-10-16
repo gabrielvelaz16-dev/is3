@@ -8,6 +8,7 @@
     "node": ">=24"
   },
   "scripts": {
+    "predev": "prisma generate",
     "dev": "tsx watch src/server.ts",
     "prebuild": "prisma generate",
     "build": "tsc -p tsconfig.build.json",

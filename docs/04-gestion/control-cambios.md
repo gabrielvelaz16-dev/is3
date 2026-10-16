@@ -58,6 +58,7 @@ Artefactos actualizados:
 | CR-01 | Evento de cambio: nuevo control documental + retraso del proveedor de identidad | — | Planificado para el piloto (R3) | Comité |
 | CR-02 | Adelantar login y gestión de usuarios (Sprint 2) en paralelo al cierre del Sprint 1; aclarar RNF-01 | 14/10/2026 | **Aprobado** 14/10/2026 | Product Owner / Gerente |
 | CR-03 | Mover S5-06 (notificaciones internas, 8 SP) del Sprint 5 al Sprint 6 | 15/10/2026 | **Aprobado** 15/10/2026 | Product Owner / Gerente |
+| CR-04 | Orden de recorte del Sprint 6: si se atrasa, S6-03 (exportar, 3 SP) pasa al Sprint 7 | 16/10/2026 | **Aprobado** 16/10/2026 · no fue necesario aplicarlo | Product Owner / Gerente |
 
 ### CR-00 · Unificación del backlog del TP con el alcance del prototipo
 
@@ -108,3 +109,11 @@ Artefactos actualizados:
 - **Impacto en plazo y SP:** Sprint 5 pasa de 29 a 21 SP; Sprint 6 de 13 a 21 SP. Total sin cambios (97 SP). No cambia el alcance ni la fecha del release R3 (Sprints 5 y 6).
 - **Impacto en riesgos:** reduce R13 (sobrecarga) en el Sprint 5.
 - **Artefactos actualizados:** [backlog.md](backlog.md), [estimacion-calendario.md](estimacion-calendario.md), tarjeta S5-06 en Trello, [sprint-05.md](sprints/sprint-05.md).
+
+### CR-04 · Orden de recorte del Sprint 6
+
+- **Solicitante:** Gerente de Proyecto · **Fecha:** 16/10/2026 · **Decisión:** aprobado por el PO el 16/10/2026, junto con el plan del Sprint 6.
+- **Motivo:** el Sprint 6 comprometía 21 SP contra una velocidad promedio de 16 SP, y el pronóstico de la Unidad 9 daba 3 sprints contra 2 disponibles (alerta del tablero, [monitoreo-metricas.md](monitoreo-metricas.md)).
+- **Descripción:** se decidió de antemano qué se recortaría: **S6-03 Exportar reportes (3 SP)** pasaría al Sprint 7. Así el recorte no se hace en silencio a último momento.
+- **Resultado:** el Sprint 6 terminó los 21 SP con la CI en verde, así que **el recorte no se aplicó**. La línea base no cambia.
+- **Artefactos:** [sprint-06.md](sprints/sprint-06.md), [estimacion-calendario.md](estimacion-calendario.md).
