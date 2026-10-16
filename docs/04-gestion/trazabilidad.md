@@ -31,6 +31,7 @@ Cadena: **Paquete de trabajo → Épica → Historia → Requisito → Prueba �
 | 1.7 Desarrollo | E6 | S6-02 / S6-03 Reportes | RF-19 | PR-19 | R3 | PR #14 (`feature/S6-dashboard-reportes`) |
 | 1.5.2 Validaciones de seguridad | E7 Calidad | S7-03 Auditoría | RF-21, RNF-03 | PR-21 | R4 | PR #15 (`feature/S7-calidad-seguridad`) |
 | 1.4 Migración (preservación) | E7 | S7-04 Backup y restauración | RF-22, RNF-07 | PR-22 | R4 | PR #15 (`feature/S7-calidad-seguridad`), ADR-13 |
+| 1.7 Desarrollo | E7 Calidad | CR-05 Mejora de la interfaz | RNF-11 | PR-27 (usabilidad) + capturas en la CI | R4 | rama `feature/S8-UI-interfaz` |
 | 1.6 Despliegue | E8 Entrega | S8-04 Versión v1.0.0 | RNF-12 | PR-24 (regresión) | R4 | pendiente |
 
 Ejemplos originales del TP (Unidad 3):

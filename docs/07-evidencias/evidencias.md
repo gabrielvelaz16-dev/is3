@@ -122,6 +122,18 @@ Fecha: 16/10/2026 · Release: R4 · Detalle: [sprint-07.md](../04-gestion/sprint
 | Prueba de usabilidad con 3 personas (PR-27) | 7 | [guia-usabilidad.md](../05-calidad-pruebas/guia-usabilidad.md) | Pendiente |
 | Prueba manual de respaldo y restauración en la PC | 7 | — | Pendiente |
 
+## CR-05 — Mejora de la interfaz
+
+Fecha: 16/10/2026 · Detalle: [cr-05-interfaz.md](../04-gestion/sprints/cr-05-interfaz.md)
+
+| Evidencia | Unidad | Artefacto | Estado |
+|---|---|---|---|
+| CR-05 registrado y aprobado | 2, 4 | [control-cambios.md](../04-gestion/control-cambios.md) | Hecho |
+| CI en verde (frontend 51/51) | 7, 8 | [run 38916734397](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38916734397) | Hecho |
+| Capturas antes (13) | 7 | [capturas/feature-S8-UI-interfaz-917a101](https://github.com/gabrielvelaz16-dev/is3/tree/capturas/feature-S8-UI-interfaz-917a101) | Hecho |
+| Capturas después (16) | 7 | [capturas/feature-S8-UI-interfaz-aebfa65](https://github.com/gabrielvelaz16-dev/is3/tree/capturas/feature-S8-UI-interfaz-aebfa65) | Hecho |
+| Prueba en la PC con la interfaz nueva | 7 | — | Pendiente |
+
 ## Plantilla por sprint
 
 ```
