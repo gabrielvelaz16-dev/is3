@@ -28,10 +28,11 @@ Esta carpeta reúne los artefactos de gestión y técnicos del proyecto. Cada do
 | 04-gestion | [historial-cambios.md](04-gestion/historial-cambios.md) | 8 | Vivo |
 | 04-gestion/sprints | [sprint-01.md](04-gestion/sprints/sprint-01.md) | 3 · 9 | En curso |
 | 04-gestion/sprints | [sprint-02.md](04-gestion/sprints/sprint-02.md) | 3 · 9 | En curso (CR-02) |
-| 04-gestion/sprints | [sprint-04.md](04-gestion/sprints/sprint-04.md) · [sprint-05.md](04-gestion/sprints/sprint-05.md) · [sprint-06.md](04-gestion/sprints/sprint-06.md) | 3 · 9 | Terminados con CI en verde; prueba manual pendiente |
+| 04-gestion/sprints | [sprint-04.md](04-gestion/sprints/sprint-04.md) · [sprint-05.md](04-gestion/sprints/sprint-05.md) · [sprint-06.md](04-gestion/sprints/sprint-06.md) · [sprint-07.md](04-gestion/sprints/sprint-07.md) | 3 · 9 | Terminados con CI en verde; prueba manual pendiente |
 | 05-calidad-pruebas | [plan-calidad.md](05-calidad-pruebas/plan-calidad.md) | 7 | Plan inicial |
 | 05-calidad-pruebas | [plan-pruebas.md](05-calidad-pruebas/plan-pruebas.md) | 7 | Plan inicial |
-| 05-calidad-pruebas | [resultados-pruebas.md](05-calidad-pruebas/resultados-pruebas.md) | 7 | Sin ejecuciones todavía |
+| 05-calidad-pruebas | [resultados-pruebas.md](05-calidad-pruebas/resultados-pruebas.md) | 7 | Con ejecuciones reales (Sprints 1 a 7) |
+| 05-calidad-pruebas | [guia-usabilidad.md](05-calidad-pruebas/guia-usabilidad.md) | 7 | Preparada; pendiente de ejecución |
 | 06-configuracion-devops | [plan-configuracion.md](06-configuracion-devops/plan-configuracion.md) | 8 | Vigente |
 | 06-configuracion-devops | [instalacion-ejecucion.md](06-configuracion-devops/instalacion-ejecucion.md) | 8 | Se verifica en Sprint 1 |
 | 07-evidencias | [evidencias.md](07-evidencias/evidencias.md) | 2–9 | Vivo |

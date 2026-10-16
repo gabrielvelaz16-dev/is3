@@ -160,6 +160,17 @@ No existen rutas para modificar ni borrar documentos, actuaciones o cambios de e
 
 **CSV:** columnas `Número;Carátula;Tipo;Iniciador;Estado;Prioridad;Dependencia actual;Responsable;Creado;Vencimiento;En tránsito hacia`, con BOM UTF-8, separador `;` y fin de línea CRLF. Un valor que empieza con `=`, `+`, `-` o `@` se antepone con `'` para que Excel no lo ejecute como fórmula.
 
+## 5 quater. Auditoría y respaldos (Sprint 7)
+
+| Método y ruta | Permiso | Entrada | Respuesta |
+|---|---|---|---|
+| `GET /api/auditoria` | `auditoria.consultar` | Query: `desde`, `hasta` (AAAA-MM-DD, inclusivos), `usuarioId`, `accion`, `resultado` (`EXITO`/`FALLO`), `pagina`, `porPagina` (máx. 100, por defecto 25) | 200 `{ data: { items: [evento], total, pagina, porPagina } }` (más recientes primero) · 400 |
+| `GET /api/auditoria/acciones` | `auditoria.consultar` | — | 200 `{ data: [accion] }` (ordenadas) |
+| `GET /api/respaldos` | `respaldo.gestionar` | — | 200 `{ data: [{ nombre, creadoEn, totalFilas, documentos, documentosConProblemas, bytes }] }` |
+| `POST /api/respaldos` | `respaldo.gestionar` | — | 201 `{ data: respaldo }`. Se audita `respaldo.crear` |
+
+**Evento de auditoría:** `{ id, fecha, usuario: { id, nombre, username } | null, accion, resultado, entidad, entidadId, detalle, ip, requestId }`. No hay rutas para modificar ni borrar eventos, y no hay ruta para restaurar (ADR-13: solo `npm run respaldo:restaurar`).
+
 ## 6. Encabezados
 
 | Encabezado | Uso |

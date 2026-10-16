@@ -76,7 +76,7 @@ Ejemplo del TP: Sprint 1 = 18 SP, Sprint 2 = 20 SP, Sprint 3 = 22 SP → velocid
 | S4 | 11 | 11 | 13,0 | 55 | 4,2 |
 | S5 | 21 (29 antes de CR-03) | 21 | 16,0 | 34 | 2,1 → **3 sprints** |
 | S6 | 21 (13 + S5-06 por CR-03) | 21 | 17,7 | 13 | 0,7 → **1 sprint** |
-| S7 | 13 | pendiente | — | — | — |
+| S7 | 13 | 13 | 18,3 | 0 | — (el Sprint 8 tiene solo tareas técnicas) |
 
 Como los Sprints 1 y 8 tienen mayormente tareas técnicas sin SP, también se registran **horas reales por tarjeta** para no subestimar el esfuerzo.
 
