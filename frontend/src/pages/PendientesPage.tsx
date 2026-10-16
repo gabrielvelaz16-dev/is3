@@ -89,7 +89,7 @@ export function PendientesPage() {
                 {datos.recibidos.map((p) => (
                   <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
                     <div className="min-w-0 text-sm">
-                      <Link to={`/expedientes/${p.expediente.id}`} className="font-mono font-medium text-marca-700 hover:underline">
+                      <Link to={`/expedientes/${p.expediente.id}`} className="font-semibold text-marca-700 hover:underline">
                         {p.expediente.numero}
                       </Link>{' '}
                       <span className="text-slate-800">{p.expediente.caratula}</span>
@@ -120,7 +120,7 @@ export function PendientesPage() {
                       {t.titulo} <EtiquetaAlerta alerta={t.alerta} />
                     </p>
                     <p className="text-xs text-slate-500">
-                      <Link to={`/expedientes/${t.expediente.id}`} className="font-mono text-marca-700 hover:underline">
+                      <Link to={`/expedientes/${t.expediente.id}`} className="font-semibold text-marca-700 hover:underline">
                         {t.expediente.numero}
                       </Link>{' '}
                       · vence {fecha(t.vencimiento)} · {ETIQUETA_TAREA[t.estado]}
@@ -163,7 +163,7 @@ export function PendientesPage() {
                 {datos.expedientesPorVencer.map((e) => (
                   <li key={e.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
                     <div className="min-w-0">
-                      <Link to={`/expedientes/${e.id}`} className="font-mono font-medium text-marca-700 hover:underline">
+                      <Link to={`/expedientes/${e.id}`} className="font-semibold text-marca-700 hover:underline">
                         {e.numero}
                       </Link>{' '}
                       <span className="text-slate-800">{e.caratula}</span>

@@ -67,70 +67,73 @@ export function NavBar({ abierto, onCerrar }: { abierto: boolean; onCerrar: () =
   return (
     <>
       {abierto && <div aria-hidden="true" onClick={onCerrar} className="fixed inset-0 z-30 bg-tinta/40 lg:hidden" />}
-      <nav
-        id="menu-principal"
-        aria-label="Principal"
-        className={`${abierto ? 'fixed inset-y-0 left-0 z-40 flex w-72 shadow-xl' : 'hidden'} flex-col bg-tinta text-white lg:sticky lg:top-0 lg:z-auto lg:flex lg:h-screen lg:w-64 lg:shrink-0 lg:shadow-none`}
-      >
-        <NavLink to="/" onClick={onCerrar} className="flex items-center gap-3 px-5 pt-6 pb-5">
-          <img src="/favicon.svg" alt="" className="h-9 w-9" />
-          <span className="leading-tight">
-            <span className="block text-[15px] font-semibold">Expediente Electrónico</span>
-            <span className="block text-xs text-marca-200">Institución pública ficticia</span>
-          </span>
-        </NavLink>
+      {/* El contenedor pinta el fondo a todo el alto de la página; el menú queda fijo al desplazarse. */}
+      <div className="lg:w-64 lg:shrink-0 lg:bg-tinta">
+        <nav
+          id="menu-principal"
+          aria-label="Principal"
+          className={`${abierto ? 'fixed inset-y-0 left-0 z-40 flex w-72 shadow-xl' : 'hidden'} flex-col bg-tinta text-white lg:sticky lg:top-0 lg:z-auto lg:flex lg:h-screen lg:w-64 lg:shadow-none`}
+        >
+          <NavLink to="/" onClick={onCerrar} className="flex items-center gap-3 px-5 pt-6 pb-5">
+            <img src="/favicon.svg" alt="" className="h-9 w-9" />
+            <span className="leading-tight">
+              <span className="block text-[15px] font-semibold">Expediente Electrónico</span>
+              <span className="block text-xs text-marca-200">Institución pública ficticia</span>
+            </span>
+          </NavLink>
 
-        <div className="flex-1 overflow-y-auto px-3 pb-4">
-          <ul className="mb-4">
-            <li>
-              <NavLink to="/" end className={claseEnlace} onClick={onCerrar}>
-                <Icono ruta="/" />
-                Inicio
-              </NavLink>
-            </li>
-          </ul>
-          {GRUPOS.map((grupo) => {
-            const delGrupo = visibles.filter((s) => s.grupo === grupo);
-            if (delGrupo.length === 0) return null;
-            return (
-              <div key={grupo} className="mb-4">
-                <p className="px-3 pb-1.5 text-xs text-marca-200/80">{grupo}</p>
-                <ul className="space-y-0.5">
-                  {delGrupo.map((s) => (
-                    <li key={s.path}>
-                      <NavLink to={s.path} className={claseEnlace} onClick={onCerrar}>
-                        <Icono ruta={s.path} />
-                        {s.label}
-                      </NavLink>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
-        </div>
-
-        {usuario && (
-          <div className="border-t border-white/10 px-4 py-4">
-            <div className="mb-3 flex items-center gap-3">
-              <span aria-hidden="true" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-carpeta-claro text-sm font-semibold text-tinta">
-                {iniciales(usuario.nombre)}
-              </span>
-              <span className="min-w-0 leading-tight">
-                <span className="block truncate text-sm font-medium text-white">{usuario.nombre}</span>
-                <span className="block truncate text-xs text-marca-200">{usuario.rol.nombre}</span>
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => void salir()}
-              className="w-full rounded-md border border-white/20 px-3 py-1.5 text-sm text-marca-100 hover:bg-tinta-claro hover:text-white"
-            >
-              Cerrar sesión
-            </button>
+          <div className="flex-1 overflow-y-auto px-3 pb-4">
+            <ul className="mb-4">
+              <li>
+                <NavLink to="/" end className={claseEnlace} onClick={onCerrar}>
+                  <Icono ruta="/" />
+                  Inicio
+                </NavLink>
+              </li>
+            </ul>
+            {GRUPOS.map((grupo) => {
+              const delGrupo = visibles.filter((s) => s.grupo === grupo);
+              if (delGrupo.length === 0) return null;
+              return (
+                <div key={grupo} className="mb-4">
+                  <p className="px-3 pb-1.5 text-xs text-marca-200/80">{grupo}</p>
+                  <ul className="space-y-0.5">
+                    {delGrupo.map((s) => (
+                      <li key={s.path}>
+                        <NavLink to={s.path} className={claseEnlace} onClick={onCerrar}>
+                          <Icono ruta={s.path} />
+                          {s.label}
+                        </NavLink>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
           </div>
-        )}
-      </nav>
+
+          {usuario && (
+            <div className="border-t border-white/10 px-4 py-4">
+              <div className="mb-3 flex items-center gap-3">
+                <span aria-hidden="true" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-carpeta-claro text-sm font-semibold text-tinta">
+                  {iniciales(usuario.nombre)}
+                </span>
+                <span className="min-w-0 leading-tight">
+                  <span className="block truncate text-sm font-medium text-white">{usuario.nombre}</span>
+                  <span className="block truncate text-xs text-marca-200">{usuario.rol.nombre}</span>
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => void salir()}
+                className="w-full rounded-md border border-white/20 px-3 py-1.5 text-sm text-marca-100 hover:bg-tinta-claro hover:text-white"
+              >
+                Cerrar sesión
+              </button>
+            </div>
+          )}
+        </nav>
+      </div>
     </>
   );
 }

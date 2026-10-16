@@ -57,6 +57,8 @@ const ir = (ruta) => (page) => page.goto(`${BASE}${ruta}`);
 {
   const { ctx, page } = await contexto('jefe');
   await captura(page, '04-expediente-detalle', 'Detalle de un expediente (jefe de Asesoría Jurídica)', ir(`/expedientes/${demo.licitacion}`));
+  await captura(page, '14-detalle-documentos', 'Detalle: pestaña Documentos', ir(`/expedientes/${demo.licitacion}?pestana=documentos`));
+  await captura(page, '15-detalle-historial', 'Detalle: pestaña Historial', ir(`/expedientes/${demo.licitacion}?pestana=historial`));
   await captura(page, '06-tareas-pendientes', 'Tareas y pendientes (jefe)', ir('/tareas'));
   await captura(page, '10-notificaciones', 'Campana de notificaciones abierta', async (p) => {
     await p.goto(`${BASE}/`);
@@ -72,6 +74,7 @@ const ir = (ruta) => (page) => page.goto(`${BASE}${ruta}`);
 {
   const { ctx, page } = await contexto('admin', { width: 390, height: 844 });
   await captura(page, '12-movil-inicio', 'Inicio en el celular', ir('/'));
+  await captura(page, '16-movil-detalle', 'Detalle de un expediente en el celular', ir(`/expedientes/${demo.licitacion}`));
   await captura(page, '13-movil-menu', 'Menú abierto en el celular', async (p) => {
     await p.goto(`${BASE}/`);
     await p.getByRole('button', { name: /abrir menú/i }).first().click();

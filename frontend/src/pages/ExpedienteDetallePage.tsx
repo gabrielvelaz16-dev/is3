@@ -146,7 +146,7 @@ export function ExpedienteDetallePage() {
                 {expediente.caratula}
               </h1>
               <p className="mt-1 text-sm text-slate-600">
-                {ETIQUETA_TIPO[expediente.tipo] ?? expediente.tipo} iniciado por {expediente.iniciador}
+                {ETIQUETA_TIPO[expediente.tipo] ?? expediente.tipo} de {expediente.iniciador}
               </p>
             </div>
             <div className="flex shrink-0 gap-2">

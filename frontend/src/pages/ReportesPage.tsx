@@ -253,7 +253,7 @@ export function ReportesPage() {
               <tbody className="divide-y divide-slate-100">
                 {reporte.items.map((x) => (
                   <tr key={x.id}>
-                    <td className="px-4 py-2 font-mono text-marca-700">
+                    <td className="px-4 py-2 font-semibold whitespace-nowrap text-marca-700">
                       <Link to={`/expedientes/${x.id}`} className="hover:underline">{x.numero}</Link>
                     </td>
                     <td className="max-w-xs truncate px-4 py-2 text-slate-800" title={x.caratula}>{x.caratula}</td>

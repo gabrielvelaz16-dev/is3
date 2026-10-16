@@ -12,7 +12,7 @@ import { ESTADOS_EXPEDIENTE, ETIQUETA_TIPO, PRIORIDADES } from '../services/tipo
 const POR_PAGINA = 10;
 
 const fecha = (iso: string | null) =>
-  iso ? new Date(iso).toLocaleString('es-PY', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+  iso ? new Date(iso).toLocaleDateString('es-PY', { dateStyle: 'short' }) : '—';
 
 const selectClass = 'rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-marca-500';
 
@@ -120,7 +120,6 @@ export function ExpedientesPage() {
               <th scope="col" className="px-4 py-3">Prioridad</th>
               <th scope="col" className="px-4 py-3">Iniciador</th>
               <th scope="col" className="px-4 py-3">Fecha</th>
-              <th scope="col" className="px-4 py-3"><span className="sr-only">Acciones</span></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -129,7 +128,7 @@ export function ExpedientesPage() {
                 <td className="px-4 py-3 text-sm font-semibold whitespace-nowrap text-marca-700">
                   <Link to={`/expedientes/${exp.id}`} className="hover:underline">{exp.numero}</Link>
                 </td>
-                <td className="px-4 py-3 font-medium text-slate-800 max-w-xs truncate" title={exp.caratula}>
+                <td className="px-4 py-3 font-medium text-slate-800 max-w-72 truncate" title={exp.caratula}>
                   {exp.caratula}
                 </td>
                 <td className="px-4 py-3 text-slate-600">{ETIQUETA_TIPO[exp.tipo] ?? exp.tipo}</td>
@@ -140,25 +139,22 @@ export function ExpedientesPage() {
                 <td className="px-4 py-3">
                   <EtiquetaPrioridad prioridad={exp.prioridad} />
                 </td>
-                <td className="px-4 py-3 text-slate-600">{exp.iniciador}</td>
-                <td className="px-4 py-3 text-slate-500 text-xs">{fecha(exp.creadoEn)}</td>
-                <td className="px-4 py-3 text-right">
-                  <Link to={`/expedientes/${exp.id}`} className="text-sm font-medium text-marca-700 hover:underline">
-                    Ver
-                  </Link>
+                <td className="max-w-44 truncate px-4 py-3 text-slate-600" title={exp.iniciador}>
+                  {exp.iniciador}
                 </td>
+                <td className="px-4 py-3 whitespace-nowrap text-slate-500">{fecha(exp.creadoEn)}</td>
               </tr>
             ))}
             {expedientes.length === 0 && !cargando && (
               <tr>
-                <td colSpan={8} className="px-4 py-6 text-center text-slate-500">
+                <td colSpan={7} className="px-4 py-6 text-center text-slate-500">
                   No hay expedientes que coincidan con los criterios.
                 </td>
               </tr>
             )}
             {cargando && (
               <tr>
-                <td colSpan={8} className="px-4 py-6 text-center text-slate-400">Cargando…</td>
+                <td colSpan={7} className="px-4 py-6 text-center text-slate-400">Cargando…</td>
               </tr>
             )}
           </tbody>

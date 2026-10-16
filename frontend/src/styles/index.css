@@ -29,7 +29,11 @@
 @layer base {
   html {
     @apply bg-papel text-slate-800 antialiased;
-    font-feature-settings: "tnum" 1; /* números de igual ancho: tablas y números de expediente alineados */
+  }
+
+  /* Números de igual ancho solo en tablas: columnas alineadas sin ensanchar el texto corrido. */
+  table {
+    font-variant-numeric: tabular-nums;
   }
 
   /* Foco visible para navegación con teclado (accesibilidad). */

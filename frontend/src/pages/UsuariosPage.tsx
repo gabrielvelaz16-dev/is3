@@ -124,7 +124,7 @@ export function UsuariosPage() {
                     {u.activo ? 'Activo' : 'Inactivo'}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-slate-600">{fecha(u.ultimoAcceso)}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-slate-600">{fecha(u.ultimoAcceso)}</td>
                 <td className="px-4 py-3 text-right">
                   <button
                     type="button"
