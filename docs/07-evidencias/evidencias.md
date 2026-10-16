@@ -101,7 +101,7 @@ Fecha: 16/10/2026 · Release: R3 · Detalle: [sprint-06.md](../04-gestion/sprint
 | CR-04 (orden de recorte decidido de antemano; no se aplicó) | 2, 3, 4 | [control-cambios.md](../04-gestion/control-cambios.md) | Hecho |
 | Migración de notificaciones aplicada en PostgreSQL de CI | 3, 8 | `backend/prisma/migrations/20261016120000_notificaciones` · [run 38901767797](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38901767797) | Hecho |
 | CI en verde: backend 130/130, frontend 45/45, cobertura 93,89 % | 7, 8 | [run 38901767797](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38901767797) | Hecho |
-| Indicadores del dashboard verificados contra la base (S6-04) | 7, 9 | Paso "Verificar indicadores del dashboard contra la base" en [run 38901767797](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38901767797) | Hecho |
+| Indicadores del dashboard verificados contra la base (S6-04): 91 comparaciones, 0 diferencias | 7, 9 | [run 38902405048](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38902405048) · paso "Verificar indicadores del dashboard contra la base", también en [run 38901767797](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38901767797) | Hecho |
 | Defecto de prueba dependiente de la fecha (D-11), detectado y corregido | 7 | [resultados-pruebas.md](../05-calidad-pruebas/resultados-pruebas.md) | Hecho |
 | Tablero de métricas actualizado con lead time desde Trello (S6-05) | 9 | [monitoreo-metricas.md §7](../04-gestion/monitoreo-metricas.md) | Hecho |
 | PR #14 | 8 | https://github.com/gabrielvelaz16-dev/is3/pull/14 | Abierto; integración por el responsable |

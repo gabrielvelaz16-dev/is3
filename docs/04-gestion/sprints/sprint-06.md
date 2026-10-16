@@ -20,7 +20,7 @@ Que cada usuario vea estadísticas y reportes confiables de los expedientes que 
 | S6-01 | Dashboard | 5 | Totales por estado, prioridad y dependencia; vencidos, por vencer, en tránsito y tareas vencidas. El alcance depende del permiso | ✅ Se agregó "por recibir" y la distribución por tipo |
 | S6-02 | Reportes con filtros | 5 | Filtros de fechas, estado, dependencia, tipo y prioridad. Listado y resumen con totales. Validación en el frontend y el backend | ✅ Pedir otra dependencia sin permiso da 403; un rango de fechas invertido da 400 |
 | S6-03 | Exportar reportes | 3 | CSV con los mismos filtros que abre en Excel con tildes. Cada exportación queda en la auditoría | ✅ Protección contra fórmulas (`=`, `+`, `-`, `@`); máximo de 5000 filas |
-| S6-04 | Verificar indicadores | — | Cada número del dashboard se compara con un conteo directo en la base, en la CI | ✅ Paso "Verificar indicadores del dashboard contra la base". Falla si un número difiere o si no hay datos |
+| S6-04 | Verificar indicadores | — | Cada número del dashboard se compara con un conteo directo en la base, en la CI | ✅ Paso "Verificar indicadores del dashboard contra la base": **91 comparaciones, 0 diferencias** ([run 38902405048](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38902405048)). Falla si un número difiere o si no hay datos |
 | S6-05 | Tablero de métricas del proyecto | — | Completar las métricas que faltaban (lead time) y actualizar la medición | ✅ Lead time medido desde el historial de Trello, con sus limitaciones ([monitoreo §6](../monitoreo-metricas.md#6-medición-al-15102026-después-del-sprint-5)) |
 
 ## 3. Decisiones
