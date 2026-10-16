@@ -1,7 +1,8 @@
 # Integración continua (S1-06, plan de configuración §6).
 # En cada push y en cada PR hacia develop/main: instalación limpia, tipos,
 # lint, pruebas con cobertura, migraciones sobre PostgreSQL real, seed,
-# build y auditoría de dependencias. Un paso que falla deja el PR en rojo.
+# verificación de indicadores (S6-04), build y auditoría de dependencias.
+# Un paso que falla deja el PR en rojo.
 name: CI
 
 on:
@@ -92,6 +93,8 @@ jobs:
             done
             echo "OK: $tabla rechazó DELETE, UPDATE y TRUNCATE"
           done
+      - name: Verificar indicadores del dashboard contra la base (S6-04)
+        run: npx tsx prisma/verificar-indicadores.ts
       - name: Build
         run: npm run build
       - name: Auditoría de dependencias de producción

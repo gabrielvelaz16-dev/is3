@@ -6,6 +6,8 @@ import type { EstadoTarea, ExpedienteRecord, Repos, TareaRecord } from '../../da
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../shared/errors.js';
 import type { AuditoriaService, Contexto } from '../auditoria/auditoria.service.js';
 import { type ExpedientesService, verificarEditable } from '../expedientes/expedientes.service.js';
+import type { NotificacionesService } from '../notificaciones/notificaciones.service.js';
+import { formatoFecha } from '../../shared/fechas.js';
 
 export const ESTADOS_TAREA = ['PENDIENTE', 'EN_CURSO', 'COMPLETADA', 'CANCELADA'] as const satisfies readonly EstadoTarea[];
 
@@ -23,7 +25,7 @@ export class TareasService {
     private readonly repos: Repos,
     private readonly expedientes: ExpedientesService,
     private readonly auditoria: AuditoriaService,
-    private readonly opciones: { now?: () => Date } = {},
+    private readonly opciones: { now?: () => Date; notificaciones?: NotificacionesService } = {},
   ) {}
 
   private ahora() {
@@ -61,6 +63,13 @@ export class TareasService {
       entidad: 'Tarea',
       entidadId: String(tarea.id),
       detalle: { expediente: expediente.numero, asignadoA: input.asignadoAId, vencimiento: vencimiento.toISOString() },
+    });
+    await this.opciones.notificaciones?.notificar({
+      usuarioIds: [input.asignadoAId],
+      tipo: 'TAREA_ASIGNADA',
+      mensaje: `Nueva tarea en ${expediente.numero}: ${tarea.titulo} (vence el ${formatoFecha(vencimiento)})`,
+      expedienteId: expediente.id,
+      autorId: usuarioId,
     });
     return tarea;
   }

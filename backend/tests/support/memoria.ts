@@ -10,6 +10,8 @@ import type {
   EventoAuditoria,
   ExpedienteRecord,
   FiltrosExpediente,
+  FiltrosReporte,
+  NotificacionRecord,
   NuevoExpediente,
   Repos,
   RolRecord,
@@ -67,6 +69,8 @@ export function crearReposEnMemoria() {
     recibidoPorId: number | null;
   })[] = [];
   const asignaciones: AsignacionRecord[] = [];
+  // Sprint 6: notificaciones
+  const notificaciones: (Omit<NotificacionRecord, 'expediente'> & { expedienteId: number | null })[] = [];
   const depRef = (id: number) => {
     const d = dependencias.find((x) => x.id === id)!;
     return { id: d.id, codigo: d.codigo, nombre: d.nombre };
@@ -111,6 +115,20 @@ export function crearReposEnMemoria() {
     };
   };
 
+  const cumpleReporte = (e: FilaExp, f: FiltrosReporte) =>
+    (!f.estado || e.estado === f.estado) &&
+    (!f.prioridad || e.prioridad === f.prioridad) &&
+    (!f.dependenciaId || e.dependenciaActualId === f.dependenciaId) &&
+    (!f.tipo || e.tipo === f.tipo) &&
+    (!f.desde || e.creadoEn.getTime() >= f.desde.getTime()) &&
+    (!f.hasta || e.creadoEn.getTime() <= f.hasta.getTime());
+  const abierto = (e: FilaExp) => e.estado !== 'RESUELTO' && e.estado !== 'ARCHIVADO';
+  const contar = <T,>(lista: T[], clave: (x: T) => string) => {
+    const m = new Map<string, number>();
+    for (const x of lista) m.set(clave(x), (m.get(clave(x)) ?? 0) + 1);
+    return m;
+  };
+
   const completar = (f: Fila): UsuarioRecord => {
     const { rolId, dependenciaId, ...resto } = f;
     return { ...resto, rol: roles.find((r) => r.id === rolId)!, dependencia: dependencias.find((d) => d.id === dependenciaId)! };
@@ -151,6 +169,10 @@ export function crearReposEnMemoria() {
         usuarios
           .filter((u) => u.activo && u.dependenciaId === dependenciaId)
           .map((u) => ({ id: u.id, nombre: u.nombre, username: u.username })),
+      listIdsConPermiso: async (dependenciaId, permiso) =>
+        usuarios
+          .filter((u) => u.activo && u.dependenciaId === dependenciaId && roles.find((r) => r.id === u.rolId)!.permisos.includes(permiso))
+          .map((u) => u.id),
       countActivosConRol: async (clave, excluirId) =>
         usuarios.filter((u) => u.activo && u.id !== excluirId && roles.find((r) => r.id === u.rolId)?.clave === clave).length,
     },
@@ -201,7 +223,7 @@ export function crearReposEnMemoria() {
         return f ? completarExp(f) : null;
       },
       list: async (filtros: FiltrosExpediente) => {
-        let filtrados = [...expedientes];
+        let filtrados = expedientes.filter((e) => cumpleReporte(e, filtros));
         if (filtros.q) {
           const q = filtros.q.toLowerCase();
           filtrados = filtrados.filter(
@@ -212,9 +234,6 @@ export function crearReposEnMemoria() {
               e.iniciador.toLowerCase().includes(q),
           );
         }
-        if (filtros.estado) filtrados = filtrados.filter((e) => e.estado === filtros.estado);
-        if (filtros.prioridad) filtrados = filtrados.filter((e) => e.prioridad === filtros.prioridad);
-        if (filtros.dependenciaId) filtrados = filtrados.filter((e) => e.dependenciaActualId === filtros.dependenciaId);
         filtrados.sort((a, b) => b.creadoEn.getTime() - a.creadoEn.getTime());
         return { items: filtrados.slice(filtros.skip, filtros.skip + filtros.take).map(completarExp), total: filtrados.length };
       },
@@ -336,6 +355,68 @@ export function crearReposEnMemoria() {
       },
     },
 
+    notificaciones: {
+      crear: async ({ usuarioIds, tipo, mensaje, expedienteId }) => {
+        for (const usuarioId of usuarioIds) {
+          notificaciones.push({ id: notificaciones.length + 1, usuarioId, tipo, mensaje, expedienteId, creadaEn: ahora(), leidaEn: null });
+        }
+      },
+      listDe: async (usuarioId, { soloNoLeidas, take }) =>
+        notificaciones
+          .filter((n) => n.usuarioId === usuarioId && (!soloNoLeidas || !n.leidaEn))
+          .sort((a, b) => b.creadaEn.getTime() - a.creadaEn.getTime() || b.id - a.id)
+          .slice(0, take)
+          .map(({ expedienteId, ...n }) => ({ ...n, expediente: expedienteId ? expRef(expedienteId) : null })),
+      contarNoLeidas: async (usuarioId) => notificaciones.filter((n) => n.usuarioId === usuarioId && !n.leidaEn).length,
+      marcarLeida: async (id, usuarioId, fecha) => {
+        const n = notificaciones.find((x) => x.id === id && x.usuarioId === usuarioId);
+        if (!n) return false;
+        n.leidaEn ??= fecha;
+        return true;
+      },
+      marcarTodasLeidas: async (usuarioId, fecha) => {
+        const pendientes = notificaciones.filter((n) => n.usuarioId === usuarioId && !n.leidaEn);
+        for (const n of pendientes) n.leidaEn = fecha;
+        return pendientes.length;
+      },
+    },
+
+    estadisticas: {
+      resumen: async (f) => {
+        const lista = expedientes.filter((e) => cumpleReporte(e, f));
+        const porEstado = { BORRADOR: 0, EN_TRAMITE: 0, EN_REVISION: 0, RESUELTO: 0, ARCHIVADO: 0 };
+        for (const e of lista) porEstado[e.estado]++;
+        const porPrioridad = { BAJA: 0, MEDIA: 0, ALTA: 0 };
+        for (const e of lista) porPrioridad[e.prioridad]++;
+        return {
+          total: lista.length,
+          porEstado,
+          porPrioridad,
+          porTipo: [...contar(lista, (e) => e.tipo)]
+            .map(([tipo, total]) => ({ tipo, total }))
+            .sort((a, b) => b.total - a.total || a.tipo.localeCompare(b.tipo)),
+          porDependencia: [...contar(lista, (e) => String(e.dependenciaActualId))]
+            .map(([id, total]) => ({ dependencia: depRef(Number(id)), total }))
+            .sort((a, b) => b.total - a.total || a.dependencia.nombre.localeCompare(b.dependencia.nombre)),
+        };
+      },
+      seguimiento: async ({ dependenciaId, ahora: t, hasta }) => {
+        const enAlcance = (e: FilaExp) => !dependenciaId || e.dependenciaActualId === dependenciaId;
+        const lista = expedientes.filter(enAlcance);
+        const fv = (e: FilaExp) => e.fechaVencimiento?.getTime();
+        const idsAlcance = new Set(lista.map((e) => e.id));
+        const abiertas = tareas.filter((x) => idsAlcance.has(x.expedienteId) && (x.estado === 'PENDIENTE' || x.estado === 'EN_CURSO'));
+        return {
+          vencidos: lista.filter((e) => abierto(e) && fv(e) !== undefined && fv(e)! < t.getTime()).length,
+          porVencer: lista.filter((e) => abierto(e) && fv(e) !== undefined && fv(e)! >= t.getTime() && fv(e)! <= hasta.getTime()).length,
+          enTransito: lista.filter((e) => pases.some((p) => p.expedienteId === e.id && !p.recibidoEn)).length,
+          porRecibir: pases.filter((p) => !p.recibidoEn && (!dependenciaId || p.destinoId === dependenciaId)).length,
+          tareasAbiertas: abiertas.length,
+          tareasVencidas: abiertas.filter((x) => x.vencimiento.getTime() < t.getTime()).length,
+        };
+      },
+    },
+
     secuencia: {
       siguienteNumero: async (anio: number) => {
         const actual = secuencias.get(anio) ?? 0;
@@ -354,7 +435,7 @@ export function crearReposEnMemoria() {
     return repos.usuarios.create({ username, email, nombre: username, passwordHash: await hashPassword(password), rolId: rolId(rolClave), dependenciaId: 1, ...extra });
   }
 
-  return { repos, auditoria, sesiones, rolId, agregarUsuario, documentos, actuaciones, cambiosEstado, tareas, pases, asignaciones, expedientes };
+  return { repos, auditoria, sesiones, rolId, agregarUsuario, documentos, actuaciones, cambiosEstado, tareas, pases, asignaciones, expedientes, notificaciones };
 }
 
 export const PASSWORD_ADMIN = '12345';

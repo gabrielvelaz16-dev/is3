@@ -1,4 +1,4 @@
-// Modelo de datos — Sprint 2 (S2-01) + Sprint 3 (S3-01): expedientes.
+// Modelo de datos — Sprint 2 (S2-01) + Sprint 3 (S3-01): expedientes. Sprints 4 a 6: ver secciones.
 // Documentación: docs/03-modelo-datos/modelo-datos.md
 // La URL de conexión se configura en prisma.config.ts (Prisma 7).
 
@@ -84,6 +84,7 @@ model Usuario {
   pasesRecibidos         Pase[]         @relation("paseRecibido")
   asignacionesHechas     Asignacion[]   @relation("asignacionHecha")
   asignacionesRecibidas  Asignacion[]   @relation("asignacionRecibida")
+  notificaciones         Notificacion[]
 
   @@index([rolId])
   @@index([dependenciaId])
@@ -168,6 +169,7 @@ model Expediente {
   tareas            Tarea[]
   pases             Pase[]
   asignaciones      Asignacion[]
+  notificaciones    Notificacion[]
 
   @@index([estado])
   @@index([dependenciaActualId])
@@ -317,4 +319,30 @@ model Asignacion {
 
   @@index([expedienteId])
   @@map("asignaciones")
+}
+
+// ── Sprint 6: Notificaciones internas ──────────────────────────────
+
+enum TipoNotificacion {
+  EXPEDIENTE_ASIGNADO
+  TAREA_ASIGNADA
+  PASE_ENTRANTE
+}
+
+/// Aviso para un usuario (S5-06, RF-17). Solo lo ve su destinatario; leerlo registra la fecha.
+model Notificacion {
+  id           Int              @id @default(autoincrement())
+  usuarioId    Int              @map("usuario_id")
+  tipo         TipoNotificacion
+  mensaje      String           @db.VarChar(300)
+  expedienteId Int?             @map("expediente_id")
+  creadaEn     DateTime         @default(now()) @map("creada_en")
+  leidaEn      DateTime?        @map("leida_en")
+
+  usuario    Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  expediente Expediente? @relation(fields: [expedienteId], references: [id], onDelete: Restrict)
+
+  @@index([usuarioId, leidaEn])
+  @@index([expedienteId])
+  @@map("notificaciones")
 }

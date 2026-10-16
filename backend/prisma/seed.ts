@@ -130,6 +130,10 @@ async function main() {
         { caratula: 'Resolución de designación de personal temporario', asunto: 'Se resuelve la designación de personal temporario para el período estival 2026-2027.', tipo: 'RESOLUCION', iniciador: 'RRHH', estado: 'RESUELTO' as const, prioridad: 'MEDIA' as const, depId: ajurDep, creadoPorId: jefeUser.id, responsableId: null },
       ];
 
+      // Vencimientos relativos a hoy para que el dashboard muestre vencidos y por vencer (Sprint 6).
+      const DIA = 24 * 60 * 60 * 1000;
+      const vencimientos = [2, 10, null, -3, null].map((dias) => (dias === null ? null : new Date(Date.now() + dias * DIA)));
+
       let secuencial = 0;
       for (const exp of expedientesDemo) {
         const numero = `EXP-${anio}-${String(++secuencial).padStart(6, '0')}`;
@@ -147,6 +151,7 @@ async function main() {
               dependenciaActualId: exp.depId,
               creadoPorId: exp.creadoPorId,
               responsableId: exp.responsableId,
+              fechaVencimiento: vencimientos[secuencial - 1] ?? null,
             },
           });
           console.log(`Expediente de demo creado: ${numero} — ${exp.caratula.slice(0, 50)}`);
