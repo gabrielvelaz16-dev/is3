@@ -96,3 +96,14 @@ Migración `20261015150000_tareas_pases`.
 
 - La recepción de un pase y el cambio de dependencia del expediente se hacen en **una transacción**; la condición `recibido_en IS NULL` evita registrar dos veces la misma recepción.
 - "En tránsito" no es un estado del expediente: se deriva de la existencia de un pase sin recibir.
+
+## 9. Implementación del Sprint 6 (notificaciones)
+
+Migración `20261016120000_notificaciones`.
+
+| Tabla | Columnas principales | Restricciones |
+|---|---|---|
+| `notificaciones` | `usuario_id`, `tipo` (`TipoNotificacion`: `EXPEDIENTE_ASIGNADO`, `TAREA_ASIGNADA`, `PASE_ENTRANTE`), `mensaje` (≤ 300), `expediente_id` (opcional), `creada_en`, `leida_en` | FK al usuario con `ON DELETE CASCADE`; FK al expediente con `RESTRICT`; índices `(usuario_id, leida_en)` y `expediente_id` |
+
+- No es una tabla de historial: la única modificación es registrar `leida_en`, y solo para el destinatario.
+- El dashboard y los reportes **no tienen tablas propias**: se calculan con `count` y `groupBy` sobre `expedientes`, `pases` y `tareas`, con la misma condición de alcance que el listado. `prisma/verificar-indicadores.ts` (S6-04) repite cada cálculo con SQL escrito a mano y lo compara en la CI.

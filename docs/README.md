@@ -24,10 +24,11 @@ Esta carpeta reúne los artefactos de gestión y técnicos del proyecto. Cada do
 | 04-gestion | [riesgos.md](04-gestion/riesgos.md) | 6 | Completo (TP Unidad 6) — registro vivo |
 | 04-gestion | [control-cambios.md](04-gestion/control-cambios.md) | 2 · 3 · 8 | Vivo |
 | 04-gestion | [trazabilidad.md](04-gestion/trazabilidad.md) | 2–9 (Anexo A) | Vivo |
-| 04-gestion | [monitoreo-metricas.md](04-gestion/monitoreo-metricas.md) | 9 | Vivo (medición real 15/10/2026) |
+| 04-gestion | [monitoreo-metricas.md](04-gestion/monitoreo-metricas.md) | 9 | Vivo (mediciones reales 15 y 16/10/2026) |
 | 04-gestion | [historial-cambios.md](04-gestion/historial-cambios.md) | 8 | Vivo |
 | 04-gestion/sprints | [sprint-01.md](04-gestion/sprints/sprint-01.md) | 3 · 9 | En curso |
 | 04-gestion/sprints | [sprint-02.md](04-gestion/sprints/sprint-02.md) | 3 · 9 | En curso (CR-02) |
+| 04-gestion/sprints | [sprint-04.md](04-gestion/sprints/sprint-04.md) · [sprint-05.md](04-gestion/sprints/sprint-05.md) · [sprint-06.md](04-gestion/sprints/sprint-06.md) | 3 · 9 | Terminados con CI en verde; prueba manual pendiente |
 | 05-calidad-pruebas | [plan-calidad.md](05-calidad-pruebas/plan-calidad.md) | 7 | Plan inicial |
 | 05-calidad-pruebas | [plan-pruebas.md](05-calidad-pruebas/plan-pruebas.md) | 7 | Plan inicial |
 | 05-calidad-pruebas | [resultados-pruebas.md](05-calidad-pruebas/resultados-pruebas.md) | 7 | Sin ejecuciones todavía |

@@ -143,6 +143,23 @@ No existen rutas para modificar ni borrar documentos, actuaciones o cambios de e
 
 **Evento del historial:** `{ tipo: "CREACION" | "CAMBIO_ESTADO" | "DOCUMENTO" | "ACTUACION" | "OBSERVACION", fecha, usuario, descripcion, referenciaId?, estadoAnterior?, estadoNuevo? }`.
 
+## 5 ter. Dashboard, reportes y notificaciones (Sprint 6)
+
+| Método y ruta | Permiso | Entrada | Respuesta |
+|---|---|---|---|
+| `GET /api/estadisticas/dashboard` | `expedientes.consultar` | — | 200 `{ data: { alcance, generadoEn, diasAviso, resumen, seguimiento } }`. `alcance` = `{ tipo: "INSTITUCION" }` con `expedientes.consultar_todas`, si no `{ tipo: "DEPENDENCIA", dependencia }` |
+| `GET /api/reportes/expedientes` | `reportes.consultar` | Query: `desde`, `hasta` (AAAA-MM-DD, creación, inclusivos), `estado`, `prioridad`, `tipo`, `dependenciaId`, `pagina`, `porPagina` (máx. 100) | 200 `{ data: { resumen, items: [expediente], total, pagina, porPagina } }` · 400 fecha inválida o `hasta` < `desde` · 403 otra dependencia sin `expedientes.consultar_todas` |
+| `GET /api/reportes/expedientes/exportar` | `reportes.consultar` | Los mismos filtros | 200 `text/csv; charset=utf-8` con `Content-Disposition: attachment; filename="reporte-expedientes-AAAAMMDD.csv"` y `X-Filas`. 400 si hay más de 5000 filas. Se audita `reporte.exportar` |
+| `GET /api/notificaciones` | sesión | Query: `soloNoLeidas=true` (opcional) | 200 `{ data: { items: [notificación], noLeidas } }` (las 30 más recientes, solo las propias) |
+| `POST /api/notificaciones/:id/leida` | sesión | — | 200 `{ data: { id, leida: true } }` · 404 si no existe o es de otro usuario |
+| `POST /api/notificaciones/leidas` | sesión | — | 200 `{ data: { marcadas } }` |
+
+**Resumen:** `{ total, porEstado: { BORRADOR, EN_TRAMITE, EN_REVISION, RESUELTO, ARCHIVADO }, porPrioridad: { BAJA, MEDIA, ALTA }, porTipo: [{ tipo, total }], porDependencia: [{ dependencia, total }] }`.
+**Seguimiento:** `{ vencidos, porVencer, enTransito, porRecibir, tareasAbiertas, tareasVencidas }` (vencidos y por vencer excluyen resueltos y archivados; "por vencer" = próximos 3 días).
+**Notificación:** `{ id, tipo: "EXPEDIENTE_ASIGNADO" | "TAREA_ASIGNADA" | "PASE_ENTRANTE", mensaje, expediente: { id, numero, caratula } | null, creadaEn, leidaEn }`.
+
+**CSV:** columnas `Número;Carátula;Tipo;Iniciador;Estado;Prioridad;Dependencia actual;Responsable;Creado;Vencimiento;En tránsito hacia`, con BOM UTF-8, separador `;` y fin de línea CRLF. Un valor que empieza con `=`, `+`, `-` o `@` se antepone con `'` para que Excel no lo ejecute como fórmula.
+
 ## 6. Encabezados
 
 | Encabezado | Uso |

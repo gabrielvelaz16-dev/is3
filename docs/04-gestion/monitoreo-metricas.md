@@ -1,6 +1,6 @@
 # Monitoreo, control y mejora
 
-**Estado:** Vivo — primera medición real el 15/10/2026 (ver §6) · **Unidad:** 9 · **Tarjeta:** S6-05 · **TP:** [Unidades 8 y 9](../08-trabajos-practicos/tp-unidades-8-9.md)
+**Estado:** Vivo — mediciones reales el 15/10/2026 (§6) y el 16/10/2026 (§7) · **Unidad:** 9 · **Tarjeta:** S6-05 · **TP:** [Unidades 8 y 9](../08-trabajos-practicos/tp-unidades-8-9.md)
 
 > No confundir con el *dashboard del sistema* (S6-01), que muestra estadísticas de expedientes para los usuarios. Este tablero mide el **proyecto**.
 
@@ -91,6 +91,9 @@
 | 15/10/2026 | Pronóstico | 34 SP / 16 SP = 3 sprints vs 2 disponibles | El alcance restante no entra en el plan | Abrir un CR para priorizar con MoSCoW lo que entra en v1.0.0, sin modificar la línea base en silencio | §6 |
 | 15/10/2026 | Tasa de fallos del pipeline | 8 de 19 ejecuciones (42 %) vs umbral < 20 % | Se sube código sin verificarlo antes en local; la recuperación es rápida (2 a 8 min) | Ejecutar tipos y pruebas antes de cada push | §6 · historial de GitHub Actions |
 | 15/10/2026 | PR integrados a `develop` | 0 de 12 vs ≥ 2 por semana | No hay versión estable ni etiquetas | Revisar e integrar los PR #1 a #12 en orden y crear `v0.2.0` antes del Sprint 6 | §6 |
+| 16/10/2026 | Pronóstico | 13 SP / 17,7 SP = 1 sprint vs 1 disponible | La alerta del 15/10 se resolvió con el Sprint 6 completo (21 SP) | Se cierra la alerta; CR-04 queda registrado y sin aplicar | §7 · [CR-04](control-cambios.md#cr-04--orden-de-recorte-del-sprint-6) |
+| 16/10/2026 | Tasa de fallos del pipeline | 12 de 25 (48 %); en el Sprint 6, 4 de 5 | La acción del 15/10 ("correr las pruebas antes del push") no se pudo aplicar: el entorno de la IA no puede instalar dependencias y la CI es el único lugar donde corren las pruebas. La recuperación sigue siendo rápida (10 min) | Mantener la CI como verificación obligatoria y pedir que el entorno de la IA tenga acceso al registro de npm; mientras tanto, se acepta la tasa alta con recuperación rápida | §7 |
+| 16/10/2026 | Tarjetas en *En revisión / pruebas* | 10 tarjetas de S4 y S5 desde el 15/10 | El cuello de botella es la revisión e integración, no el desarrollo (coincide con 0 PR integrados) | El responsable integra los PR #1 a #14 antes de empezar el Sprint 7 | §7 |
 | 15/10/2026 | Riesgos materializados | R15 (errores de IA) | El Sprint 3 se cerró con la CI en rojo | La DoD exige CI en verde para cerrar una historia | [riesgos.md](riesgos.md) |
 
 ## 5. De mejora local a estándar institucional
@@ -131,3 +134,28 @@ Valores reales del prototipo. Lo que no se midió queda como *pendiente*; no se 
 **Cómo se calcularon los datos de DevOps:** historial de GitHub Actions del 14/10 al 15/10/2026: 21 ejecuciones, 2 canceladas (no cuentan), 11 exitosas y 8 fallidas. El tiempo de recuperación es la diferencia entre la primera ejecución roja y la siguiente verde de la misma rama. El caso de 19 h corresponde al Sprint 3 (run 38609784288 → run 38739999945), que se dio por terminado con la CI en rojo (R15).
 
 **Limitación:** los sprints del prototipo se ejecutaron en horas y con asistencia de IA; las métricas sirven para comparar sprints entre sí y justificar decisiones, no para estimar el calendario real del proyecto institucional.
+
+## 7. Medición al 16/10/2026 (después del Sprint 6, S6-05)
+
+| Dimensión | Métrica | Umbral | Valor | Estado | Cambio vs §6 |
+|---|---|---|---|---|---|
+| Alcance | SP terminados / línea base | Según plan | 84 de 97 SP (87 %) | En curso | +21 SP |
+| Alcance | Solicitudes de cambio | — | 5 (CR-00 a CR-04) | Controlado | +CR-04 |
+| Cronograma | Pronóstico vs sprints disponibles | ≤ 1 sprint | 13 / 17,7 = 1 sprint | OK | Se resolvió la alerta |
+| Velocidad | SP por sprint (S1 a S6) | ± 20 % | 3, 12, 16, 11, 21, 21 | Se estabiliza | Dos sprints seguidos de 21 SP |
+| Flujo | Lead time (de *En progreso* a *Hecho*) | Descendente | Mediana de 2 h 28 min (11 tarjetas de S1 y S2) | Medido con limitación | Antes: sin medir |
+| Flujo | Tarjetas en *En revisión / pruebas* | ≤ 3 | 10 (S4 y S5, desde el 15/10) | Alerta | Nueva métrica |
+| Calidad | Pruebas aprobadas | 100 % | 175 / 175 (130 + 45) | OK | +26 pruebas |
+| Calidad | Cobertura del backend (líneas) | ≥ 70 % | 93,89 % | OK | +0,43 |
+| Calidad | Indicadores verificados contra la base | 100 % | Todos coinciden (S6-04) | OK | Nueva verificación |
+| Defectos | Abiertos / cerrados | 0 críticos | 0 abiertos / 11 cerrados (D-10 y D-11 en el Sprint 6) | OK | D-10 cerrado |
+| DevOps | Tasa de fallos del pipeline | < 20 % | 12 de 25 (48 %) | Alerta | Empeoró (era 42 %) |
+| DevOps | Tiempo de recuperación | < 1 día | 10 min en el Sprint 6 | OK | Igual |
+| DevOps | PR integrados a `develop` | ≥ 2 por semana | 0 de 14 | Alerta | +2 PR sin integrar |
+
+**Cómo se midió el lead time:** con el historial de movimientos de tarjetas del tablero de Trello (60 movimientos). Solo 11 tarjetas, de los Sprints 1 y 2, tienen registrado el paso por *En progreso*. Duraron entre 2 h 27 min y 3 h 19 min, con una mediana de 2 h 28 min.
+
+**Limitación:** muchas tarjetas se movieron juntas al final del día (por ejemplo, 17:55 del 14/10), así que el lead time mide cuándo se actualizó el tablero más que el trabajo real. Las tarjetas de los Sprints 3 a 5 se movieron una sola vez, sin pasar por *En progreso*, y no se pueden medir. **Acción:** desde el Sprint 7, mover cada tarjeta a *En progreso* al empezarla y a *Hecho* recién con la CI en verde y el PR integrado.
+
+**Cómo se midió la tasa de fallos:** con el historial de GitHub Actions al 16/10/2026: 28 ejecuciones, 3 canceladas (no cuentan), 13 exitosas y 12 fallidas.
+

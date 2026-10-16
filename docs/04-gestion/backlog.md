@@ -103,7 +103,7 @@ SP = Story Points (escala 1-2-3-5-8-13). Las tareas técnicas y de documentació
 | S5-05 | Recibir expediente | 5 | TP |
 | S5-06 | Notificaciones internas — **movida al Sprint 6 por CR-03** (los pendientes y alertas de vencimiento quedaron en el Sprint 5) | 8 | TP (Notificaciones) |
 
-### Sprint 6 — Dashboard y reportes (E6) · 13 SP
+### Sprint 6 — Dashboard y reportes (E6) · 21 SP (13 + S5-06 por CR-03) · terminado el 16/10/2026 ([sprint-06.md](sprints/sprint-06.md))
 
 | Código | Ítem | SP | Origen |
 |---|---|---|---|

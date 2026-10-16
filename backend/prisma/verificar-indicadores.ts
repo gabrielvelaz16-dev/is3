@@ -141,6 +141,8 @@ async function main() {
   }
 
   console.log(`\n${verificados} comparaciones, ${errores.length} con diferencias o sin datos.`);
+  // Evidencia visible en el resumen de la ejecución de la CI.
+  console.log(`::notice title=Indicadores (S6-04)::${verificados} comparaciones contra la base, ${errores.length} con diferencias o sin datos.`);
   if (errores.length > 0) process.exitCode = 1;
 }
 
