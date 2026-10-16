@@ -1,0 +1,86 @@
+# Capturas automáticas de la interfaz (CR-05, evidencia para la defensa).
+# Levanta PostgreSQL, el backend y el frontend con datos de demostración ficticios, entra con
+# cada rol y saca capturas con Playwright. Las guarda en la rama `capturas` (separada del código),
+# en una carpeta por rama y commit, para comparar el antes y el después.
+name: Capturas de la interfaz
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feature/S8-UI-*']
+
+concurrency:
+  group: capturas-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  capturas:
+    name: Capturas con Playwright
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: expediente_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U ci -d expediente_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      # Credenciales solo de la base efímera de CI (no son secretos reales).
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/expediente_ci?schema=public
+      NODE_ENV: development
+      LOG_LEVEL: warn
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+      - name: Backend con datos de demostración
+        working-directory: backend
+        run: |
+          npm ci
+          npx prisma generate
+          npx prisma migrate deploy
+          npm run db:seed
+          nohup npx tsx src/server.ts > ../backend.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://localhost:3000/api/health >/dev/null && break; sleep 1; done
+          node ../scripts/capturas/preparar-demo.mjs http://localhost:3000 > ../demo.json
+          cat ../demo.json
+      - name: Frontend (servidor de desarrollo de Vite)
+        working-directory: frontend
+        run: |
+          npm ci
+          nohup npx vite --port 5173 > ../frontend.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://localhost:5173/ >/dev/null && break; sleep 1; done
+      - name: Sacar capturas
+        working-directory: scripts/capturas
+        run: |
+          npm install --no-package-lock
+          npx playwright install --with-deps chromium
+          node capturas.mjs "$RUNNER_TEMP/capturas" ../../demo.json http://localhost:5173
+      - name: Guardar en la rama "capturas"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DESTINO="${GITHUB_REF_NAME//\//-}-${GITHUB_SHA::7}"
+          URL="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git clone --quiet --depth 1 --branch capturas "$URL" "$RUNNER_TEMP/rama"; then :; else
+            mkdir -p "$RUNNER_TEMP/rama" && cd "$RUNNER_TEMP/rama" && git init -q -b capturas && git remote add origin "$URL" && cd -
+          fi
+          cd "$RUNNER_TEMP/rama"
+          rm -rf "$DESTINO" && mkdir -p "$DESTINO" && cp "$RUNNER_TEMP"/capturas/* "$DESTINO"/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Capturas de ${GITHUB_REF_NAME} (${GITHUB_SHA::7})" || { echo "Sin cambios"; exit 0; }
+          git push -q origin capturas
+          echo "::notice title=Capturas::$(ls "$DESTINO"/*.png | wc -l) capturas en la rama capturas, carpeta $DESTINO"
+      - name: Logs si algo falló
+        if: failure()
+        run: tail -n 50 backend.log frontend.log || true
