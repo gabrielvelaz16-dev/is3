@@ -46,6 +46,8 @@ export function crearReposEnMemoria() {
   const usuarios: Fila[] = [];
   const sesiones = new Map<string, SesionRecord>();
   const auditoria: EventoAuditoria[] = [];
+  /** Fecha de cada evento de auditoría (mismo índice que `auditoria`). */
+  const fechasAuditoria: Date[] = [];
 
   // Sprint 3: expedientes en memoria
   type FilaExp = Omit<ExpedienteRecord, 'dependenciaActual' | 'creadoPor' | 'responsable' | 'paseEnTransito'>;
@@ -199,7 +201,37 @@ export function crearReposEnMemoria() {
     auditoria: {
       insert: async (e) => {
         auditoria.push(e);
+        fechasAuditoria.push(ahora());
       },
+      list: async ({ desde, hasta, usuarioId, accion, resultado, skip, take }) => {
+        const filas = auditoria
+          .map((e, i) => ({ e, id: i + 1, fecha: fechasAuditoria[i]! }))
+          .filter(
+            ({ e, fecha }) =>
+              (!desde || fecha.getTime() >= desde.getTime()) &&
+              (!hasta || fecha.getTime() <= hasta.getTime()) &&
+              (!usuarioId || e.usuarioId === usuarioId) &&
+              (!accion || e.accion === accion) &&
+              (!resultado || e.resultado === resultado),
+          )
+          .sort((a, b) => b.fecha.getTime() - a.fecha.getTime() || b.id - a.id);
+        return {
+          total: filas.length,
+          items: filas.slice(skip, skip + take).map(({ e, id, fecha }) => ({
+            id,
+            fecha,
+            usuario: e.usuarioId ? persona(e.usuarioId) : null,
+            accion: e.accion,
+            resultado: e.resultado,
+            entidad: e.entidad ?? null,
+            entidadId: e.entidadId ?? null,
+            detalle: e.detalle ?? null,
+            ip: e.ip ?? null,
+            requestId: e.requestId ?? null,
+          })),
+        };
+      },
+      acciones: async () => [...new Set(auditoria.map((e) => e.accion))].sort(),
     },
 
     expedientes: {
@@ -415,6 +447,48 @@ export function crearReposEnMemoria() {
           tareasVencidas: abiertas.filter((x) => x.vencimiento.getTime() < t.getTime()).length,
         };
       },
+    },
+
+    // Respaldo en memoria: exporta lo que hay; restaurar se prueba con PostgreSQL en la CI (S7-04).
+    respaldo: {
+      exportar: async () => ({
+        dependencias: dependencias.map((d) => ({ ...d })),
+        roles: roles.map(({ permisos: _p, ...r }) => ({ ...r })),
+        permisos: [],
+        rolesPermisos: [],
+        usuarios: usuarios.map((u) => ({ ...u })),
+        auditoria: auditoria.map((e, i) => ({ ...e, id: i + 1, fecha: fechasAuditoria[i] })),
+        secuencias: [...secuencias].map(([anio, ultimoNumero]) => ({ anio, ultimoNumero })),
+        expedientes: expedientes.map((x) => ({ ...x })),
+        documentos: documentos.map(({ subidoPor, ...d }) => ({ ...d, subidoPorId: subidoPor.id })),
+        actuaciones: actuaciones.map(({ autor, ...a }) => ({ ...a, autorId: autor.id })),
+        cambiosEstado: cambiosEstado.map(({ usuario, ...c }) => ({ ...c, usuarioId: usuario.id })),
+        tareas: tareas.map((t) => ({ ...t })),
+        pases: pases.map((p) => ({ ...p })),
+        asignaciones: asignaciones.map((a) => ({ ...a })),
+        notificaciones: notificaciones.map((n) => ({ ...n })),
+      }),
+      importar: async () => {
+        throw new Error('La restauración en memoria no está soportada');
+      },
+      conteos: async () => ({
+        dependencias: dependencias.length,
+        roles: roles.length,
+        permisos: 0,
+        rolesPermisos: 0,
+        usuarios: usuarios.length,
+        auditoria: auditoria.length,
+        secuencias: secuencias.size,
+        expedientes: expedientes.length,
+        documentos: documentos.length,
+        actuaciones: actuaciones.length,
+        cambiosEstado: cambiosEstado.length,
+        tareas: tareas.length,
+        pases: pases.length,
+        asignaciones: asignaciones.length,
+        notificaciones: notificaciones.length,
+      }),
+      migraciones: async () => ['memoria'],
     },
 
     secuencia: {

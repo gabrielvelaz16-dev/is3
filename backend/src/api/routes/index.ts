@@ -14,10 +14,12 @@ import { NotificacionesService } from '../../modules/notificaciones/notificacion
 import { PasesService } from '../../modules/pases/pases.service.js';
 import { PendientesService } from '../../modules/pendientes/pendientes.service.js';
 import { ReportesService } from '../../modules/reportes/reportes.service.js';
+import { RespaldoService } from '../../modules/respaldo/respaldo.service.js';
 import { TareasService } from '../../modules/tareas/tareas.service.js';
 import { UsuariosService } from '../../modules/usuarios/usuarios.service.js';
 import { healthController } from '../controllers/health.controller.js';
 import { cargarSesion } from '../middlewares/auth.js';
+import { administracionRouter } from './administracion.routes.js';
 import { authRouter } from './auth.routes.js';
 import { expedientesRouter } from './expedientes.routes.js';
 import { reportesRouter } from './reportes.routes.js';
@@ -33,6 +35,8 @@ export interface ApiDeps {
   almacenamiento: AlmacenamientoDocumentos;
   /** Tamaño máximo de un documento en bytes (por defecto 10 MB). */
   maxUploadBytes?: number;
+  /** Carpeta de los respaldos (S7-04, BACKUP_PATH). */
+  carpetaRespaldos?: string;
   sesionHoras?: number;
   cookieSecure?: boolean;
   now?: () => Date;
@@ -73,6 +77,13 @@ export function apiRouter(deps: ApiDeps): Router {
       estadisticas: new EstadisticasService(deps.repos, { now: deps.now }),
       reportes: new ReportesService(deps.repos, auditoria, { now: deps.now }),
       notificaciones,
+    }),
+  );
+  router.use(
+    '/',
+    administracionRouter({
+      auditoria,
+      respaldo: new RespaldoService(deps.repos.respaldo, deps.almacenamiento, deps.carpetaRespaldos ?? 'backups', { now: deps.now }),
     }),
   );
   router.use('/', catalogosRouter(deps.repos.roles, deps.repos.dependencias));

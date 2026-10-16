@@ -1,4 +1,4 @@
-import type { AuditoriaRepo, EventoAuditoria } from '../../database/repositories.js';
+import type { AuditoriaRecord, AuditoriaRepo, EventoAuditoria, FiltrosAuditoria } from '../../database/repositories.js';
 import { logger } from '../../shared/logger.js';
 
 /** Datos de la petición que se agregan a cada evento de auditoría. */
@@ -23,5 +23,14 @@ export class AuditoriaService {
       logger.error('no se pudo registrar la auditoría', { accion: evento.accion, requestId: ctx.requestId, error: (err as Error).message });
       throw err;
     }
+  }
+
+  /** Consulta con filtros (S7-03, RF-21). Solo lectura: no hay rutas para modificar la auditoría. */
+  consultar(filtros: FiltrosAuditoria): Promise<{ items: AuditoriaRecord[]; total: number }> {
+    return this.repo.list(filtros);
+  }
+
+  acciones(): Promise<string[]> {
+    return this.repo.acciones();
   }
 }

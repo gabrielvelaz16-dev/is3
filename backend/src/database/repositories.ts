@@ -99,8 +99,36 @@ export interface EventoAuditoria {
   requestId?: string;
 }
 
+export interface AuditoriaRecord {
+  id: number;
+  fecha: Date;
+  usuario: { id: number; nombre: string; username: string } | null;
+  accion: string;
+  resultado: 'EXITO' | 'FALLO';
+  entidad: string | null;
+  entidadId: string | null;
+  detalle: unknown;
+  ip: string | null;
+  requestId: string | null;
+}
+
+/** Filtros de la consulta de auditoría (S7-03, RF-21). */
+export interface FiltrosAuditoria {
+  desde?: Date;
+  hasta?: Date;
+  usuarioId?: number;
+  accion?: string;
+  resultado?: 'EXITO' | 'FALLO';
+  skip: number;
+  take: number;
+}
+
 export interface AuditoriaRepo {
   insert(evento: EventoAuditoria): Promise<void>;
+  /** Más recientes primero. */
+  list(filtros: FiltrosAuditoria): Promise<{ items: AuditoriaRecord[]; total: number }>;
+  /** Acciones distintas registradas, para el filtro. */
+  acciones(): Promise<string[]>;
 }
 
 // ── Sprint 3: Expedientes ──────────────────────────────────────────
@@ -392,6 +420,42 @@ export interface EstadisticasRepo {
   seguimiento(params: { dependenciaId?: number; ahora: Date; hasta: Date }): Promise<IndicadoresSeguimiento>;
 }
 
+// ── Sprint 7: Copia de seguridad y restauración (S7-04, RF-22, ADR-13) ─────
+
+/**
+ * Tablas que entran en un respaldo, en el orden en que se restauran (respetando las claves
+ * foráneas). Las sesiones no se respaldan: después de restaurar, cada usuario inicia sesión de nuevo.
+ */
+export const TABLAS_RESPALDO = [
+  'dependencias',
+  'roles',
+  'permisos',
+  'rolesPermisos',
+  'usuarios',
+  'auditoria',
+  'secuencias',
+  'expedientes',
+  'documentos',
+  'actuaciones',
+  'cambiosEstado',
+  'tareas',
+  'pases',
+  'asignaciones',
+  'notificaciones',
+] as const;
+
+export type TablaRespaldo = (typeof TABLAS_RESPALDO)[number];
+export type DatosRespaldo = Record<TablaRespaldo, Record<string, unknown>[]>;
+
+export interface RespaldoRepo {
+  exportar(): Promise<DatosRespaldo>;
+  /** Carga los datos en una base vacía y migrada; falla (sin cambiar nada) si la base tiene datos. */
+  importar(datos: DatosRespaldo): Promise<void>;
+  conteos(): Promise<Record<TablaRespaldo, number>>;
+  /** Migraciones aplicadas en la base, para comprobar que el respaldo corresponde al mismo esquema. */
+  migraciones(): Promise<string[]>;
+}
+
 export interface Repos {
   usuarios: UsuariosRepo;
   roles: RolesRepo;
@@ -408,4 +472,5 @@ export interface Repos {
   asignaciones: AsignacionesRepo;
   notificaciones: NotificacionesRepo;
   estadisticas: EstadisticasRepo;
+  respaldo: RespaldoRepo;
 }

@@ -22,7 +22,10 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "respaldo:crear": "tsx src/cli/respaldo.ts crear",
+    "respaldo:verificar": "tsx src/cli/respaldo.ts verificar",
+    "respaldo:restaurar": "tsx src/cli/respaldo.ts restaurar"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.0",

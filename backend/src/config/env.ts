@@ -25,6 +25,8 @@ export const envSchema = z.object({
   COOKIE_SECURE: z.stringbool().default(false),
   /** Carpeta de documentos (S4-02). Si es relativa, se toma desde la raíz del repositorio. */
   STORAGE_PATH: z.string().min(1).default('./storage/documentos'),
+  /** Carpeta de las copias de seguridad (S7-04). Si es relativa, se toma desde la raíz del repositorio. */
+  BACKUP_PATH: z.string().min(1).default('./backups'),
   /** Tamaño máximo de un documento en MB (RF-08). */
   MAX_UPLOAD_MB: z.coerce.number().min(1).max(50).default(10),
 });
