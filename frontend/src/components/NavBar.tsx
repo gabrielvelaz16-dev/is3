@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router';
 import { useAuth } from '../auth/AuthContext';
 import { sections } from '../routes/navigation';
+import { NotificacionesCampana } from './NotificacionesCampana';
 
 const linkBase = 'block rounded-md px-3 py-2 text-sm font-medium transition-colors';
 const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -65,22 +66,24 @@ export function NavBar() {
             </span>
           </Link>
 
-          <button
-            type="button"
-            className="rounded-md p-2 text-marca-100 hover:bg-marca-500 lg:hidden"
-            aria-controls="menu-principal"
-            aria-expanded={abierto}
-            onClick={() => setAbierto((v) => !v)}
-          >
-            <span className="sr-only">{abierto ? 'Cerrar menú' : 'Abrir menú'}</span>
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2">
-              {abierto ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
-            </svg>
-          </button>
-
-          <div className="hidden items-center gap-6 lg:flex">
-            <ul className="flex gap-1">{enlaces()}</ul>
-            {usuarioYSalir}
+          <div className="flex items-center gap-2 lg:gap-6">
+            <div className="hidden items-center gap-6 lg:flex">
+              <ul className="flex gap-1">{enlaces()}</ul>
+              {usuarioYSalir}
+            </div>
+            {usuario && <NotificacionesCampana />}
+            <button
+              type="button"
+              className="rounded-md p-2 text-marca-100 hover:bg-marca-500 lg:hidden"
+              aria-controls="menu-principal"
+              aria-expanded={abierto}
+              onClick={() => setAbierto((v) => !v)}
+            >
+              <span className="sr-only">{abierto ? 'Cerrar menú' : 'Abrir menú'}</span>
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2">
+                {abierto ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+              </svg>
+            </button>
           </div>
         </div>
 

@@ -8,6 +8,7 @@ import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PendientesPage } from './pages/PendientesPage';
+import { ReportesPage } from './pages/ReportesPage';
 import { SectionPage } from './pages/SectionPage';
 import { UsuariosPage } from './pages/UsuariosPage';
 import { sections } from './routes/navigation';
@@ -66,6 +67,14 @@ export function App() {
           }
         />
         <Route path="/tareas" element={<PendientesPage />} />
+        <Route
+          path="/reportes"
+          element={
+            <RequierePermiso permiso="reportes.consultar">
+              <ReportesPage />
+            </RequierePermiso>
+          }
+        />
         <Route
           path="/administracion"
           element={

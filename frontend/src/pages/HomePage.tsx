@@ -1,10 +1,11 @@
 import { Link } from 'react-router';
 import { useAuth } from '../auth/AuthContext';
+import { Dashboard } from '../components/Dashboard';
 import { PageHeader } from '../components/PageHeader';
 import { SystemStatus } from '../components/SystemStatus';
 import { sections } from '../routes/navigation';
 
-/** Página de inicio: estado del sistema y acceso a las secciones permitidas (S1-03, S1-04). */
+/** Página de inicio: estado del sistema, estadísticas (S6-01) y acceso a las secciones permitidas (S1-03, S1-04). */
 export function HomePage() {
   const { usuario, puede } = useAuth();
   const visibles = sections.filter((s) => !s.permiso || puede(s.permiso));
@@ -17,6 +18,8 @@ export function HomePage() {
       />
 
       <SystemStatus />
+
+      {puede('expedientes.consultar') && <Dashboard />}
 
       <section aria-labelledby="titulo-secciones">
         <h2 id="titulo-secciones" className="sr-only">

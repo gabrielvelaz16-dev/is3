@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { sections } from '../src/routes/navigation';
-import { ADMIN, FUNCIONARIO, renderApp } from './support';
+import { ADMIN, DASHBOARD_VACIO, FUNCIONARIO, renderApp } from './support';
 
 describe('Navegación y diseño base (S1-04)', () => {
   it('muestra el menú principal con Inicio y todas las secciones para el administrador', async () => {
@@ -34,10 +34,18 @@ describe('Navegación y diseño base (S1-04)', () => {
     expect(within(nav).getByRole('link', { name: 'Expedientes' })).toHaveAttribute('aria-current', 'page');
   });
 
-  it('las secciones todavía no implementadas indican en qué sprint se construyen', async () => {
-    renderApp('/reportes');
+  it('Reportes ya no está "en construcción": la sección abre su página (Sprint 6)', async () => {
+    renderApp('/reportes', {
+      handlers: {
+        'GET /api/reportes/expedientes': () => ({
+          body: { data: { resumen: DASHBOARD_VACIO.resumen, items: [], total: 0, pagina: 1, porPagina: 20 } },
+        }),
+        'GET /api/dependencias': () => ({ body: { data: [] } }),
+      },
+    });
 
-    expect(await screen.findByText('Se implementa en el Sprint 6 (RF-18 y RF-19).')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Reportes' })).toBeInTheDocument();
+    expect(screen.queryByText(/Se implementa en el Sprint/)).not.toBeInTheDocument();
   });
 
   it('una ruta inexistente muestra la página 404 con enlace al inicio', async () => {
@@ -95,6 +103,14 @@ describe('Menú según el rol', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Acceso denegado' })).toBeInTheDocument();
     const nav = screen.getByRole('navigation', { name: 'Principal' });
     expect(within(nav).queryByRole('link', { name: 'Administración' })).not.toBeInTheDocument();
+  });
+
+  it('un funcionario sin reportes.consultar no ve Reportes y por URL ve "Acceso denegado"', async () => {
+    renderApp('/reportes', { usuario: FUNCIONARIO });
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Acceso denegado' })).toBeInTheDocument();
+    const nav = screen.getByRole('navigation', { name: 'Principal' });
+    expect(within(nav).queryByRole('link', { name: 'Reportes' })).not.toBeInTheDocument();
   });
 
   it('muestra el nombre y el rol del usuario en la barra', async () => {

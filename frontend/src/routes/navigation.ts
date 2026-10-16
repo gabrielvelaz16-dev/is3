@@ -39,6 +39,8 @@ export const sections: Section[] = [
     description: 'Estadísticas de expedientes, reportes con filtros y exportación a CSV.',
     sprint: 6,
     requisitos: 'RF-18 y RF-19',
+    permiso: 'reportes.consultar',
+    implementada: true,
   },
   {
     path: '/administracion',
