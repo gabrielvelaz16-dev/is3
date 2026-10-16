@@ -64,7 +64,7 @@ describe('Dashboard en el inicio (S6-01)', () => {
       },
     });
 
-    const panel = await screen.findByRole('region', { name: 'Estadísticas · Administración General' });
+    const panel = await screen.findByRole('region', { name: 'Situación de Administración General' });
     const valor = (titulo: string) => within(panel).getByText(titulo).parentElement!.querySelector('dd')!.textContent;
     expect(valor('Expedientes')).toBe('3');
     expect(valor('Vencidos')).toBe('2');

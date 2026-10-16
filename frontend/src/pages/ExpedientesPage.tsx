@@ -2,26 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../auth/AuthContext';
 import { PageHeader } from '../components/PageHeader';
+import { Boton } from '../components/ui/Boton';
+import { EtiquetaEstado, EtiquetaPrioridad } from '../components/ui/Etiquetas';
 import { ApiError } from '../services/api';
 import { expedientesApi } from '../services/expedientes';
 import type { Expediente, EstadoExpediente, Prioridad } from '../services/tipos';
 import { ESTADOS_EXPEDIENTE, ETIQUETA_TIPO, PRIORIDADES } from '../services/tipos';
 
 const POR_PAGINA = 10;
-
-const claseEstado: Record<EstadoExpediente, string> = {
-  BORRADOR: 'bg-slate-100 text-slate-700',
-  EN_TRAMITE: 'bg-blue-100 text-blue-800',
-  EN_REVISION: 'bg-amber-100 text-amber-800',
-  RESUELTO: 'bg-green-100 text-green-800',
-  ARCHIVADO: 'bg-slate-200 text-slate-600',
-};
-
-const clasePrioridad: Record<Prioridad, string> = {
-  BAJA: 'bg-slate-100 text-slate-600',
-  MEDIA: 'bg-yellow-100 text-yellow-800',
-  ALTA: 'bg-red-100 text-red-800',
-};
 
 const fecha = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString('es-PY', { dateStyle: 'short', timeStyle: 'short' }) : '—';
@@ -66,20 +54,13 @@ export function ExpedientesPage() {
     void cargar();
   }, [cargar]);
 
-  const etiquetaEstado = (e: EstadoExpediente) =>
-    ESTADOS_EXPEDIENTE.find((x) => x.valor === e)?.etiqueta ?? e;
-
   return (
     <>
       <PageHeader title="Expedientes" subtitle="Registro, consulta y seguimiento de expedientes electrónicos.">
         {puede('expedientes.crear') && (
-          <button
-            type="button"
-            onClick={() => navigate('/expedientes/nuevo')}
-            className="rounded-md bg-marca-700 px-4 py-2 text-sm font-medium text-white hover:bg-marca-900"
-          >
+          <Boton variante="primario" onClick={() => navigate('/expedientes/nuevo')}>
             Nuevo expediente
-          </button>
+          </Boton>
         )}
       </PageHeader>
 
@@ -127,10 +108,10 @@ export function ExpedientesPage() {
       </div>
 
       {/* Tabla */}
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
           <caption className="sr-only">Expedientes del sistema</caption>
-          <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+          <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-600">
             <tr>
               <th scope="col" className="px-4 py-3">Número</th>
               <th scope="col" className="px-4 py-3">Carátula</th>
@@ -145,7 +126,7 @@ export function ExpedientesPage() {
           <tbody className="divide-y divide-slate-100">
             {expedientes.map((exp) => (
               <tr key={exp.id} className="hover:bg-slate-50">
-                <td className="px-4 py-3 font-mono text-sm text-marca-700">
+                <td className="px-4 py-3 text-sm font-semibold whitespace-nowrap text-marca-700">
                   <Link to={`/expedientes/${exp.id}`} className="hover:underline">{exp.numero}</Link>
                 </td>
                 <td className="px-4 py-3 font-medium text-slate-800 max-w-xs truncate" title={exp.caratula}>
@@ -153,14 +134,11 @@ export function ExpedientesPage() {
                 </td>
                 <td className="px-4 py-3 text-slate-600">{ETIQUETA_TIPO[exp.tipo] ?? exp.tipo}</td>
                 <td className="px-4 py-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${claseEstado[exp.estado]}`}>
-                    {etiquetaEstado(exp.estado)}
-                  </span>
+                  <EtiquetaEstado estado={exp.estado} />
+                  {exp.paseEnTransito && <span className="mt-1 block text-xs text-violet-800">En tránsito</span>}
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${clasePrioridad[exp.prioridad]}`}>
-                    {exp.prioridad}
-                  </span>
+                  <EtiquetaPrioridad prioridad={exp.prioridad} />
                 </td>
                 <td className="px-4 py-3 text-slate-600">{exp.iniciador}</td>
                 <td className="px-4 py-3 text-slate-500 text-xs">{fecha(exp.creadoEn)}</td>

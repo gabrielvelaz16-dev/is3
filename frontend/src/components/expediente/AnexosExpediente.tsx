@@ -4,6 +4,7 @@
  */
 import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../auth/AuthContext';
+import { useAviso } from '../ui/Avisos';
 import {
   type Actuacion,
   anexosApi,
@@ -41,8 +42,8 @@ function useCarga<T>(cargar: () => Promise<T>, version: number) {
 
 function Seccion({ titulo, id, children }: { titulo: string; id: string; children: React.ReactNode }) {
   return (
-    <section aria-labelledby={id} className="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 id={id} className="mb-4 text-lg font-semibold text-slate-800">
+    <section aria-labelledby={id} className="rounded-lg border border-slate-200 bg-white p-5">
+      <h2 id={id} className="mb-4 text-base font-semibold text-tinta">
         {titulo}
       </h2>
       {children}
@@ -56,11 +57,6 @@ const Alerta = ({ texto }: { texto: string }) => (
   </p>
 );
 
-const Aviso = ({ texto }: { texto: string }) => (
-  <p role="status" className="mb-3 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
-    {texto}
-  </p>
-);
 
 // ── Documentos ────────────────────────────────────────────────────
 
@@ -71,7 +67,7 @@ function DocumentosSeccion({ expediente, version, onCambio, editable }: PropsSec
   const [descripcion, setDescripcion] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [errorAccion, setErrorAccion] = useState<string | null>(null);
-  const [aviso, setAviso] = useState<string | null>(null);
+  const avisar = useAviso();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const puedeAdjuntar = puede('documentos.adjuntar') && editable;
@@ -80,7 +76,6 @@ function DocumentosSeccion({ expediente, version, onCambio, editable }: PropsSec
     ev.preventDefault();
     if (!archivo) return;
     setErrorAccion(null);
-    setAviso(null);
     if (archivo.size > MAX_MB * 1024 * 1024) {
       setErrorAccion(`El archivo supera el máximo de ${MAX_MB} MB`);
       return;
@@ -88,7 +83,7 @@ function DocumentosSeccion({ expediente, version, onCambio, editable }: PropsSec
     setEnviando(true);
     try {
       const doc = await anexosApi.subir(expediente.id, archivo, descripcion);
-      setAviso(`Documento "${doc.nombreOriginal}" adjuntado`);
+      avisar(`Documento "${doc.nombreOriginal}" adjuntado`);
       setArchivo(null);
       setDescripcion('');
       if (inputRef.current) inputRef.current.value = '';
@@ -114,7 +109,6 @@ function DocumentosSeccion({ expediente, version, onCambio, editable }: PropsSec
     <Seccion titulo="Documentos" id="titulo-documentos">
       {error && <Alerta texto={error} />}
       {errorAccion && <Alerta texto={errorAccion} />}
-      {aviso && <Aviso texto={aviso} />}
 
       {documentos && documentos.length === 0 && <p className="text-sm text-slate-500">El expediente todavía no tiene documentos.</p>}
       {documentos && documentos.length > 0 && (
@@ -447,14 +441,19 @@ interface PropsSeccion extends Props {
   editable: boolean;
 }
 
-export function AnexosExpediente(props: Props) {
+export type ClaveAnexo = 'documentos' | 'actuaciones' | 'tareas' | 'historial';
+
+/** Una sección del expediente; el detalle las muestra en pestañas (CR-05). */
+export function AnexoExpediente({ seccion, ...props }: Props & { seccion: ClaveAnexo }) {
   const editable = props.expediente.estado !== 'ARCHIVADO' && !props.expediente.paseEnTransito;
-  return (
-    <>
-      <TareasSeccion {...props} editable={editable} />
-      <DocumentosSeccion {...props} editable={editable} />
-      <ActuacionesSeccion {...props} editable={editable} />
-      <HistorialSeccion expediente={props.expediente} version={props.version} />
-    </>
-  );
+  switch (seccion) {
+    case 'documentos':
+      return <DocumentosSeccion {...props} editable={editable} />;
+    case 'actuaciones':
+      return <ActuacionesSeccion {...props} editable={editable} />;
+    case 'tareas':
+      return <TareasSeccion {...props} editable={editable} />;
+    case 'historial':
+      return <HistorialSeccion expediente={props.expediente} version={props.version} />;
+  }
 }

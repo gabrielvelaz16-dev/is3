@@ -65,8 +65,9 @@ describe('Navegación y diseño base (S1-04)', () => {
     expect(screen.getByRole('button', { name: 'Cerrar menú' })).toHaveAttribute('aria-expanded', 'true');
     const menu = document.getElementById('menu-principal')!;
 
+    // CR-05: el menú es lateral; en pantallas chicas se abre como panel y se cierra al elegir una sección.
     await user.click(within(menu).getByRole('link', { name: 'Tareas y pendientes' }));
-    expect(document.getElementById('menu-principal')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Abrir menú' })).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByRole('heading', { level: 1, name: 'Tareas y pendientes' })).toBeInTheDocument();
   });
 });

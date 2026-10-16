@@ -1,6 +1,13 @@
 @import "tailwindcss";
 
-/* Paleta institucional sobria (S1-04). Se usa como bg-marca-700, text-marca-900, etc. */
+/*
+ * Identidad visual (CR-05). La idea es la de una carpeta de expediente:
+ *  - tinta: azul institucional del menú y los títulos
+ *  - papel: fondo frío y claro, para leer mucho texto sin cansar la vista
+ *  - carpeta: ocre de las carpetas de archivo, solo para marcar "dónde estoy" (menú activo, pestaña)
+ *  - sello: rojo de sello para lo vencido o peligroso
+ * Se mantiene la escala marca-* de los sprints anteriores (bg-marca-700, text-marca-900, …).
+ */
 @theme {
   --color-marca-50: #f2f6fa;
   --color-marca-100: #dde7f1;
@@ -8,16 +15,34 @@
   --color-marca-500: #3b6797;
   --color-marca-700: #1e3a5f;
   --color-marca-900: #12243b;
-  --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --color-tinta: #15243b;
+  --color-tinta-claro: #22375a;
+  --color-papel: #f4f6f9;
+  --color-carpeta: #c9973a;
+  --color-carpeta-claro: #f6ead2;
+  --color-sello: #a3342b;
+
+  --font-sans: "Public Sans", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 @layer base {
   html {
-    @apply bg-slate-50 text-slate-800 antialiased;
+    @apply bg-papel text-slate-800 antialiased;
+    font-feature-settings: "tnum" 1; /* números de igual ancho: tablas y números de expediente alineados */
   }
 
   /* Foco visible para navegación con teclado (accesibilidad). */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-marca-500;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }

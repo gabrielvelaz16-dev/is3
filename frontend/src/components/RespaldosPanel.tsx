@@ -6,13 +6,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ApiError } from '../services/api';
 import { type Respaldo, respaldosApi, tamano } from '../services/administracion';
+import { useAviso } from './ui/Avisos';
 
 const cuando = (iso: string) => new Date(iso).toLocaleString('es-PY', { dateStyle: 'short', timeStyle: 'short' });
 
 export function RespaldosPanel() {
   const [lista, setLista] = useState<Respaldo[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [aviso, setAviso] = useState<string | null>(null);
+  const avisar = useAviso();
   const [creando, setCreando] = useState(false);
 
   const cargar = useCallback(async () => {
@@ -29,11 +30,10 @@ export function RespaldosPanel() {
 
   async function crear() {
     setError(null);
-    setAviso(null);
     setCreando(true);
     try {
       const r = await respaldosApi.crear();
-      setAviso(
+      avisar(
         `Respaldo ${r.nombre} creado: ${r.totalFilas} filas y ${r.documentos} documentos.` +
           (r.documentosConProblemas ? ` Atención: ${r.documentosConProblemas} documento(s) sin archivo o con hash distinto.` : ''),
       );
@@ -46,7 +46,7 @@ export function RespaldosPanel() {
   }
 
   return (
-    <section aria-labelledby="titulo-respaldos" className="mt-10 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <section aria-labelledby="titulo-respaldos" className="mt-10 rounded-lg border border-slate-200 bg-white p-5">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <h2 id="titulo-respaldos" className="text-lg font-semibold text-slate-800">
           Copias de seguridad
@@ -70,18 +70,13 @@ export function RespaldosPanel() {
           {error}
         </p>
       )}
-      {aviso && (
-        <p role="status" className="mb-3 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
-          {aviso}
-        </p>
-      )}
 
       {lista.length === 0 ? (
         <p className="text-sm text-slate-500">Todavía no hay respaldos.</p>
       ) : (
         <table className="min-w-full text-sm">
           <caption className="sr-only">Respaldos disponibles</caption>
-          <thead className="text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+          <thead className="text-left text-xs font-semibold text-slate-600">
             <tr>
               <th scope="col" className="py-2 pr-4">Respaldo</th>
               <th scope="col" className="py-2 pr-4">Fecha</th>

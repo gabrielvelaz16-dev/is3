@@ -5,6 +5,7 @@ import { RespaldosPanel } from '../components/RespaldosPanel';
 import { ApiError } from '../services/api';
 import type { Dependencia, Rol, Usuario } from '../services/tipos';
 import { usuariosApi } from '../services/usuarios';
+import { useAviso } from '../components/ui/Avisos';
 
 const POR_PAGINA = 10;
 const inputClass = 'mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-marca-500 disabled:bg-slate-100';
@@ -20,7 +21,7 @@ export function UsuariosPage() {
   const [roles, setRoles] = useState<Rol[]>([]);
   const [dependencias, setDependencias] = useState<Dependencia[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [aviso, setAviso] = useState<string | null>(null);
+  const avisar = useAviso();
   const [editando, setEditando] = useState<Usuario | 'nuevo' | null>(null);
 
   const cargar = useCallback(async () => {
@@ -51,7 +52,7 @@ export function UsuariosPage() {
 
   function alGuardar(mensaje: string) {
     setEditando(null);
-    setAviso(mensaje);
+    avisar(mensaje);
     void cargar();
   }
 
@@ -61,7 +62,6 @@ export function UsuariosPage() {
         <button
           type="button"
           onClick={() => {
-            setAviso(null);
             setEditando('nuevo');
           }}
           className="rounded-md bg-marca-700 px-4 py-2 text-sm font-medium text-white hover:bg-marca-900"
@@ -70,11 +70,6 @@ export function UsuariosPage() {
         </button>
       </PageHeader>
 
-      {aviso && (
-        <p role="status" className="mb-4 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
-          {aviso}
-        </p>
-      )}
       {error && (
         <p role="alert" className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
           {error}
@@ -98,10 +93,10 @@ export function UsuariosPage() {
         />
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
           <caption className="sr-only">Usuarios del sistema</caption>
-          <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+          <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-600">
             <tr>
               <th scope="col" className="px-4 py-3">Nombre</th>
               <th scope="col" className="px-4 py-3">Usuario</th>
@@ -134,7 +129,6 @@ export function UsuariosPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setAviso(null);
                       setEditando(u);
                     }}
                     className="text-sm font-medium text-marca-700 hover:underline"

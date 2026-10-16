@@ -121,13 +121,15 @@ describe('Detalle del expediente: seguimiento (Sprint 5)', () => {
     expect(screen.queryByRole('button', { name: 'Enviar' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Asignar' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Editar' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Crear tarea' })).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Motivo del cambio de estado')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Tareas' }));
+    expect(await screen.findByRole('heading', { name: 'Tareas' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Crear tarea' })).not.toBeInTheDocument();
   });
 
   it('crea una tarea con vencimiento al final del día elegido', async () => {
     const user = userEvent.setup();
-    const { fetchMock } = renderApp('/expedientes/7', {
+    const { fetchMock } = renderApp('/expedientes/7?pestana=tareas', {
       usuario: JEFE,
       handlers: detalle({ 'POST /api/expedientes/7/tareas': ok({ id: 1 }, 201) }),
     });

@@ -27,8 +27,8 @@ export function AccionesExpediente({ expediente, editable, onActualizado }: Prop
   if (!puedeAsignar && !puedeEnviar) return null;
 
   return (
-    <section aria-labelledby="titulo-acciones" className="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 id="titulo-acciones" className="mb-4 text-lg font-semibold text-slate-800">
+    <section aria-labelledby="titulo-acciones" className="mt-6 rounded-lg border border-slate-200 bg-white p-5">
+      <h2 id="titulo-acciones" className="mb-4 text-base font-semibold text-tinta">
         Responsable y pase
       </h2>
       <div className="grid gap-6 md:grid-cols-2">

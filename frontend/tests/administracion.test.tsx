@@ -95,7 +95,7 @@ describe('Copias de seguridad (S7-04, RF-22)', () => {
     expect(within(panel).getByText('20.0 KB')).toBeInTheDocument();
 
     await user.click(within(panel).getByRole('button', { name: 'Crear respaldo ahora' }));
-    expect(await within(panel).findByRole('status')).toHaveTextContent('Respaldo respaldo-20261016-110000 creado: 120 filas y 3 documentos. Atención: 1 documento(s)');
+    expect(await screen.findByRole('status')).toHaveTextContent('Respaldo respaldo-20261016-110000 creado: 120 filas y 3 documentos. Atención: 1 documento(s)');
     expect(await within(panel).findByText('respaldo-20261016-110000')).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith('/api/respaldos', expect.objectContaining({ method: 'POST' }));
     expect(within(panel).queryByRole('button', { name: /restaurar/i })).not.toBeInTheDocument();

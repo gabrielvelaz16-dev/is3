@@ -9,6 +9,7 @@ import { useAuth } from '../auth/AuthContext';
 import { PageHeader } from '../components/PageHeader';
 import { ApiError } from '../services/api';
 import { type Alerta, ETIQUETA_TAREA, type EstadoTarea, type Pendientes, seguimientoApi } from '../services/seguimiento';
+import { useAviso } from '../components/ui/Avisos';
 
 const fecha = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString('es-PY', { dateStyle: 'medium' }) : '—');
 const mensaje = (err: unknown, porDefecto: string) => (err instanceof ApiError ? err.message : porDefecto);
@@ -24,7 +25,7 @@ function EtiquetaAlerta({ alerta }: { alerta: Alerta }) {
 
 function Bloque({ titulo, id, vacio, children }: { titulo: string; id: string; vacio: string | null; children: React.ReactNode }) {
   return (
-    <section aria-labelledby={id} className="mb-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <section aria-labelledby={id} className="mb-6 rounded-lg border border-slate-200 bg-white p-5">
       <h2 id={id} className="mb-3 text-lg font-semibold text-slate-800">
         {titulo}
       </h2>
@@ -37,7 +38,7 @@ export function PendientesPage() {
   const { puede } = useAuth();
   const [datos, setDatos] = useState<Pendientes | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [aviso, setAviso] = useState<string | null>(null);
+  const avisar = useAviso();
   const [ocupado, setOcupado] = useState(false);
 
   const cargar = useCallback(async () => {
@@ -54,11 +55,10 @@ export function PendientesPage() {
 
   async function accion(fn: () => Promise<unknown>, ok: string) {
     setError(null);
-    setAviso(null);
     setOcupado(true);
     try {
       await fn();
-      setAviso(ok);
+      avisar(ok);
       await cargar();
     } catch (err) {
       setError(mensaje(err, 'No se pudo completar la acción'));
@@ -77,11 +77,6 @@ export function PendientesPage() {
       {error && (
         <p role="alert" className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
           {error}
-        </p>
-      )}
-      {aviso && (
-        <p role="status" className="mb-4 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
-          {aviso}
         </p>
       )}
       {!datos && !error && <p className="py-8 text-center text-slate-500">Cargando…</p>}
