@@ -1,6 +1,7 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { PageHeader } from '../components/PageHeader';
+import { RespaldosPanel } from '../components/RespaldosPanel';
 import { ApiError } from '../services/api';
 import type { Dependencia, Rol, Usuario } from '../services/tipos';
 import { usuariosApi } from '../services/usuarios';
@@ -11,7 +12,7 @@ const fecha = (iso: string | null) => (iso ? new Date(iso).toLocaleString('es-PY
 
 /** Administración de usuarios y roles (RF-03, S2-05). */
 export function UsuariosPage() {
-  const { usuario: yo } = useAuth();
+  const { usuario: yo, puede } = useAuth();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [total, setTotal] = useState(0);
   const [pagina, setPagina] = useState(1);
@@ -179,6 +180,8 @@ export function UsuariosPage() {
           onGuardado={alGuardar}
         />
       )}
+
+      {puede('respaldo.gestionar') && <RespaldosPanel />}
     </>
   );
 }
