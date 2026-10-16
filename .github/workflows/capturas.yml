@@ -50,6 +50,7 @@ jobs:
           npm run db:seed
           nohup npx tsx src/server.ts > ../backend.log 2>&1 &
           for i in $(seq 1 60); do curl -sf http://localhost:3000/api/health >/dev/null && break; sleep 1; done
+          curl -sf http://localhost:3000/api/health >/dev/null || { echo "::error title=Backend::no respondió /api/health"; exit 1; }
           node ../scripts/capturas/preparar-demo.mjs http://localhost:3000 > ../demo.json
           cat ../demo.json
       - name: Frontend (servidor de desarrollo de Vite)
@@ -83,4 +84,9 @@ jobs:
           echo "::notice title=Capturas::$(ls "$DESTINO"/*.png | wc -l) capturas en la rama capturas, carpeta $DESTINO"
       - name: Logs si algo falló
         if: failure()
-        run: tail -n 50 backend.log frontend.log || true
+        run: |
+          # Las últimas líneas de cada log como anotaciones (visibles sin descargar el log).
+          for f in backend.log frontend.log; do
+            [ -f "$f" ] && tail -n 15 "$f" | sed -e 's/%/%25/g' -e "s/^/::warning title=$f::/"
+          done
+          true

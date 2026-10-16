@@ -25,6 +25,7 @@ async function sesion(usuario) {
   };
 }
 
+try {
 const mesa = await sesion('mesa');
 const jefe = await sesion('jefe');
 const deps = await mesa('GET', '/dependencias');
@@ -82,3 +83,8 @@ await jefe('POST', `/expedientes/${licitacion.id}/tareas`, {
 await jefe('POST', `/expedientes/${licitacion.id}/actuaciones`, { tipo: 'OBSERVACION', texto: 'Falta la constancia de disponibilidad presupuestaria.' });
 
 console.log(JSON.stringify({ licitacion: licitacion.id, reclamo: reclamo.id, nota: nota.id }));
+} catch (err) {
+  // En GitHub Actions el mensaje queda como anotación visible sin abrir el log.
+  console.error(`::error title=Datos de demostración::${String(err.message ?? err).replace(/\r?\n/g, ' ').slice(0, 500)}`);
+  process.exit(1);
+}
