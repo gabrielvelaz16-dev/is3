@@ -42,6 +42,10 @@ const expediente = (id: number, caratula: string) => ({
   creadoPor: { id: 1, nombre: 'Admin', username: 'admin' },
   responsable: null,
   paseEnTransito: null,
+  activo: true,
+  desactivadoEn: null,
+  desactivadoPor: null,
+  motivoDesactivacion: null,
 });
 const reporte = { resumen, items: [expediente(1, 'Nota de prueba'), expediente(2, 'Otra nota')], total: 2, pagina: 1, porPagina: 20 };
 const ok = (data: unknown) => () => ({ body: { data } });

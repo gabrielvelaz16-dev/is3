@@ -47,6 +47,7 @@ export const ADMIN: UsuarioSesion = {
     'expedientes.consultar',
     'expedientes.consultar_todas',
     'expedientes.modificar',
+    'expedientes.desactivar',
     'documentos.adjuntar',
     'documentos.descargar',
     'actuaciones.registrar',

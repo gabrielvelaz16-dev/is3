@@ -8,7 +8,8 @@
  *
  * Imprime en la salida un JSON con los ids que usan las capturas. Si los datos ya estaban
  * cargados no duplica nada: avisa y devuelve los mismos ids.
- * Usuarios del seed (contraseña 12345): mesa (Mesa de Entradas), jefe y funcionario (Asesoría Jurídica).
+ * Usuarios del seed (contraseña 12345): mesa (Mesa de Entradas), jefe y funcionario (Asesoría Jurídica),
+ * y admin para desactivar el expediente duplicado (CR-08).
  */
 const BASE = process.argv[2] ?? 'http://localhost:3000';
 const DIA = 24 * 60 * 60 * 1000;
@@ -190,7 +191,14 @@ for (const datos of [
   await mesa('POST', `/expedientes/${exp.id}/pases`, { destinoId: rrhh.id, motivo: 'Para trámite en Recursos Humanos' });
 }
 
-console.error('Datos de demostración cargados: 11 expedientes nuevos, con pases, documentos, tareas y actuaciones.');
+// Cargado dos veces por error (CR-08): tiene un documento, así que no se puede eliminar;
+// el administrador lo desactiva y queda en "Expedientes desactivados", fuera de listas e indicadores.
+const admin = await sesion('admin');
+const duplicado = await crear({ caratula: 'Pedido de informe sobre compras del primer semestre (cargado dos veces)', asunto: 'Copia por error del pedido de informe sobre compras directas.', tipo: 'INFORME', prioridad: 'ALTA', iniciador: 'Auditoría interna (ficticia)' });
+await adjuntar(mesa, duplicado.id, 'nota-de-pedido-copia.pdf', 'Copia de la nota de pedido');
+await admin('POST', `/expedientes/${duplicado.id}/desactivar`, { motivo: `Duplicado de ${informe.numero}: se cargó dos veces la misma nota` });
+
+console.error('Datos de demostración cargados: 12 expedientes nuevos (1 desactivado), con pases, documentos, tareas y actuaciones.');
 console.log(JSON.stringify({ licitacion: licitacion.id, reclamo: reclamo.id, nota: nota.id }));
 } catch (err) {
   // En GitHub Actions el mensaje queda como anotación visible sin abrir el log.

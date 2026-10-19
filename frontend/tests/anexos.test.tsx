@@ -23,6 +23,10 @@ const EXPEDIENTE = {
   creadoPor: { id: 1, nombre: 'Administrador del sistema', username: 'admin' },
   responsable: null,
   paseEnTransito: null,
+  activo: true,
+  desactivadoEn: null,
+  desactivadoPor: null,
+  motivoDesactivacion: null,
 };
 
 const persona = { id: 1, nombre: 'Administrador del sistema', username: 'admin' };

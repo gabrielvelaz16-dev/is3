@@ -42,6 +42,11 @@ const MATRIZ: [Metodo, string, Requisito][] = [
   ['get', '/api/expedientes', 'expedientes.consultar'],
   ['get', E, 'expedientes.consultar'],
   ['patch', E, 'expedientes.modificar'],
+  // Bajas de expedientes (CR-08)
+  ['get', '/api/expedientes/desactivados', 'expedientes.desactivar'],
+  ['post', `${E}/desactivar`, 'expedientes.desactivar'],
+  ['post', `${E}/reactivar`, 'expedientes.desactivar'],
+  ['delete', E, 'expedientes.desactivar'],
   // Documentos, actuaciones e historial (Sprint 4)
   ['get', `${E}/documentos`, 'expedientes.consultar'],
   ['post', `${E}/documentos`, 'documentos.adjuntar'],

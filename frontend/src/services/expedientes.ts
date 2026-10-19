@@ -1,4 +1,4 @@
-import { api, apiRaw } from './api';
+import { api, apiRaw, errorDe, pedir } from './api';
 import type { Expediente, EstadoExpediente, Prioridad } from './tipos';
 
 export interface CrearExpediente {
@@ -53,4 +53,23 @@ export const expedientesApi = {
 
   modificar: (id: number, datos: ModificarExpediente) =>
     api<Expediente>(`/expedientes/${id}`, { method: 'PATCH', body: datos }),
+
+  // CR-08: bajas (solo con el permiso expedientes.desactivar)
+  listarDesactivados: async (filtros: { q?: string; pagina: number; porPagina: number }) => {
+    const query = new URLSearchParams({ pagina: String(filtros.pagina), porPagina: String(filtros.porPagina) });
+    if (filtros.q) query.set('q', filtros.q);
+    const res = await apiRaw<Expediente[]>(`/expedientes/desactivados?${query.toString()}`);
+    return { items: res.data, paginacion: (res as unknown as { paginacion: PaginacionResp }).paginacion };
+  },
+
+  desactivar: (id: number, motivo: string) =>
+    api<Expediente>(`/expedientes/${id}/desactivar`, { method: 'POST', body: { motivo } }),
+
+  reactivar: (id: number) => api<Expediente>(`/expedientes/${id}/reactivar`, { method: 'POST' }),
+
+  /** Responde 204 sin cuerpo; con actividad registrada devuelve 409 (hay que desactivarlo). */
+  eliminar: async (id: number) => {
+    const res = await pedir(`/expedientes/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw await errorDe(res);
+  },
 };

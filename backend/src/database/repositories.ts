@@ -161,6 +161,11 @@ export interface ExpedienteRecord {
   responsable: { id: number; nombre: string; username: string } | null;
   /** Pase sin recibir (Sprint 5): mientras exista, el expediente está "en tránsito". */
   paseEnTransito: { id: number; destino: DependenciaRef; enviadoEn: Date } | null;
+  /** CR-08: false = desactivado (fuera de listas e indicadores, solo lectura). */
+  activo: boolean;
+  desactivadoEn: Date | null;
+  desactivadoPor: { id: number; nombre: string; username: string } | null;
+  motivoDesactivacion: string | null;
 }
 
 export type DependenciaRef = Pick<DependenciaRecord, 'id' | 'codigo' | 'nombre'>;
@@ -191,6 +196,10 @@ export type CambiosExpediente = Partial<{
   responsableId: number | null;
   fechaVencimiento: Date | null;
   descripcion: string | null;
+  activo: boolean;
+  desactivadoEn: Date | null;
+  desactivadoPorId: number | null;
+  motivoDesactivacion: string | null;
 }>;
 
 /** Filtros comunes del listado y de los reportes (Sprint 6: tipo y rango de fechas de creación). */
@@ -203,6 +212,8 @@ export interface FiltrosReporte {
   desde?: Date;
   /** Creados hasta esta fecha (inclusive). */
   hasta?: Date;
+  /** CR-08: por defecto solo los activos; false lista los desactivados. */
+  activo?: boolean;
 }
 
 export interface FiltrosExpediente extends FiltrosReporte {
@@ -219,6 +230,10 @@ export interface ExpedientesRepo {
   list(filtros: FiltrosExpediente): Promise<{ items: ExpedienteRecord[]; total: number }>;
   create(data: NuevoExpediente): Promise<ExpedienteRecord>;
   update(id: number, data: CambiosExpediente): Promise<ExpedienteRecord>;
+  /** true si tiene documentos, actuaciones, estados, tareas, pases, asignaciones o avisos (no se puede borrar). */
+  tieneActividad(id: number): Promise<boolean>;
+  /** Borra un expediente sin actividad (CR-08). */
+  delete(id: number): Promise<void>;
 }
 
 export interface SecuenciaRepo {

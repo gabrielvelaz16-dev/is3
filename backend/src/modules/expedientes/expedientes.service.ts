@@ -48,13 +48,16 @@ export const TRANSICIONES: Record<EstadoExpediente, readonly EstadoExpediente[]>
 };
 
 /**
- * Un expediente archivado o en tránsito hacia otra dependencia no admite cambios,
- * documentos, actuaciones, tareas ni asignaciones (409). Sí se puede consultar.
+ * Un expediente desactivado (CR-08), archivado o en tránsito hacia otra dependencia no admite
+ * cambios, documentos, actuaciones, tareas ni asignaciones (409). Sí se puede consultar.
  */
 export function verificarEditable(
-  expediente: Pick<ExpedienteRecord, 'estado' | 'paseEnTransito'>,
+  expediente: Pick<ExpedienteRecord, 'estado' | 'paseEnTransito' | 'activo'>,
   accion: string,
 ): void {
+  if (!expediente.activo) {
+    throw new ConflictError(`No se puede ${accion} un expediente desactivado; primero hay que reactivarlo`);
+  }
   if (expediente.estado === 'ARCHIVADO') {
     throw new ConflictError(`No se puede ${accion} un expediente archivado`);
   }
@@ -249,6 +252,82 @@ export class ExpedientesService {
       });
     }
     return actualizado;
+  }
+
+  /**
+   * Da de baja un expediente (CR-08): sale de listas, indicadores, reportes y pendientes y queda
+   * en solo lectura, sin perder nada de su historial. Se puede reactivar.
+   */
+  async desactivar(id: number, motivo: string, usuarioId: number, ctx: Contexto = {}): Promise<ExpedienteRecord> {
+    const expediente = await this.existente(id);
+    if (!expediente.activo) throw new ConflictError('El expediente ya está desactivado');
+    if (expediente.paseEnTransito) {
+      throw new ConflictError(
+        `El expediente está en tránsito hacia ${expediente.paseEnTransito.destino.nombre}. No se puede desactivar un expediente en tránsito hasta que la dependencia destino lo reciba`,
+      );
+    }
+    const actualizado = await this.repos.expedientes.update(id, {
+      activo: false,
+      desactivadoEn: new Date(),
+      desactivadoPorId: usuarioId,
+      motivoDesactivacion: motivo.trim(),
+    });
+    await this.auditoria.registrar({ ...ctx, usuarioId }, {
+      accion: 'EXPEDIENTE_DESACTIVADO',
+      resultado: 'EXITO',
+      entidad: 'Expediente',
+      entidadId: String(id),
+      detalle: { numero: expediente.numero, motivo: motivo.trim() },
+    });
+    return actualizado;
+  }
+
+  /** Vuelve a poner en circulación un expediente desactivado (CR-08). */
+  async reactivar(id: number, usuarioId: number, ctx: Contexto = {}): Promise<ExpedienteRecord> {
+    const expediente = await this.existente(id);
+    if (expediente.activo) throw new ConflictError('El expediente no está desactivado');
+    const actualizado = await this.repos.expedientes.update(id, {
+      activo: true,
+      desactivadoEn: null,
+      desactivadoPorId: null,
+      motivoDesactivacion: null,
+    });
+    await this.auditoria.registrar({ ...ctx, usuarioId }, {
+      accion: 'EXPEDIENTE_REACTIVADO',
+      resultado: 'EXITO',
+      entidad: 'Expediente',
+      entidadId: String(id),
+      detalle: { numero: expediente.numero, motivoDesactivacion: expediente.motivoDesactivacion },
+    });
+    return actualizado;
+  }
+
+  /**
+   * Borra un expediente creado por error (CR-08). Solo si no tiene actividad: el historial es de
+   * solo inserción (ADR-07) y no puede quedar sin el expediente al que pertenece. Con actividad,
+   * se desactiva en su lugar.
+   */
+  async eliminar(id: number, usuarioId: number, ctx: Contexto = {}): Promise<void> {
+    const expediente = await this.existente(id);
+    if (await this.repos.expedientes.tieneActividad(id)) {
+      throw new ConflictError(
+        'El expediente tiene documentos, actuaciones, tareas, pases o cambios registrados y no se puede eliminar; desactívelo para conservar el historial',
+      );
+    }
+    await this.repos.expedientes.delete(id);
+    await this.auditoria.registrar({ ...ctx, usuarioId }, {
+      accion: 'EXPEDIENTE_ELIMINADO',
+      resultado: 'EXITO',
+      entidad: 'Expediente',
+      entidadId: String(id),
+      detalle: { numero: expediente.numero, caratula: expediente.caratula, estado: expediente.estado, activo: expediente.activo },
+    });
+  }
+
+  private async existente(id: number): Promise<ExpedienteRecord> {
+    const expediente = await this.repos.expedientes.findById(id);
+    if (!expediente) throw new NotFoundError('Expediente no encontrado');
+    return expediente;
   }
 
   /** Usuario activo que pertenece a la dependencia indicada; si no, 400 sobre el campo indicado. */

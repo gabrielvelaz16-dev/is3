@@ -67,4 +67,14 @@ export const sections: Section[] = [
     implementada: true,
     grupo: 'Sistema',
   },
+  {
+    path: '/expedientes-desactivados',
+    label: 'Expedientes desactivados',
+    description: 'Expedientes dados de baja por el administrador: se pueden consultar, reactivar o, si no tienen actividad, eliminar.',
+    sprint: 8,
+    requisitos: 'RF-05 (CR-08)',
+    permiso: 'expedientes.desactivar',
+    implementada: true,
+    grupo: 'Sistema',
+  },
 ];

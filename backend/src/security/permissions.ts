@@ -13,6 +13,7 @@ export const PERMISOS = {
   'expedientes.consultar': 'Consultar expedientes de su dependencia',
   'expedientes.consultar_todas': 'Consultar expedientes de todas las dependencias',
   'expedientes.modificar': 'Modificar datos de expedientes',
+  'expedientes.desactivar': 'Desactivar, reactivar y eliminar expedientes (CR-08)',
   'expedientes.enviar': 'Enviar expedientes a otra dependencia',
   'expedientes.recibir': 'Confirmar la recepción de expedientes',
   'documentos.adjuntar': 'Adjuntar documentos a expedientes',
