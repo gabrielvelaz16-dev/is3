@@ -144,7 +144,7 @@ Artefactos actualizados:
 - **Impacto en riesgos:** R06 (accesos): la ruta nueva entra en la matriz de permisos, que pasa de 40 a **41 rutas** y sigue fallando si aparece una ruta sin probar. Riesgo de borrar trazabilidad: controlado con la regla de "solo sin actividad" y la prueba que lo verifica.
 - **Impacto en calidad / pruebas:** backend 225 → **230** pruebas (eliminación, actividad, uno mismo, permisos); frontend 51 → **59** (ojo, confirmación de eliminación, navegación de la lista, migas, buscador). Tipos y lint sin errores. La consulta de actividad y el borrado en cascada de sesiones y notificaciones se verificaron también contra PostgreSQL.
 - **Releases:** entra en la v1.0.0, todavía sin etiquetar.
-- **Artefactos:** commits `3c0fd5c` y `27cc709` en `feature/S8-entrega`, [requisitos.md](../01-alcance-requisitos/requisitos.md) (RF-03), [contrato-api.md](../02-arquitectura/contrato-api.md), [historial-cambios.md](historial-cambios.md), [CHANGELOG.md](../../CHANGELOG.md).
+- **Artefactos:** commits `4c58b9c` y `0dbd609` en `feature/S8-entrega`, [requisitos.md](../01-alcance-requisitos/requisitos.md) (RF-03), [contrato-api.md](../02-arquitectura/contrato-api.md), [historial-cambios.md](historial-cambios.md), [CHANGELOG.md](../../CHANGELOG.md).
 
 ### CR-07 · Más tipos de documentos adjuntos
 
@@ -160,4 +160,4 @@ Artefactos actualizados:
 - **Impacto en riesgos:** RNF-04 (integridad y archivos maliciosos): el texto no tiene firma, así que se valida por contenido; las pruebas cubren un ejecutable renombrado como `.txt` y como imagen.
 - **Impacto en calidad / pruebas:** backend 230 → **233** (tipos nuevos, tipo no informado, binarios renombrados); frontend 59 → **60** (selector y carga de un `.txt`). Comprobado también contra el backend en ejecución: un `.exe` renombrado como `.txt` responde 400 con la lista nueva de tipos.
 - **Defecto encontrado al probar:** D-13, mensaje del expediente en tránsito mal redactado ([resultados-pruebas.md](../05-calidad-pruebas/resultados-pruebas.md)).
-- **Artefactos:** commits `360f21f` (CR-07) y `4fb5c66` (D-13), [requisitos.md](../01-alcance-requisitos/requisitos.md) (RF-08), [decisiones-tecnicas.md](../02-arquitectura/decisiones-tecnicas.md) (ADR-12), [manual-usuario.md](../manual-usuario.md), [guia-prueba-manual.md](../05-calidad-pruebas/guia-prueba-manual.md), [historial-cambios.md](historial-cambios.md), [CHANGELOG.md](../../CHANGELOG.md).
+- **Artefactos:** commits `0126404` (CR-07) y `5366bca` (D-13), [requisitos.md](../01-alcance-requisitos/requisitos.md) (RF-08), [decisiones-tecnicas.md](../02-arquitectura/decisiones-tecnicas.md) (ADR-12), [manual-usuario.md](../manual-usuario.md), [guia-prueba-manual.md](../05-calidad-pruebas/guia-prueba-manual.md), [historial-cambios.md](historial-cambios.md), [CHANGELOG.md](../../CHANGELOG.md).
