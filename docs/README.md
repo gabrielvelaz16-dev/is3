@@ -37,6 +37,7 @@ Esta carpeta reúne los artefactos de gestión y técnicos del proyecto. Cada do
 | — | [manual-usuario.md](manual-usuario.md) | 7 · 8 | Vigente (Sprint 8) |
 | 07-evidencias | [evidencias.md](07-evidencias/evidencias.md) | 2–9 | Vivo |
 | 07-evidencias/fase0 | [acta-puerta-g1.md](07-evidencias/fase0/acta-puerta-g1.md) | 7 | Aprobada |
+| 08-trabajos-practicos | [Informe final del TP 6 (Word)](08-trabajos-practicos/Informe_Final_TP6_Expediente_Electronico.docx) | 2–9 | Borrador para revisión (19/10/2026) |
 | 08-trabajos-practicos | [tp-unidades-8-9.md](08-trabajos-practicos/tp-unidades-8-9.md) · [versión Word](08-trabajos-practicos/TP_Unidades_8_y_9_Expediente_Electronico.docx) | 8 · 9 | Entregable (15/10/2026) |
 | bitacora-ia | [bitacora-ia.md](bitacora-ia/bitacora-ia.md) | Transversal (Anexo D) | Vivo |
 
