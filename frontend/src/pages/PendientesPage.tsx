@@ -4,7 +4,7 @@
  * abiertas con alertas de vencimiento y los expedientes de su dependencia por vencer.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { useAuth } from '../auth/AuthContext';
 import { PageHeader } from '../components/PageHeader';
 import { ApiError } from '../services/api';
@@ -52,6 +52,13 @@ export function PendientesPage() {
   useEffect(() => {
     void cargar();
   }, [cargar]);
+
+  // Desde Inicio se llega con un ancla (#titulo-por-vencer): al terminar de cargar, ir a ese bloque.
+  const { hash } = useLocation();
+  const cargado = datos !== null;
+  useEffect(() => {
+    if (cargado && hash) document.getElementById(decodeURIComponent(hash.slice(1)))?.scrollIntoView?.({ block: 'start' });
+  }, [cargado, hash]);
 
   async function accion(fn: () => Promise<unknown>, ok: string) {
     setError(null);

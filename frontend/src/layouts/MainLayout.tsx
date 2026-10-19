@@ -1,6 +1,7 @@
-import { useCallback, useState } from 'react';
-import { Link, Outlet } from 'react-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, Outlet, useLocation } from 'react-router';
 import { useAuth } from '../auth/AuthContext';
+import { BuscadorRapido } from '../components/BuscadorRapido';
 import { NavBar } from '../components/NavBar';
 import { NotificacionesCampana } from '../components/NotificacionesCampana';
 import { AvisosProvider } from '../components/ui/Avisos';
@@ -10,9 +11,23 @@ import { AvisosProvider } from '../components/ui/Avisos';
  * con los avisos del usuario, contenido y pie.
  */
 export function MainLayout() {
-  const { usuario } = useAuth();
+  const { usuario, puede } = useAuth();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const cerrarMenu = useCallback(() => setMenuAbierto(false), []);
+  const { pathname } = useLocation();
+  const contenido = useRef<HTMLElement>(null);
+  const primeraVez = useRef(true);
+
+  // Al cambiar de página (no de pestaña ni de filtro): volver arriba y llevar el foco al
+  // contenido, para que el teclado y los lectores de pantalla empiecen por la página nueva.
+  useEffect(() => {
+    if (primeraVez.current) {
+      primeraVez.current = false;
+      return;
+    }
+    document.documentElement.scrollTop = 0;
+    contenido.current?.focus({ preventScroll: true });
+  }, [pathname]);
 
   return (
     <AvisosProvider>
@@ -46,10 +61,13 @@ export function MainLayout() {
             <p className="hidden truncate text-sm text-slate-500 lg:block">
               {usuario ? `${usuario.dependencia.nombre}` : ''}
             </p>
-            <div className="ml-auto flex items-center gap-2">{usuario && <NotificacionesCampana />}</div>
+            <div className="ml-auto flex flex-1 items-center justify-end gap-2">
+              {puede('expedientes.consultar') && <BuscadorRapido />}
+              {usuario && <NotificacionesCampana />}
+            </div>
           </header>
 
-          <main id="contenido" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 lg:px-8">
+          <main id="contenido" ref={contenido} tabIndex={-1} className="mx-auto outline-none w-full max-w-6xl flex-1 px-4 py-8 lg:px-8">
             <Outlet />
           </main>
 

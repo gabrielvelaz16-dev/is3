@@ -65,7 +65,7 @@ describe('Dashboard en el inicio (S6-01)', () => {
     });
 
     const panel = await screen.findByRole('region', { name: 'Situación de Administración General' });
-    const valor = (titulo: string) => within(panel).getByText(titulo).parentElement!.querySelector('dd')!.textContent;
+    const valor = (titulo: string) => within(panel).getByText(titulo).closest('dt')!.parentElement!.querySelector('dd')!.textContent;
     expect(valor('Expedientes')).toBe('3');
     expect(valor('Vencidos')).toBe('2');
     expect(valor('Por vencer')).toBe('1');
@@ -74,6 +74,11 @@ describe('Dashboard en el inicio (S6-01)', () => {
     // Sin consultar_todas se muestra la distribución por tipo, no por dependencia.
     expect(within(panel).getByRole('region', { name: 'Por tipo' })).toBeInTheDocument();
     expect(within(panel).getByRole('link', { name: 'Ver reportes' })).toHaveAttribute('href', '/reportes');
+    // Las tarjetas y las filas de la distribución llevan a la lista correspondiente.
+    expect(within(panel).getByRole('link', { name: 'Expedientes' })).toHaveAttribute('href', '/expedientes');
+    expect(within(panel).getByRole('link', { name: 'Vencidos' })).toHaveAttribute('href', '/tareas#titulo-por-vencer');
+    expect(within(panel).getByRole('link', { name: 'Borrador' })).toHaveAttribute('href', '/expedientes?estado=BORRADOR');
+    expect(within(panel).queryByRole('link', { name: 'En tránsito' })).not.toBeInTheDocument();
   });
 
   it('si el servidor falla, avisa sin romper la página', async () => {

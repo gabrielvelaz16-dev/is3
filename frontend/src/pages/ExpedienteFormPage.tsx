@@ -1,6 +1,8 @@
 import { type FormEvent, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { PageHeader } from '../components/PageHeader';
+import { MigasDePan } from '../components/ui/MigasDePan';
+import { rutaListaExpedientes } from '../routes/navegacion';
 import { ApiError } from '../services/api';
 import { expedientesApi } from '../services/expedientes';
 import type { Expediente, Prioridad } from '../services/tipos';
@@ -102,8 +104,17 @@ export function ExpedienteFormPage() {
     return <p className="py-8 text-center text-slate-500">Cargando expediente…</p>;
   }
 
+  const lista = rutaListaExpedientes();
+
   return (
     <>
+      <MigasDePan
+        items={
+          esNuevo
+            ? [{ etiqueta: 'Expedientes', to: lista }, { etiqueta: 'Nuevo expediente' }]
+            : [{ etiqueta: 'Expedientes', to: lista }, { etiqueta: original?.numero ?? 'Expediente', to: `/expedientes/${id}` }, { etiqueta: 'Editar' }]
+        }
+      />
       <PageHeader
         title={esNuevo ? 'Nuevo expediente' : `Editar expediente`}
         subtitle={esNuevo ? 'Complete los datos para registrar un nuevo expediente.' : `Editando ${original?.numero}`}
@@ -173,7 +184,7 @@ export function ExpedienteFormPage() {
           <button type="submit" disabled={guardando} className="rounded-md bg-marca-700 px-5 py-2 text-sm font-medium text-white hover:bg-marca-900 disabled:opacity-60">
             {guardando ? 'Guardando…' : esNuevo ? 'Crear expediente' : 'Guardar cambios'}
           </button>
-          <button type="button" onClick={() => navigate(esNuevo ? '/expedientes' : `/expedientes/${id}`)} className="rounded-md border border-slate-300 px-4 py-2 text-sm">
+          <button type="button" onClick={() => navigate(esNuevo ? lista : `/expedientes/${id}`)} className="rounded-md border border-slate-300 px-4 py-2 text-sm">
             Cancelar
           </button>
         </div>

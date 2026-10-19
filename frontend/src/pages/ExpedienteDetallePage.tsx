@@ -11,8 +11,10 @@ import { AccionesExpediente } from '../components/expediente/AccionesExpediente'
 import { AnexoExpediente, type ClaveAnexo } from '../components/expediente/AnexosExpediente';
 import { PageHeader } from '../components/PageHeader';
 import { Boton, BotonEnlace } from '../components/ui/Boton';
+import { MigasDePan } from '../components/ui/MigasDePan';
 import { EtiquetaEstado, EtiquetaPrioridad, etiquetaEstado } from '../components/ui/Etiquetas';
 import { type Pestana, Pestanas } from '../components/ui/Pestanas';
+import { rutaListaExpedientes, useTituloPagina } from '../routes/navegacion';
 import { ApiError } from '../services/api';
 import { expedientesApi } from '../services/expedientes';
 import { seguimientoApi } from '../services/seguimiento';
@@ -59,6 +61,8 @@ export function ExpedienteDetallePage() {
   /** Aumenta cuando cambia algo del expediente, para recargar documentos, actuaciones e historial. */
   const [version, setVersion] = useState(0);
   const [motivo, setMotivo] = useState('');
+  const lista = rutaListaExpedientes();
+  useTituloPagina(expediente?.numero);
 
   const pestana = PESTANAS.some((p) => p.clave === params.get('pestana')) ? params.get('pestana')! : 'datos';
   const cambiarPestana = (clave: string) =>
@@ -114,7 +118,7 @@ export function ExpedienteDetallePage() {
         <p role="alert" className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
           {error}
         </p>
-        <BotonEnlace to="/expedientes" className="mt-4">
+        <BotonEnlace to={lista} className="mt-4">
           Volver a la lista
         </BotonEnlace>
       </>
@@ -133,6 +137,7 @@ export function ExpedienteDetallePage() {
 
   return (
     <>
+      <MigasDePan items={[{ etiqueta: 'Expedientes', to: lista }, { etiqueta: expediente.numero }]} />
       {/* Carátula: la tapa de la carpeta, con el número en la pestaña. */}
       <div className="relative mt-7 mb-8">
         <span className="absolute -top-7 left-0 rounded-t-lg border border-b-0 border-carpeta/50 bg-carpeta-claro px-4 pt-1.5 pb-1 text-sm font-semibold tracking-wide text-tinta">
@@ -153,7 +158,7 @@ export function ExpedienteDetallePage() {
               {puede('expedientes.modificar') && editable && (
                 <Boton onClick={() => navigate(`/expedientes/${expediente.id}/editar`)}>Editar</Boton>
               )}
-              <BotonEnlace to="/expedientes" variante="fantasma">
+              <BotonEnlace to={lista} variante="fantasma">
                 Volver a la lista
               </BotonEnlace>
             </div>

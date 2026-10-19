@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useAuth } from '../auth/AuthContext';
 import { PageHeader } from '../components/PageHeader';
 import { Boton } from '../components/ui/Boton';
 import { EtiquetaEstado, EtiquetaPrioridad } from '../components/ui/Etiquetas';
 import { ApiError } from '../services/api';
+import { recordarListaExpedientes } from '../routes/navegacion';
 import { expedientesApi } from '../services/expedientes';
 import type { Expediente, EstadoExpediente, Prioridad } from '../services/tipos';
 import { ESTADOS_EXPEDIENTE, ETIQUETA_TIPO, PRIORIDADES } from '../services/tipos';
@@ -22,10 +23,34 @@ export function ExpedientesPage() {
   const [expedientes, setExpedientes] = useState<Expediente[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(1);
-  const [pagina, setPagina] = useState(1);
-  const [busqueda, setBusqueda] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState('');
-  const [filtroPrioridad, setFiltroPrioridad] = useState('');
+  // Búsqueda, filtros y página viven en la dirección (?q=...&estado=...&pagina=2): sobreviven
+  // al ir a un expediente y volver, al botón Atrás del navegador y se pueden compartir.
+  const [params, setParams] = useSearchParams();
+  const busqueda = params.get('q') ?? '';
+  const filtroEstado = params.get('estado') ?? '';
+  const filtroPrioridad = params.get('prioridad') ?? '';
+  const pagina = Math.max(1, Number(params.get('pagina')) || 1);
+
+  const cambiar = (cambios: Record<string, string>) => {
+    setParams(
+      (actual) => {
+        const nuevos = new URLSearchParams(actual);
+        for (const [clave, valor] of Object.entries(cambios)) {
+          if (valor) nuevos.set(clave, valor);
+          else nuevos.delete(clave);
+        }
+        // Cambiar un filtro vuelve a la primera página.
+        if (!('pagina' in cambios)) nuevos.delete('pagina');
+        return nuevos;
+      },
+      { replace: true },
+    );
+  };
+  const irAPagina = (p: number) => cambiar({ pagina: p > 1 ? String(p) : '' });
+
+  useEffect(() => {
+    recordarListaExpedientes(params.size ? `?${params.toString()}` : '');
+  }, [params]);
   const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(true);
 
@@ -79,14 +104,14 @@ export function ExpedientesPage() {
             type="search"
             placeholder="Buscar por carátula, asunto, número o iniciador"
             value={busqueda}
-            onChange={(e) => { setBusqueda(e.target.value); setPagina(1); }}
+            onChange={(e) => cambiar({ q: e.target.value })}
             className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-marca-500"
           />
         </div>
         <select
           aria-label="Filtrar por estado"
           value={filtroEstado}
-          onChange={(e) => { setFiltroEstado(e.target.value); setPagina(1); }}
+          onChange={(e) => cambiar({ estado: e.target.value })}
           className={selectClass}
         >
           <option value="">Todos los estados</option>
@@ -97,7 +122,7 @@ export function ExpedientesPage() {
         <select
           aria-label="Filtrar por prioridad"
           value={filtroPrioridad}
-          onChange={(e) => { setFiltroPrioridad(e.target.value); setPagina(1); }}
+          onChange={(e) => cambiar({ prioridad: e.target.value })}
           className={selectClass}
         >
           <option value="">Todas las prioridades</option>
@@ -105,6 +130,11 @@ export function ExpedientesPage() {
             <option key={p.valor} value={p.valor}>{p.etiqueta}</option>
           ))}
         </select>
+        {(busqueda || filtroEstado || filtroPrioridad) && (
+          <Boton variante="fantasma" onClick={() => setParams({}, { replace: true })}>
+            Limpiar filtros
+          </Boton>
+        )}
       </div>
 
       {/* Tabla */}
@@ -129,7 +159,9 @@ export function ExpedientesPage() {
                   <Link to={`/expedientes/${exp.id}`} className="hover:underline">{exp.numero}</Link>
                 </td>
                 <td className="px-4 py-3 font-medium text-slate-800 max-w-72 truncate" title={exp.caratula}>
-                  {exp.caratula}
+                  <Link to={`/expedientes/${exp.id}`} tabIndex={-1} className="hover:text-marca-700 hover:underline">
+                    {exp.caratula}
+                  </Link>
                 </td>
                 <td className="px-4 py-3 text-slate-600">{ETIQUETA_TIPO[exp.tipo] ?? exp.tipo}</td>
                 <td className="px-4 py-3">
@@ -167,10 +199,10 @@ export function ExpedientesPage() {
           {total} expediente{total === 1 ? '' : 's'} · página {pagina} de {totalPaginas}
         </span>
         <div className="flex gap-2">
-          <button type="button" disabled={pagina <= 1} onClick={() => setPagina((p) => p - 1)} className="rounded-md border border-slate-300 px-3 py-1 disabled:opacity-50">
+          <button type="button" disabled={pagina <= 1} onClick={() => irAPagina(pagina - 1)} className="rounded-md border border-slate-300 px-3 py-1 disabled:opacity-50">
             Anterior
           </button>
-          <button type="button" disabled={pagina >= totalPaginas} onClick={() => setPagina((p) => p + 1)} className="rounded-md border border-slate-300 px-3 py-1 disabled:opacity-50">
+          <button type="button" disabled={pagina >= totalPaginas} onClick={() => irAPagina(pagina + 1)} className="rounded-md border border-slate-300 px-3 py-1 disabled:opacity-50">
             Siguiente
           </button>
         </div>
