@@ -33,6 +33,7 @@ Esta carpeta reúne los artefactos de gestión y técnicos del proyecto. Cada do
 | 05-calidad-pruebas | [plan-calidad.md](05-calidad-pruebas/plan-calidad.md) | 7 | Plan inicial |
 | 05-calidad-pruebas | [plan-pruebas.md](05-calidad-pruebas/plan-pruebas.md) | 7 | Plan inicial |
 | 05-calidad-pruebas | [resultados-pruebas.md](05-calidad-pruebas/resultados-pruebas.md) | 7 | Con ejecuciones reales (Sprints 1 a 8) |
+| 05-calidad-pruebas | [guia-prueba-manual.md](05-calidad-pruebas/guia-prueba-manual.md) | 7 | Lista para ejecutar en la PC |
 | 05-calidad-pruebas | [guia-usabilidad.md](05-calidad-pruebas/guia-usabilidad.md) | 7 | Preparada; pendiente de ejecución |
 | 06-configuracion-devops | [plan-configuracion.md](06-configuracion-devops/plan-configuracion.md) | 8 | Vigente |
 | 06-configuracion-devops | [instalacion-ejecucion.md](06-configuracion-devops/instalacion-ejecucion.md) | 8 | Se verifica en Sprint 1 |
