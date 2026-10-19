@@ -93,8 +93,6 @@ export function LoginPage() {
             {enviando ? 'Ingresando…' : 'Ingresar'}
           </button>
         </form>
-
-        <p className="mt-4 text-center text-xs text-slate-500">Prototipo académico — uso exclusivo con datos ficticios.</p>
       </div>
     </main>
   );
