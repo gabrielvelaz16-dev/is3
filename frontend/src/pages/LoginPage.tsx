@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router';
 import { useAuth } from '../auth/AuthContext';
+import { CampoPassword } from '../components/ui/CampoPassword';
 import { ApiError } from '../services/api';
 
 /** Pantalla de inicio de sesión (RF-01). */
@@ -73,9 +74,8 @@ export function LoginPage() {
             <label htmlFor="password" className="block text-sm font-medium text-slate-700">
               Contraseña
             </label>
-            <input
+            <CampoPassword
               id="password"
-              type="password"
               autoComplete="current-password"
               required
               value={password}

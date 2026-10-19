@@ -219,6 +219,34 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
       async update(id, data) {
         return aUsuario(await prisma.usuario.update({ where: { id }, data, include: incluirUsuario }));
       },
+      async tieneActividad(id) {
+        const u = await prisma.usuario.findUnique({
+          where: { id },
+          select: {
+            _count: {
+              select: {
+                auditoria: true,
+                expedientesCreados: true,
+                expedientesResponsable: true,
+                documentosSubidos: true,
+                actuaciones: true,
+                cambiosEstado: true,
+                tareasAsignadas: true,
+                tareasCreadas: true,
+                pasesEnviados: true,
+                pasesRecibidos: true,
+                asignacionesHechas: true,
+                asignacionesRecibidas: true,
+              },
+            },
+          },
+        });
+        return !!u && Object.values(u._count).some((n) => n > 0);
+      },
+      async delete(id) {
+        // Las sesiones y las notificaciones se borran en cascada (onDelete: Cascade).
+        await prisma.usuario.delete({ where: { id } });
+      },
       countActivosConRol(rolClave, excluirId) {
         return prisma.usuario.count({
           where: { activo: true, rol: { clave: rolClave }, ...(excluirId ? { id: { not: excluirId } } : {}) },

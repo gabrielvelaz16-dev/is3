@@ -57,6 +57,10 @@ export interface UsuariosRepo {
   list(params: { q?: string; skip: number; take: number }): Promise<{ items: UsuarioRecord[]; total: number }>;
   create(data: NuevoUsuario): Promise<UsuarioRecord>;
   update(id: number, data: CambiosUsuario): Promise<UsuarioRecord>;
+  /** true si el usuario figura en la auditoría, en expedientes o en su historial (entonces no se puede borrar). */
+  tieneActividad(id: number): Promise<boolean>;
+  /** Borra el usuario junto con sus sesiones y notificaciones. Solo para usuarios sin actividad. */
+  delete(id: number): Promise<void>;
   /** Cantidad de usuarios activos con un rol, opcionalmente excluyendo uno. */
   countActivosConRol(rolClave: string, excluirId?: number): Promise<number>;
   /** Usuarios activos de una dependencia (para asignar responsables y tareas, Sprint 5). */

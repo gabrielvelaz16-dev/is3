@@ -18,7 +18,7 @@ describe('Gestión de usuarios y roles (RF-02, RF-03, S2-03, S2-05)', () => {
 
   describe('autorización en el servidor', () => {
     it('sin sesión, todas las rutas de usuarios responden 401', async () => {
-      for (const [metodo, ruta] of [['get', '/api/usuarios'], ['post', '/api/usuarios'], ['patch', '/api/usuarios/1'], ['get', '/api/roles']] as const) {
+      for (const [metodo, ruta] of [['get', '/api/usuarios'], ['post', '/api/usuarios'], ['patch', '/api/usuarios/1'], ['delete', '/api/usuarios/1'], ['get', '/api/roles']] as const) {
         expect((await request(e.app)[metodo](ruta)).status, `${metodo} ${ruta}`).toBe(401);
       }
     });
@@ -27,7 +27,7 @@ describe('Gestión de usuarios y roles (RF-02, RF-03, S2-03, S2-05)', () => {
       const agente = request.agent(e.app);
       await agente.post('/api/auth/login').send({ usuario: 'funcionario', password: PASSWORD_USUARIO });
 
-      for (const [metodo, ruta] of [['get', '/api/usuarios'], ['post', '/api/usuarios'], ['patch', '/api/usuarios/1'], ['get', '/api/roles']] as const) {
+      for (const [metodo, ruta] of [['get', '/api/usuarios'], ['post', '/api/usuarios'], ['patch', '/api/usuarios/1'], ['delete', '/api/usuarios/1'], ['get', '/api/roles']] as const) {
         const res = await agente[metodo](ruta).send({});
         expect(res.status, `${metodo} ${ruta}`).toBe(403);
         expect(res.body.error.code).toBe('FORBIDDEN');
@@ -170,6 +170,50 @@ describe('Gestión de usuarios y roles (RF-02, RF-03, S2-03, S2-05)', () => {
       expect((await admin.patch(`/api/usuarios/${e.funcionario.id}`).send({ email: 'cambio@x.test' })).status).toBe(400);
       expect((await admin.patch(`/api/usuarios/${e.funcionario.id}`).send({})).status).toBe(400);
       expect((await admin.patch('/api/usuarios/999').send({ nombre: 'Nadie Nadie' })).status).toBe(404);
+    });
+  });
+
+  describe('eliminar', () => {
+    it('elimina un usuario sin actividad, cierra sus sesiones y queda auditado', async () => {
+      const admin = await comoAdmin(e);
+      const creado = await admin.post('/api/usuarios').send({
+        username: 'por.error',
+        email: 'error@institucion.test',
+        nombre: 'Creado Por Error',
+        password: '12345',
+        rolId: e.rolId('FUNCIONARIO'),
+        dependenciaId: 1,
+      });
+
+      const res = await admin.delete(`/api/usuarios/${creado.body.data.id}`);
+
+      expect(res.status).toBe(204);
+      expect((await admin.get(`/api/usuarios/${creado.body.data.id}`)).status).toBe(404);
+      expect(e.auditoria.at(-1)).toMatchObject({
+        accion: 'USUARIO_ELIMINADO',
+        resultado: 'EXITO',
+        entidadId: String(creado.body.data.id),
+        detalle: { username: 'por.error', email: 'error@institucion.test', rol: 'FUNCIONARIO' },
+      });
+    });
+
+    it('no elimina un usuario con actividad registrada (409): hay que desactivarlo', async () => {
+      const admin = await comoAdmin(e);
+      // Al iniciar sesión, el funcionario ya figura en la auditoría.
+      await request(e.app).post('/api/auth/login').send({ usuario: 'funcionario', password: PASSWORD_USUARIO });
+
+      const res = await admin.delete(`/api/usuarios/${e.funcionario.id}`);
+
+      expect(res.status).toBe(409);
+      expect(res.body.error.message).toMatch(/desactívelo/);
+      expect((await admin.get(`/api/usuarios/${e.funcionario.id}`)).status).toBe(200);
+    });
+
+    it('el administrador no puede eliminarse a sí mismo y un id inexistente da 404', async () => {
+      const admin = await comoAdmin(e);
+
+      expect((await admin.delete(`/api/usuarios/${e.admin.id}`)).status).toBe(409);
+      expect((await admin.delete('/api/usuarios/999')).status).toBe(404);
     });
   });
 

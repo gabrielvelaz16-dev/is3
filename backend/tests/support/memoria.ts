@@ -157,7 +157,8 @@ export function crearReposEnMemoria() {
         return { items: filtrados.slice(skip, skip + take).map(completar), total: filtrados.length };
       },
       create: async (data) => {
-        const fila: Fila = { id: usuarios.length + 1, activo: true, ultimoAcceso: null, creadoEn: new Date(), ...data };
+        const id = Math.max(0, ...usuarios.map((u) => u.id)) + 1;
+        const fila: Fila = { id, activo: true, ultimoAcceso: null, creadoEn: new Date(), ...data };
         usuarios.push(fila);
         return completar(fila);
       },
@@ -166,6 +167,23 @@ export function crearReposEnMemoria() {
         if (!fila) throw new Error('no existe');
         Object.assign(fila, data);
         return completar(fila);
+      },
+      tieneActividad: async (id) =>
+        auditoria.some((e) => e.usuarioId === id) ||
+        expedientes.some((e) => e.creadoPorId === id || e.responsableId === id) ||
+        documentos.some((d) => d.subidoPor.id === id) ||
+        actuaciones.some((a) => a.autor.id === id) ||
+        cambiosEstado.some((c) => c.usuario.id === id) ||
+        tareas.some((t) => t.asignadoAId === id || t.creadoPorId === id) ||
+        pases.some((p) => p.enviadoPorId === id || p.recibidoPorId === id) ||
+        asignaciones.some((a) => a.usuario.id === id || a.responsable?.id === id),
+      delete: async (id) => {
+        usuarios.splice(
+          usuarios.findIndex((u) => u.id === id),
+          1,
+        );
+        for (const [k, s] of sesiones) if (s.usuarioId === id) sesiones.delete(k);
+        for (let i = notificaciones.length - 1; i >= 0; i--) if (notificaciones[i]!.usuarioId === id) notificaciones.splice(i, 1);
       },
       listActivosDeDependencia: async (dependenciaId) =>
         usuarios

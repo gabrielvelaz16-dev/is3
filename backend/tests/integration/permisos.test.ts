@@ -13,7 +13,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PERMISOS, ROLES } from '../../src/security/permissions.js';
 import { crearEntorno, PASSWORD_ADMIN, PASSWORD_USUARIO } from '../support/memoria.js';
 
-type Metodo = 'get' | 'post' | 'patch';
+type Metodo = 'get' | 'post' | 'patch' | 'delete';
 /** 'publico': no exige sesión · 'sesion': cualquier usuario · un permiso · o una lista (alcanza con uno). */
 type Requisito = 'publico' | 'sesion' | keyof typeof PERMISOS | (keyof typeof PERMISOS)[];
 
@@ -35,6 +35,7 @@ const MATRIZ: [Metodo, string, Requisito][] = [
   ['get', '/api/usuarios/999', 'usuarios.gestionar'],
   ['post', '/api/usuarios', 'usuarios.gestionar'],
   ['patch', '/api/usuarios/999', 'usuarios.gestionar'],
+  ['delete', '/api/usuarios/999', 'usuarios.gestionar'],
   ['get', '/api/roles', 'usuarios.gestionar'],
   // Expedientes (Sprint 3)
   ['post', '/api/expedientes', 'expedientes.crear'],

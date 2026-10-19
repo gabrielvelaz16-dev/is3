@@ -1,4 +1,4 @@
-import { api, apiRaw } from './api';
+import { api, apiRaw, errorDe, pedir } from './api';
 import type { Dependencia, Rol, Usuario, UsuarioSesion } from './tipos';
 
 export const authApi = {
@@ -28,6 +28,11 @@ export const usuariosApi = {
   },
   crear: (datos: CrearUsuario) => api<Usuario>('/usuarios', { method: 'POST', body: datos }),
   modificar: (id: number, datos: ModificarUsuario) => api<Usuario>(`/usuarios/${id}`, { method: 'PATCH', body: datos }),
+  /** Responde 204 sin cuerpo; un usuario con actividad devuelve 409 (hay que desactivarlo). */
+  eliminar: async (id: number) => {
+    const res = await pedir(`/usuarios/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw await errorDe(res);
+  },
   roles: () => api<Rol[]>('/roles'),
   dependencias: () => api<Dependencia[]>('/dependencias'),
 };
