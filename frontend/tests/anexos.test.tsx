@@ -100,6 +100,24 @@ describe('Detalle del expediente: documentos, actuaciones e historial (Sprint 4)
     });
   });
 
+  it('el selector de archivos acepta texto e imágenes GIF y WEBP, y adjunta un .txt', async () => {
+    const user = userEvent.setup();
+    const { fetchMock } = renderApp('/expedientes/7?pestana=documentos', {
+      handlers: handlers({ 'POST /api/expedientes/7/documentos': ok({ ...DOCUMENTO, id: 5, nombreOriginal: 'nota.txt', tipoMime: 'text/plain' }, 201) }),
+    });
+
+    const campo = await screen.findByLabelText('Archivo');
+    for (const ext of ['.pdf', '.docx', '.txt', '.png', '.jpg', '.gif', '.webp']) expect(campo.getAttribute('accept')).toContain(ext);
+    expect(screen.getByText(/texto \(\.txt\) o imágenes/)).toBeInTheDocument();
+
+    await user.upload(campo, new File(['Nota de prueba'], 'nota.txt', { type: 'text/plain' }));
+    await user.click(screen.getByRole('button', { name: 'Adjuntar' }));
+
+    expect(await screen.findByText('Documento "nota.txt" adjuntado')).toBeInTheDocument();
+    const llamada = fetchMock.mock.calls.find(([url, init]) => url === '/api/expedientes/7/documentos' && init?.method === 'POST')!;
+    expect(llamada[1]!.headers).toMatchObject({ 'Content-Type': 'text/plain' });
+  });
+
   it('muestra el motivo cuando el servidor rechaza el tipo de archivo', async () => {
     const user = userEvent.setup();
     renderApp('/expedientes/7?pestana=documentos', {

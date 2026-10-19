@@ -49,7 +49,7 @@ export interface EventoHistorial {
 }
 
 /** Mismos tipos que valida el servidor (el servidor es quien decide; esto solo orienta al usuario). */
-export const EXTENSIONES_PERMITIDAS = '.pdf,.png,.jpg,.jpeg,.docx,.xlsx';
+export const EXTENSIONES_PERMITIDAS = '.pdf,.docx,.xlsx,.txt,.png,.jpg,.jpeg,.gif,.webp';
 export const MAX_MB = 10;
 
 export function tamanoLegible(bytes: number): string {
