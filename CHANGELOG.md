@@ -12,9 +12,13 @@ Primera versión estable del prototipo (Sprint 8).
 ### Agregado
 - Datos de demostración cargados por la API: 16 expedientes en todos los estados, con pases, documentos, tareas y actuaciones (`npm run demo:cargar`).
 - Manual de usuario y documentación final.
+- Eliminación de usuarios sin actividad registrada, con confirmación (CR-06).
+- Botón para mostrar u ocultar la contraseña en el inicio de sesión y en el formulario de usuarios (CR-06).
+- Migas de pan, buscador rápido de expedientes (tecla `/`) y enlaces desde las tarjetas de Inicio (CR-06).
 
 ### Cambiado
 - Interfaz (CR-05): menú lateral agrupado, detalle del expediente con carátula y pestañas, componentes comunes y avisos flotantes.
+- La lista de expedientes conserva la búsqueda, los filtros y la página al volver de un expediente (CR-06).
 
 ### Corregido
 - D-12: el historial y los mensajes de error mostraban los nombres internos de los estados (`EN_TRAMITE`).

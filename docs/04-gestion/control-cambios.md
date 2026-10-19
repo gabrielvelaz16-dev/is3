@@ -60,6 +60,7 @@ Artefactos actualizados:
 | CR-03 | Mover S5-06 (notificaciones internas, 8 SP) del Sprint 5 al Sprint 6 | 15/10/2026 | **Aprobado** 15/10/2026 | Product Owner / Gerente |
 | CR-04 | Orden de recorte del Sprint 6: si se atrasa, S6-03 (exportar, 3 SP) pasa al Sprint 7 | 16/10/2026 | **Aprobado** 16/10/2026 · no fue necesario aplicarlo | Product Owner / Gerente |
 | CR-05 | Mejora de la interfaz: menú lateral, detalle en pestañas y componentes comunes | 16/10/2026 | **Aprobado** 16/10/2026 | Product Owner |
+| CR-06 | Mostrar la contraseña, eliminar usuarios sin actividad y mejoras de navegación | 19/10/2026 | **Aprobado** 19/10/2026 | Product Owner |
 
 ### CR-00 · Unificación del backlog del TP con el alcance del prototipo
 
@@ -128,3 +129,18 @@ Artefactos actualizados:
 - **Impacto en plazo:** se hace antes del Sprint 8, en una rama propia. Sin cambio de fecha de entrega.
 - **Impacto en riesgos:** riesgo de romper pruebas de interfaz (controlado: se ajustaron 4 archivos de prueba y la CI quedó en verde).
 - **Artefactos:** [cr-05-interfaz.md](sprints/cr-05-interfaz.md).
+
+### CR-06 · Contraseña visible, eliminación de usuarios y navegación
+
+- **Solicitante:** Product Owner · **Fecha:** 19/10/2026 · **Decisión:** aprobado por el PO el 19/10/2026, al pedir los cambios y probarlos en la PC durante el Sprint 8.
+- **Motivo:** usuario. Pedidos del PO al probar el sistema: ver la contraseña mientras se escribe, poder eliminar usuarios y moverse con más facilidad entre las pantallas.
+- **Descripción:**
+  1. *Contraseña visible:* botón del ojo en el inicio de sesión y en el formulario de usuarios. El pedido incluía ver la contraseña actual al editar un usuario; **no se implementó** porque se guarda como hash scrypt (RNF-01, ADR-10) y no se puede recuperar. El formulario lo explica y permite ver la contraseña nueva mientras se escribe.
+  2. *Eliminar usuarios:* `DELETE /api/usuarios/:id`. Solo se eliminan usuarios **sin actividad** (sin registros en la auditoría, expedientes, documentos, actuaciones, estados, tareas, pases ni asignaciones). La auditoría es de solo inserción (ADR-07) y el historial debe seguir mostrando quién hizo cada cosa; por eso un usuario con actividad se desactiva, como hasta ahora (409 con el motivo). No se permite eliminarse a uno mismo ni dejar el sistema sin administradores activos. Cada eliminación queda en la auditoría (`USUARIO_ELIMINADO`).
+  3. *Navegación:* búsqueda, filtros y página de la lista en la dirección; migas de pan; buscador rápido en la barra superior (tecla `/`); tarjetas y distribuciones de Inicio con enlaces; título de la pestaña por página; foco y desplazamiento al cambiar de página.
+- **Impacto en alcance:** amplía **RF-03** (crear, editar y desactivar usuarios → también eliminar los que no tienen actividad). El resto mejora RNF de usabilidad y accesibilidad. La base de datos no cambia (sin migraciones).
+- **Impacto en plazo y SP:** se hace dentro del Sprint 8, sin mover la fecha de entrega. No suma SP al backlog de 97 SP: se registra como cambio del PO, igual que CR-05.
+- **Impacto en riesgos:** R06 (accesos): la ruta nueva entra en la matriz de permisos, que pasa de 40 a **41 rutas** y sigue fallando si aparece una ruta sin probar. Riesgo de borrar trazabilidad: controlado con la regla de "solo sin actividad" y la prueba que lo verifica.
+- **Impacto en calidad / pruebas:** backend 225 → **230** pruebas (eliminación, actividad, uno mismo, permisos); frontend 51 → **59** (ojo, confirmación de eliminación, navegación de la lista, migas, buscador). Tipos y lint sin errores. La consulta de actividad y el borrado en cascada de sesiones y notificaciones se verificaron también contra PostgreSQL.
+- **Releases:** entra en la v1.0.0, todavía sin etiquetar.
+- **Artefactos:** commits `3c0fd5c` y `27cc709` en `feature/S8-entrega`, [requisitos.md](../01-alcance-requisitos/requisitos.md) (RF-03), [contrato-api.md](../02-arquitectura/contrato-api.md), [historial-cambios.md](historial-cambios.md), [CHANGELOG.md](../../CHANGELOG.md).

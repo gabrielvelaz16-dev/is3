@@ -82,6 +82,7 @@ La sesión viaja en la cookie `is3_sid` (`httpOnly`, `SameSite=Strict`, `Path=/a
 | `GET /api/usuarios/:id` | `usuarios.gestionar` | — | 200 `{ data: usuario }` · 404 |
 | `POST /api/usuarios` | `usuarios.gestionar` | `{ username, email, nombre, password, rolId, dependenciaId }` | 201 `{ data: usuario }` · 400 · 409 nombre de usuario o correo repetido |
 | `PATCH /api/usuarios/:id` | `usuarios.gestionar` | Al menos uno de `{ nombre, rolId, dependenciaId, activo, password }` | 200 `{ data: usuario }` · 400 · 404 · 409 (desactivarse o cambiarse el rol a uno mismo, o dejar el sistema sin administradores activos) |
+| `DELETE /api/usuarios/:id` (CR-06) | `usuarios.gestionar` | — | 204 sin cuerpo · 404 · 409 (eliminarse a uno mismo, dejar el sistema sin administradores activos, o usuario con actividad registrada: hay que desactivarlo) |
 | `GET /api/roles` | `usuarios.gestionar` | — | 200 `{ data: [rol con permisos] }` |
 | `GET /api/dependencias` | sesión | — | 200 `{ data: [dependencia activa] }` |
 
