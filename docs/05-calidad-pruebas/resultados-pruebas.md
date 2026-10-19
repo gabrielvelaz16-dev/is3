@@ -72,6 +72,8 @@ Este documento registra **solo resultados reales** obtenidos de la ejecución de
 
 ## 3. Pruebas manuales
 
+Pasos y resultados esperados: [guia-prueba-manual.md](guia-prueba-manual.md).
+
 | Prueba | Fecha | Participantes | Resultado | Evidencia |
 |---|---|---|---|---|
 | Backup y restauración (PR-22) | | | | |

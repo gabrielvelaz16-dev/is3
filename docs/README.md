@@ -14,10 +14,10 @@ Esta carpeta reúne los artefactos de gestión y técnicos del proyecto. Cada do
 | 01-alcance-requisitos | [alcance.md](01-alcance-requisitos/alcance.md) | 3 | Línea base inicial |
 | 01-alcance-requisitos | [requisitos.md](01-alcance-requisitos/requisitos.md) | 3 · 7 | Línea base inicial |
 | 01-alcance-requisitos | [resumen-alcance-requisitos.md](01-alcance-requisitos/resumen-alcance-requisitos.md) | 3 · 7 | Aprobado (G1) |
-| 02-arquitectura | [arquitectura.md](02-arquitectura/arquitectura.md) | 8 | Inicial |
-| 02-arquitectura | [decisiones-tecnicas.md](02-arquitectura/decisiones-tecnicas.md) | 8 | Inicial |
+| 02-arquitectura | [arquitectura.md](02-arquitectura/arquitectura.md) | 8 | Vigente |
+| 02-arquitectura | [decisiones-tecnicas.md](02-arquitectura/decisiones-tecnicas.md) | 8 | Vivo (ADR-01 a ADR-13) |
 | 02-arquitectura | [contrato-api.md](02-arquitectura/contrato-api.md) | 8 | Vigente (Sprint 1) |
-| 03-modelo-datos | [modelo-datos.md](03-modelo-datos/modelo-datos.md) | 3 | Borrador (se refina en Sprint 2) |
+| 03-modelo-datos | [modelo-datos.md](03-modelo-datos/modelo-datos.md) | 3 | Vigente (modelo implementado) |
 | 04-gestion | [enfoque-gobernanza.md](04-gestion/enfoque-gobernanza.md) | 2 | Completo (TP Unidad 2) |
 | 04-gestion | [planificacion.md](04-gestion/planificacion.md) | 3 | Completo (TP Unidad 3) |
 | 04-gestion | [estimacion-calendario.md](04-gestion/estimacion-calendario.md) | 4 | Completo (TP Unidad 4) + actualización |
@@ -36,7 +36,7 @@ Esta carpeta reúne los artefactos de gestión y técnicos del proyecto. Cada do
 | 05-calidad-pruebas | [guia-prueba-manual.md](05-calidad-pruebas/guia-prueba-manual.md) | 7 | Lista para ejecutar en la PC |
 | 05-calidad-pruebas | [guia-usabilidad.md](05-calidad-pruebas/guia-usabilidad.md) | 7 | Preparada; pendiente de ejecución |
 | 06-configuracion-devops | [plan-configuracion.md](06-configuracion-devops/plan-configuracion.md) | 8 | Vigente |
-| 06-configuracion-devops | [instalacion-ejecucion.md](06-configuracion-devops/instalacion-ejecucion.md) | 8 | Se verifica en Sprint 1 |
+| 06-configuracion-devops | [instalacion-ejecucion.md](06-configuracion-devops/instalacion-ejecucion.md) | 8 | Vigente (Sprint 8) |
 | — | [manual-usuario.md](manual-usuario.md) | 7 · 8 | Vigente (Sprint 8) |
 | 07-evidencias | [evidencias.md](07-evidencias/evidencias.md) | 2–9 | Vivo |
 | 07-evidencias/fase0 | [acta-puerta-g1.md](07-evidencias/fase0/acta-puerta-g1.md) | 7 | Aprobada |

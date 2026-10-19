@@ -159,3 +159,27 @@ Valores reales del prototipo. Lo que no se midió queda como *pendiente*; no se 
 
 **Cómo se midió la tasa de fallos:** con el historial de GitHub Actions al 16/10/2026: 28 ejecuciones, 3 canceladas (no cuentan), 13 exitosas y 12 fallidas.
 
+## 8. Medición al 19/10/2026 (Sprint 8)
+
+| Dimensión | Métrica | Umbral | Valor | Estado | Cambio vs §7 |
+|---|---|---|---|---|---|
+| Alcance | SP terminados / línea base | Según plan | 97 de 97 SP (100 %) | OK | +13 SP (Sprint 7) |
+| Alcance | Solicitudes de cambio | — | 6 (CR-00 a CR-05) | Controlado | +CR-05 |
+| Cronograma | SP restantes | 0 al cierre | 0; el Sprint 8 tiene tareas técnicas | OK | — |
+| Hitos | Puertas | Sin atraso | G1 aprobada; G4 y G5 esperan la integración | Alerta | — |
+| Velocidad | SP por sprint | ± 20 % | 3, 12, 16, 11, 21, 21, 13 | Estable | +S7 |
+| Flujo | Tarjetas en *En revisión / pruebas* | ≤ 3 | 26 de 67 | Alerta | Empeoró (10 → 26) |
+| Calidad | Pruebas aprobadas | 100 % | 276 / 276 (225 + 51) | OK | +101 pruebas |
+| Calidad | Cobertura del backend (líneas) | ≥ 70 % | 94,01 % | OK | +0,12 |
+| Calidad | Indicadores verificados | 100 % | 97 comparaciones sin diferencias | OK | +6 comparaciones |
+| Defectos | Abiertos / cerrados | 0 críticos | 0 / 12 (D-12 en el Sprint 8) | OK | +1 cerrado |
+| Adopción | Tareas de usabilidad sin ayuda | ≥ 80 % | Sin medir | Pendiente | — |
+| DevOps | Tasa de fallos del pipeline | < 20 % | 12 de 40 (30 %); las últimas 15 en verde | Mejora | Era 48 % |
+| DevOps | PR integrados a `develop` | ≥ 2 por semana | 0 de 17 | Alerta | +3 PR sin integrar |
+
+**Fuentes:** Trello (67 tarjetas: 29 *Hecho*, 26 *En revisión / pruebas*, 10 *Control formal*, 2 *Backlog*), GitHub Actions (43 ejecuciones del flujo CI, 3 canceladas) y [resultados-pruebas.md](../05-calidad-pruebas/resultados-pruebas.md).
+
+**Decisiones:**
+- **Tasa de fallos:** bajó del 48 % al 30 % acumulado y no hubo fallos en las 15 ejecuciones desde el 16/10. La práctica que funcionó fue revisar la anotación de cada paso de la CI antes de seguir. Se mantiene como estándar.
+- **Integración:** sigue siendo el cuello de botella (0 de 17 PR, 26 tarjetas esperando). Se escala al responsable: integrar antes de etiquetar `v1.0.0`. No se crean etiquetas sobre ramas sin integrar.
+- **Adopción y costo:** siguen sin dato. Para cerrar el proyecto se ejecutan la [guía de prueba manual](../05-calidad-pruebas/guia-prueba-manual.md) y la [prueba de usabilidad](../05-calidad-pruebas/guia-usabilidad.md).

@@ -8,11 +8,11 @@ Cadena: **Paquete de trabajo → Épica → Historia → Requisito → Prueba �
 
 | Paquete EDT | Épica | Historia (Trello) | Requisito | Prueba | Release | Commit / PR |
 |---|---|---|---|---|---|---|
-| 1.5.1 Control de acceso | E2 Gestión de acceso | S2-02 Iniciar y cerrar sesión | RF-01, RNF-01 | PR-01 | R1 | pendiente |
-| 1.5.1 Control de acceso | E2 | S2-03 Roles y autorización | RF-02, RNF-02 | PR-02 | R1 | pendiente |
-| 1.2.1 Definición de roles | E2 | S2-05 Gestionar usuarios | RF-03 | PR-03 | R1 | pendiente |
-| 1.5.1 / riesgo R01 | E2 | S2-04 Adaptador de identidad | RF-23 | PR-23 | R1 | pendiente |
-| 1.5.2 Validaciones de seguridad | E2 | S2-07 Auditoría base | RF-20, RNF-03 | PR-20 | R1 | pendiente |
+| 1.5.1 Control de acceso | E2 Gestión de acceso | S2-02 Iniciar y cerrar sesión | RF-01, RNF-01 | PR-01 | R1 | PR #7 (`feature/S2-login-usuarios`) + CI en PR #8 |
+| 1.5.1 Control de acceso | E2 | S2-03 Roles y autorización | RF-02, RNF-02 | PR-02 | R1 | PR #7 (`feature/S2-login-usuarios`) + CI en PR #8 |
+| 1.2.1 Definición de roles | E2 | S2-05 Gestionar usuarios | RF-03 | PR-03 | R1 | PR #7 (`feature/S2-login-usuarios`) + CI en PR #8 |
+| 1.5.1 / riesgo R01 | E2 | S2-04 Adaptador de identidad | RF-23 | PR-23 | R1 | PR #7 (`feature/S2-login-usuarios`) + CI en PR #8 |
+| 1.5.2 Validaciones de seguridad | E2 | S2-07 Auditoría base | RF-20, RNF-03 | PR-20 | R1 | PR #7 (`feature/S2-login-usuarios`) + CI en PR #8 |
 | 1.7 Desarrollo | E3 Expedientes | S3-01 Crear expediente | RF-04 | PR-04 | R2 | PR #9 + correcciones PR #10 |
 | 1.7 Desarrollo | E3 | S3-05 Número único | RF-05 | PR-05 | R2 | PR #9 + correcciones PR #10 |
 | 1.7 Desarrollo | E3 | S3-02 / S3-03 Consultar y modificar | RF-06 | PR-06 | R2 | PR #9 + correcciones PR #10 |
@@ -31,8 +31,10 @@ Cadena: **Paquete de trabajo → Épica → Historia → Requisito → Prueba �
 | 1.7 Desarrollo | E6 | S6-02 / S6-03 Reportes | RF-19 | PR-19 | R3 | PR #14 (`feature/S6-dashboard-reportes`) |
 | 1.5.2 Validaciones de seguridad | E7 Calidad | S7-03 Auditoría | RF-21, RNF-03 | PR-21 | R4 | PR #15 (`feature/S7-calidad-seguridad`) |
 | 1.4 Migración (preservación) | E7 | S7-04 Backup y restauración | RF-22, RNF-07 | PR-22 | R4 | PR #15 (`feature/S7-calidad-seguridad`), ADR-13 |
-| 1.7 Desarrollo | E7 Calidad | CR-05 Mejora de la interfaz | RNF-11 | PR-27 (usabilidad) + capturas en la CI | R4 | rama `feature/S8-UI-interfaz` |
-| 1.6 Despliegue | E8 Entrega | S8-04 Versión v1.0.0 | RNF-12 | PR-24 (regresión) | R4 | pendiente |
+| 1.7 Desarrollo | E7 Calidad | CR-05 Mejora de la interfaz | RNF-11 | PR-27 (usabilidad) + capturas en la CI | R4 | PR #16 (`feature/S8-UI-interfaz`) |
+| 1.4 Migración (datos) | E8 Entrega | S8-02 Datos de demostración | RNF-12 | Carga doble en la CI | R4 | PR #17 (`feature/S8-entrega`) |
+| 1.6 Despliegue | E8 Entrega | S8-01 Regresión / S8-04 Versión v1.0.0 | RNF-12 | PR-24 (regresión) + [guía de prueba manual](../05-calidad-pruebas/guia-prueba-manual.md) | R4 | PR #17; etiqueta `v1.0.0` pendiente de la integración |
+| 1.3 Capacitación | E8 Entrega | S8-03 Manual de usuario | RNF-11 | Prueba manual | R4 | PR #17 |
 
 Ejemplos originales del TP (Unidad 3):
 

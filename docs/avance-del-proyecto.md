@@ -57,6 +57,7 @@ Registro de expedientes con número único (`EXP-AAAA-NNNNNN`), búsqueda, filtr
   - S8-04 CHANGELOG y versión 1.0.0 en los `package.json` ✅ — falta la etiqueta `v1.0.0`
   - S8-05 evidencias y capturas finales ✅ — falta la presentación de la defensa
   - S8-06 informe final en Word (17 páginas) ✅ borrador — falta tu revisión
+  - [Guía de prueba manual](05-calidad-pruebas/guia-prueba-manual.md) ✅ — falta ejecutarla en la PC
 
 ## 4. Velocidad
 
@@ -88,7 +89,7 @@ Registro de expedientes con número único (`EXP-AAAA-NNNNNN`), búsqueda, filtr
 
 **Tuyos (la IA no los puede hacer):**
 1. Integrar los PR #1 a #17 en GitHub, en orden. Del #9 en adelante, primero cambiar la base a `develop`. Atajo posible: cambiar la base del #17 a `develop` e integrarlo solo (trae todos los commits).
-2. Probar el sistema en la PC con la rama `feature/S8-entrega` (ver §8).
+2. Probar el sistema en la PC con la rama `feature/S8-entrega` siguiendo la [guía de prueba manual](05-calidad-pruebas/guia-prueba-manual.md) (unos 40 minutos).
 3. Prueba de usabilidad con 3 personas ([guia-usabilidad.md](05-calidad-pruebas/guia-usabilidad.md)).
 4. DT-05: actualizar Prisma a 7.10.1 en la PC después de verificar con `npm view`.
 5. Revisar el informe final.
