@@ -23,14 +23,14 @@ Este documento reúne en un solo lugar dónde está el proyecto. El detalle de c
 | Sprint 7 — Calidad y seguridad | Terminado | Verde (221 + 51) | #15 |
 | CR-05 — Mejora de la interfaz | Terminado | Verde (51 frontend; 16 capturas) | #16 |
 | Sprint 8 — Entrega | En curso | Verde (225 + 51) | #17 |
-| CR-06 — Contraseña visible, eliminar usuarios, navegación | Terminado | Local 230 + 59 | — (en `feature/S8-entrega`) |
+| CR-06 — Contraseña visible, eliminar usuarios, navegación | Terminado | Verde (run 39284967003) | — (en `feature/S8-entrega`) |
 | CR-07 — Adjuntar texto e imágenes GIF y WEBP (+ D-13) | Terminado | Verde (233 + 60, run 39285882711) | — (en `feature/S8-entrega`) |
-| CR-08 — Desactivar, reactivar y eliminar expedientes | Terminado | Local 251 + 66 | — (en `feature/S8-entrega`) |
+| CR-08 — Desactivar, reactivar y eliminar expedientes | Terminado | Verde (251 + 66, run 39296628029) | — (en `feature/S8-entrega`) |
 
 - **Alcance:** 97 de 97 SP desarrollados. 23 requisitos funcionales y 13 no funcionales.
-- **Calidad:** 317 pruebas automáticas aprobadas (251 backend + 66 frontend); cobertura del backend 94,45 % (medida en local el 19/10, después del CR-08). La última CI en verde: 293 pruebas (run 39285882711).
+- **Calidad:** 317 pruebas automáticas aprobadas (251 backend + 66 frontend); cobertura del backend 94,45 % (medida en local el 19/10, después del CR-08). CI en verde sobre esos commits: run 39296628029.
 - **Defectos:** 13 encontrados y corregidos (D-01 a D-13); ninguno abierto.
-- **CI:** 43 ejecuciones (28 en verde, 12 en rojo, 3 canceladas). Las últimas 15 seguidas en verde.
+- **CI:** 50 ejecuciones al 19/10 (35 en verde, 12 en rojo, 3 canceladas). Las últimas 23 seguidas en verde. El flujo de capturas falló dos veces por el CR-06 y volvió a verde con `56a3d10`.
 - **Integración:** los 17 PR están abiertos y apilados; **ninguno integrado**. No hay etiquetas creadas.
 
 ## 2. Qué hace el sistema
