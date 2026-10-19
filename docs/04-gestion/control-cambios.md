@@ -61,6 +61,7 @@ Artefactos actualizados:
 | CR-04 | Orden de recorte del Sprint 6: si se atrasa, S6-03 (exportar, 3 SP) pasa al Sprint 7 | 16/10/2026 | **Aprobado** 16/10/2026 · no fue necesario aplicarlo | Product Owner / Gerente |
 | CR-05 | Mejora de la interfaz: menú lateral, detalle en pestañas y componentes comunes | 16/10/2026 | **Aprobado** 16/10/2026 | Product Owner |
 | CR-06 | Mostrar la contraseña, eliminar usuarios sin actividad y mejoras de navegación | 19/10/2026 | **Aprobado** 19/10/2026 | Product Owner |
+| CR-07 | Adjuntar documentos de texto (.txt) e imágenes GIF y WEBP | 19/10/2026 | **Aprobado** 19/10/2026 | Product Owner |
 
 ### CR-00 · Unificación del backlog del TP con el alcance del prototipo
 
@@ -144,3 +145,19 @@ Artefactos actualizados:
 - **Impacto en calidad / pruebas:** backend 225 → **230** pruebas (eliminación, actividad, uno mismo, permisos); frontend 51 → **59** (ojo, confirmación de eliminación, navegación de la lista, migas, buscador). Tipos y lint sin errores. La consulta de actividad y el borrado en cascada de sesiones y notificaciones se verificaron también contra PostgreSQL.
 - **Releases:** entra en la v1.0.0, todavía sin etiquetar.
 - **Artefactos:** commits `3c0fd5c` y `27cc709` en `feature/S8-entrega`, [requisitos.md](../01-alcance-requisitos/requisitos.md) (RF-03), [contrato-api.md](../02-arquitectura/contrato-api.md), [historial-cambios.md](historial-cambios.md), [CHANGELOG.md](../../CHANGELOG.md).
+
+### CR-07 · Más tipos de documentos adjuntos
+
+- **Solicitante:** Product Owner · **Fecha:** 19/10/2026 · **Decisión:** aprobado por el PO el 19/10/2026, al pedir que se puedan adjuntar "pdf, docx, txt o imágenes".
+- **Motivo:** usuario. PDF, Word e imágenes PNG/JPG ya se aceptaban desde el Sprint 4; faltaban el texto plano y otros formatos de imagen comunes.
+- **Descripción:** se agregan **texto (.txt)**, **GIF** y **WEBP** a la lista blanca de ADR-12. Se mantiene la triple verificación (tipo declarado, extensión y contenido):
+  - binarios: firma de los primeros bytes (`GIF87a`/`GIF89a`; `RIFF` + `WEBP`);
+  - texto: sin bytes de control fuera de tabulación y saltos de línea (UTF-8 o ANSI), o UTF-16 con su BOM. Un ejecutable renombrado como `.txt` se rechaza.
+  - Si el navegador no informa el tipo (vacío u `application/octet-stream`), se deduce por la extensión y el contenido se verifica igual; se guarda el tipo normalizado.
+- **Fuera del cambio:** `.doc` y `.xls` (formatos viejos de Office) y SVG, que puede contener código ejecutable.
+- **Impacto en alcance:** amplía la lista de tipos de **RF-08**; el requisito (validar tipo y tamaño) se mantiene. Sin cambios en la base de datos ni en la API (misma ruta, mismos errores).
+- **Impacto en plazo y SP:** dentro del Sprint 8, sin cambio de fecha. No suma SP (cambio del PO, como CR-05 y CR-06).
+- **Impacto en riesgos:** RNF-04 (integridad y archivos maliciosos): el texto no tiene firma, así que se valida por contenido; las pruebas cubren un ejecutable renombrado como `.txt` y como imagen.
+- **Impacto en calidad / pruebas:** backend 230 → **233** (tipos nuevos, tipo no informado, binarios renombrados); frontend 59 → **60** (selector y carga de un `.txt`). Comprobado también contra el backend en ejecución: un `.exe` renombrado como `.txt` responde 400 con la lista nueva de tipos.
+- **Defecto encontrado al probar:** D-13, mensaje del expediente en tránsito mal redactado ([resultados-pruebas.md](../05-calidad-pruebas/resultados-pruebas.md)).
+- **Artefactos:** commits `360f21f` (CR-07) y `4fb5c66` (D-13), [requisitos.md](../01-alcance-requisitos/requisitos.md) (RF-08), [decisiones-tecnicas.md](../02-arquitectura/decisiones-tecnicas.md) (ADR-12), [manual-usuario.md](../manual-usuario.md), [guia-prueba-manual.md](../05-calidad-pruebas/guia-prueba-manual.md), [historial-cambios.md](historial-cambios.md), [CHANGELOG.md](../../CHANGELOG.md).

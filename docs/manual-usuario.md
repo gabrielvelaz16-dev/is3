@@ -31,7 +31,7 @@ La contraseña de todos es `12345`. Después de 5 intentos fallidos hay que espe
 
 ### Adjuntar un documento
 1. Abrí el expediente → pestaña **Documentos**.
-2. Elegí el archivo (PDF, PNG, JPG, Word o Excel, hasta 10 MB) y *Adjuntar*.
+2. Elegí el archivo (PDF, Word, Excel, texto `.txt` o imágenes PNG, JPG, GIF y WEBP, hasta 10 MB) y *Adjuntar*.
 El sistema revisa el contenido real del archivo, no solo la extensión, y guarda su huella (SHA-256).
 
 ### Enviar a otra dependencia

@@ -78,7 +78,7 @@ Este es el flujo principal: Mesa de Entradas registra, envía a Asesoría Juríd
 | 2.1 | *Expedientes → Nuevo expediente*. Tocá *Crear expediente* sin completar nada | Mensajes en rojo debajo de cada campo obligatorio |
 | 2.2 | Completá: carátula "Prueba manual — pedido de informe", asunto cualquiera, tipo *Solicitud*, iniciador "Prueba", prioridad *Alta*, vencimiento dentro de 5 días → *Crear expediente* | Se abre el detalle con un número nuevo `EXP-2026-0000NN` en la pestaña de la carpeta y estado **Borrador**. **Anotá el número** |
 | 2.3 | Pestaña **Documentos** → elegí un PDF cualquiera de tu PC (que no tenga datos personales) → *Adjuntar* | Aviso verde arriba a la derecha; el documento aparece en la lista |
-| 2.4 | Intentá adjuntar un `.txt` o un `.exe` | Mensaje de error: tipo de archivo no permitido |
+| 2.4 | Adjuntá un `.txt` (se acepta, CR-07) y después intentá adjuntar un `.exe`, o un `.exe` renombrado como `.txt` | El `.txt` aparece en la lista; el `.exe` da el error "tipo de archivo no permitido" |
 | 2.5 | Pestaña **Datos** → *Enviar a otra dependencia* → *Asesoría Jurídica*, motivo "Para dictamen" → *Enviar* | Aparece el aviso violeta **En tránsito**; desaparecen *Editar* y los botones de estado |
 | 2.6 | Pestaña **Historial** | Creación, Documento, Pase enviado y Cambio de estado *Borrador → En trámite* |
 

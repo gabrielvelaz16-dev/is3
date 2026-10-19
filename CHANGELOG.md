@@ -15,6 +15,7 @@ Primera versión estable del prototipo (Sprint 8).
 - Eliminación de usuarios sin actividad registrada, con confirmación (CR-06).
 - Botón para mostrar u ocultar la contraseña en el inicio de sesión y en el formulario de usuarios (CR-06).
 - Migas de pan, buscador rápido de expedientes (tecla `/`) y enlaces desde las tarjetas de Inicio (CR-06).
+- Documentos de texto (.txt) e imágenes GIF y WEBP, con verificación del contenido (CR-07).
 
 ### Cambiado
 - Interfaz (CR-05): menú lateral agrupado, detalle del expediente con carátula y pestañas, componentes comunes y avisos flotantes.
@@ -22,6 +23,7 @@ Primera versión estable del prototipo (Sprint 8).
 
 ### Corregido
 - D-12: el historial y los mensajes de error mostraban los nombres internos de los estados (`EN_TRAMITE`).
+- D-13: el mensaje de un expediente en tránsito estaba mal redactado ("adjuntar documentos a hasta que se reciba").
 
 ## [0.2.0] — pendiente de etiquetar
 
