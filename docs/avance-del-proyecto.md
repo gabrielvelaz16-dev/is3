@@ -62,7 +62,7 @@ Registro de expedientes con número único (`EXP-AAAA-NNNNNN`), búsqueda, filtr
   - S8-03 README, manual de usuario, `sprint-03.md`, `sprint-08.md` ✅
   - S8-04 CHANGELOG y versión 1.0.0 en los `package.json` ✅ — falta la etiqueta `v1.0.0`
   - S8-05 evidencias y capturas finales ✅ — falta la presentación de la defensa
-  - S8-06 informe final en Word (17 páginas) ✅ borrador — falta tu revisión
+  - S8-06 informe final en Word (18 páginas, con CR-06 a CR-08) ✅ borrador — falta tu revisión
   - [Guía de prueba manual](05-calidad-pruebas/guia-prueba-manual.md) ✅ — falta ejecutarla en la PC
 
 ## 4. Velocidad
@@ -78,15 +78,15 @@ Registro de expedientes con número único (`EXP-AAAA-NNNNNN`), búsqueda, filtr
 - **Riesgos:** 19 (12 amenazas + 3 oportunidades institucionales, 4 operativas). R15 (errores de IA) se materializó dos veces y se controló con CI y revisión. → [riesgos.md](04-gestion/riesgos.md)
 - **Decisiones técnicas:** ADR-01 a ADR-13. → [decisiones-tecnicas.md](02-arquitectura/decisiones-tecnicas.md)
 - **Métricas y decisiones:** [monitoreo-metricas.md](04-gestion/monitoreo-metricas.md). Alertas abiertas: PR sin integrar (0 de 17), 25 tarjetas en *En revisión*, costo sin horas registradas, adopción sin medir.
-- **Bitácora de IA:** 19 entradas. → [bitacora-ia.md](bitacora-ia/bitacora-ia.md)
-- **Trello:** 69 tarjetas — 29 en *Hecho*, 26 en *En revisión / pruebas*, 12 en *Control formal*, 2 en *Backlog*.
+- **Bitácora de IA:** 20 entradas. → [bitacora-ia.md](bitacora-ia/bitacora-ia.md)
+- **Trello:** 70 tarjetas — 29 en *Hecho*, 26 en *En revisión / pruebas*, 13 en *Control formal*, 2 en *Backlog*.
 
 ## 6. Entregables del TP
 
 | Entregable | Archivo | Estado |
 |---|---|---|
 | TP Unidades 8 y 9 | [TP_Unidades_8_y_9_Expediente_Electronico.docx](08-trabajos-practicos/TP_Unidades_8_y_9_Expediente_Electronico.docx) | Entregable (15/10) |
-| Informe final (máx. 28 páginas) | [Informe_Final_TP6_Expediente_Electronico.docx](08-trabajos-practicos/Informe_Final_TP6_Expediente_Electronico.docx) | Borrador de 17 páginas (19/10) |
+| Informe final (máx. 28 páginas) | [Informe_Final_TP6_Expediente_Electronico.docx](08-trabajos-practicos/Informe_Final_TP6_Expediente_Electronico.docx) | Borrador de 18 páginas (19/10, con CR-06 a CR-08) |
 | Tablero integrado | [monitoreo-metricas.md](04-gestion/monitoreo-metricas.md) y sección 9 del informe | Medido al 15, 16 y 19/10 |
 | Evidencias | [evidencias.md](07-evidencias/evidencias.md) | Al día |
 | Defensa de 15 minutos | — | Pendiente |
