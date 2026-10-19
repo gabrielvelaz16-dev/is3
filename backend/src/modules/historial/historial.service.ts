@@ -4,6 +4,7 @@
  * y las actuaciones. Todo sale de tablas de solo inserción: el historial no se reescribe.
  */
 import type { EstadoExpediente, ExpedienteRecord, PersonaRef, Repos } from '../../database/repositories.js';
+import { textoEstado } from '../../shared/etiquetas.js';
 
 export type TipoEvento =
   | 'CREACION'
@@ -64,7 +65,7 @@ export class HistorialService {
         tipo: 'CAMBIO_ESTADO' as const,
         fecha: c.fecha,
         usuario: c.usuario,
-        descripcion: `Estado: ${c.estadoAnterior ?? '—'} → ${c.estadoNuevo}${c.motivo ? ` (${c.motivo})` : ''}`,
+        descripcion: `Estado: ${textoEstado(c.estadoAnterior)} → ${textoEstado(c.estadoNuevo)}${c.motivo ? ` (${c.motivo})` : ''}`,
         referenciaId: c.id,
         estadoAnterior: c.estadoAnterior,
         estadoNuevo: c.estadoNuevo,

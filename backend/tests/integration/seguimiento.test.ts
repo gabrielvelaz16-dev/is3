@@ -72,7 +72,7 @@ describe('Tareas y seguimiento (Sprint 5: RF-12 a RF-17)', () => {
       expect(res.status).toBe(200);
       expect(res.body.data.estado).toBe('EN_TRAMITE');
       const historial = (await funcionario.get(`/api/expedientes/${expedienteId}/historial`)).body.data;
-      expect(historial[1]).toMatchObject({ tipo: 'CAMBIO_ESTADO', descripcion: 'Estado: BORRADOR → EN_TRAMITE (Documentación completa)' });
+      expect(historial[1]).toMatchObject({ tipo: 'CAMBIO_ESTADO', descripcion: 'Estado: Borrador → En trámite (Documentación completa)' });
       expect(e.auditoria.some((a) => a.accion === 'expediente.cambiar_estado')).toBe(true);
     });
 

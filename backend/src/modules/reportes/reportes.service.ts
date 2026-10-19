@@ -12,6 +12,7 @@ import type {
   ResumenExpedientes,
 } from '../../database/repositories.js';
 import { ForbiddenError, ValidationError } from '../../shared/errors.js';
+import { ESTADO_TEXTO, PRIORIDAD_TEXTO } from '../../shared/etiquetas.js';
 import { fechaCompacta, fechaLocal, formatoFecha } from '../../shared/fechas.js';
 import type { AuditoriaService, Contexto } from '../auditoria/auditoria.service.js';
 
@@ -35,14 +36,6 @@ interface UsuarioReporte {
   permisos: string[];
 }
 
-const ESTADO_TEXTO: Record<EstadoExpediente, string> = {
-  BORRADOR: 'Borrador',
-  EN_TRAMITE: 'En trámite',
-  EN_REVISION: 'En revisión',
-  RESUELTO: 'Resuelto',
-  ARCHIVADO: 'Archivado',
-};
-const PRIORIDAD_TEXTO: Record<Prioridad, string> = { BAJA: 'Baja', MEDIA: 'Media', ALTA: 'Alta' };
 
 /**
  * Celda CSV: comillas cuando hace falta y protección contra fórmulas

@@ -13,6 +13,7 @@ import type {
   Repos,
 } from '../../database/repositories.js';
 import { ConflictError, NotFoundError, ValidationError } from '../../shared/errors.js';
+import { textoEstado } from '../../shared/etiquetas.js';
 import type { AuditoriaService, Contexto } from '../auditoria/auditoria.service.js';
 import type { NotificacionesService } from '../notificaciones/notificaciones.service.js';
 
@@ -262,7 +263,7 @@ export class ExpedientesService {
   /** 409 si la transición no está permitida por la máquina de estados (contrato de la API). */
   validarTransicion(desde: EstadoExpediente, hacia: EstadoExpediente): void {
     if (!TRANSICIONES[desde].includes(hacia)) {
-      throw new ConflictError(`Transición de estado no permitida: ${desde} → ${hacia}`);
+      throw new ConflictError(`No se puede pasar de ${textoEstado(desde)} a ${textoEstado(hacia)}`);
     }
   }
 }

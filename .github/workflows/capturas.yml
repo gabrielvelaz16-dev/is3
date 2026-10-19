@@ -51,7 +51,7 @@ jobs:
           nohup npx tsx src/server.ts > ../backend.log 2>&1 &
           for i in $(seq 1 60); do curl -sf http://localhost:3000/api/health >/dev/null && break; sleep 1; done
           curl -sf http://localhost:3000/api/health >/dev/null || { echo "::error title=Backend::no respondió /api/health"; exit 1; }
-          node ../scripts/capturas/preparar-demo.mjs http://localhost:3000 > ../demo.json
+          node ../scripts/demo/cargar-demo.mjs http://localhost:3000 > ../demo.json
           cat ../demo.json
       - name: Frontend (servidor de desarrollo de Vite)
         working-directory: frontend

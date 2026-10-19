@@ -172,6 +172,8 @@ describe('Expedientes (RF-04 a RF-07, S3-01 a S3-06)', () => {
       const res = await admin.post(`/api/expedientes/${creado.id}/estado`).send({ estado: 'ARCHIVADO' });
       expect(res.status).toBe(409);
       expect(res.body.error.code).toBe('CONFLICT');
+      // S8-03: el mensaje usa los nombres legibles, no los internos.
+      expect(res.body.error.message).toBe('No se puede pasar de Borrador a Archivado');
     });
 
     it('no se puede modificar un expediente archivado', async () => {
