@@ -25,7 +25,7 @@ Los requisitos se escriben de forma verificable. Cada uno tiene prioridad (MoSCo
 | RF-03 | El administrador debe poder crear, editar y desactivar usuarios y asignarles rol y dependencia, y eliminar los que no tienen actividad registrada (CR-06). | Must | S2-05, CR-06 | PR-03 |
 | RF-04 | El sistema debe permitir registrar un expediente con carátula, asunto, tipo, iniciador y dependencia. | Must | S3-01 | PR-04 |
 | RF-05 | Cada expediente debe recibir un número único con formato `EXP-AAAA-NNNNNN`. | Must | S3-05 | PR-05 |
-| RF-06 | El sistema debe permitir consultar y modificar expedientes según permisos. | Must | S3-02, S3-03 | PR-06 |
+| RF-06 | El sistema debe permitir consultar y modificar expedientes según permisos. El administrador puede desactivarlos (con motivo), reactivarlos y eliminar los que no tienen actividad (CR-08). | Must | S3-02, S3-03, CR-08 | PR-06 |
 | RF-07 | El sistema debe listar expedientes con búsqueda por texto, filtros (estado, fecha, dependencia, responsable) y paginación. | Must | S3-04 | PR-07 |
 | RF-08 | El sistema debe permitir adjuntar documentos a un expediente, validando tipo y tamaño. Tipos: PDF, Word, Excel, texto (.txt) e imágenes PNG, JPG, GIF y WEBP (CR-07). | Must | S4-01, S4-02, CR-07 | PR-08 |
 | RF-09 | Solo usuarios autorizados pueden descargar documentos de un expediente. | Must | S4-05 | PR-09 |

@@ -62,6 +62,7 @@ Artefactos actualizados:
 | CR-05 | Mejora de la interfaz: menú lateral, detalle en pestañas y componentes comunes | 16/10/2026 | **Aprobado** 16/10/2026 | Product Owner |
 | CR-06 | Mostrar la contraseña, eliminar usuarios sin actividad y mejoras de navegación | 19/10/2026 | **Aprobado** 19/10/2026 | Product Owner |
 | CR-07 | Adjuntar documentos de texto (.txt) e imágenes GIF y WEBP | 19/10/2026 | **Aprobado** 19/10/2026 | Product Owner |
+| CR-08 | Desactivar, reactivar y eliminar expedientes; sección "Expedientes desactivados" | 19/10/2026 | **Aprobado** 19/10/2026 | Product Owner |
 
 ### CR-00 · Unificación del backlog del TP con el alcance del prototipo
 
@@ -161,3 +162,22 @@ Artefactos actualizados:
 - **Impacto en calidad / pruebas:** backend 230 → **233** (tipos nuevos, tipo no informado, binarios renombrados); frontend 59 → **60** (selector y carga de un `.txt`). Comprobado también contra el backend en ejecución: un `.exe` renombrado como `.txt` responde 400 con la lista nueva de tipos.
 - **Defecto encontrado al probar:** D-13, mensaje del expediente en tránsito mal redactado ([resultados-pruebas.md](../05-calidad-pruebas/resultados-pruebas.md)).
 - **Artefactos:** commits `0126404` (CR-07) y `5366bca` (D-13), [requisitos.md](../01-alcance-requisitos/requisitos.md) (RF-08), [decisiones-tecnicas.md](../02-arquitectura/decisiones-tecnicas.md) (ADR-12), [manual-usuario.md](../manual-usuario.md), [guia-prueba-manual.md](../05-calidad-pruebas/guia-prueba-manual.md), [historial-cambios.md](historial-cambios.md), [CHANGELOG.md](../../CHANGELOG.md).
+
+### CR-08 · Bajas de expedientes
+
+- **Solicitante:** Product Owner · **Fecha:** 19/10/2026 · **Decisión:** aprobado por el PO el 19/10/2026, al pedir que "el administrador pueda eliminar los expedientes o deshabilitarlos y que aparezcan en otro sector".
+- **Motivo:** usuario. Los expedientes cargados por error o duplicados no se podían sacar de circulación: seguían en la lista, en los indicadores y en los pendientes.
+- **Descripción:**
+  1. *Desactivar:* el administrador da de baja un expediente con un motivo obligatorio. Sale de la lista, el dashboard, los reportes, los vencimientos y las tareas pendientes, y queda en solo lectura (409 al intentar modificarlo, como un archivado). No se permite en tránsito, para no dejar un pase sin recibir. El historial no se toca.
+  2. *Expedientes desactivados:* sección nueva del menú (*Sistema*) con quién, cuándo y por qué se desactivó cada uno, buscador y botones **Reactivar** y **Eliminar**.
+  3. *Reactivar:* el expediente vuelve a circular con su estado y su historial.
+  4. *Eliminar:* borrado definitivo **solo si no tiene actividad** (documentos, actuaciones, cambios de estado, tareas, pases, asignaciones ni avisos). Esas tablas son de solo inserción (ADR-07) y referencian al expediente; borrarlo con historial obligaría a romper la regla. Con actividad responde 409 y pide desactivarlo. La numeración no se reutiliza: queda un hueco, registrado en la auditoría.
+  - Auditoría: `EXPEDIENTE_DESACTIVADO` (con el motivo), `EXPEDIENTE_REACTIVADO` y `EXPEDIENTE_ELIMINADO` (con número, carátula y estado).
+- **Alternativa descartada:** permitir eliminar cualquier expediente borrando también su historial. Contradice ADR-07 y la trazabilidad exigida: un expediente público con actuaciones no puede desaparecer sin rastro.
+- **Impacto en alcance:** amplía **RF-06** (consultar y modificar → también dar de baja, reactivar y eliminar sin actividad). Permiso nuevo `expedientes.desactivar`, solo del administrador (18 permisos).
+- **Impacto en datos:** migración `20261019172842_expedientes_desactivados`: columnas `activo` (por defecto `true`, con índice), `desactivado_en`, `desactivado_por_id` (FK a usuarios) y `motivo_desactivacion`. Los expedientes existentes quedan activos. El respaldo y la restauración las incluyen sin cambios.
+- **Impacto en plazo y SP:** dentro del Sprint 8, sin cambio de fecha. No suma SP (cambio del PO).
+- **Impacto en riesgos:** R06 (accesos): 4 rutas nuevas en la matriz de permisos (45 rutas, 85 casos). Riesgo de indicadores inconsistentes: `verificar-indicadores.ts` (S6-04) cuenta solo activos, y la demo agrega un expediente desactivado para que la CI lo pruebe.
+- **Impacto en calidad / pruebas:** backend 233 → **251** (desactivar, solo lectura, pendientes, motivo, tránsito, permisos, reactivar, eliminar con y sin actividad); frontend 60 → **66** (menú, lista de desactivados, reactivar, eliminar rechazado, diálogo con motivo, detalle desactivado). Cobertura local del backend: líneas 94,45 %. Verificación de indicadores en local: 97 comparaciones sin diferencias.
+- **Releases:** entra en la v1.0.0, todavía sin etiquetar.
+- **Artefactos:** commit `6c950af` (y `56a3d10`, corrección del flujo de capturas por el CR-06), [requisitos.md](../01-alcance-requisitos/requisitos.md) (RF-06), [contrato-api.md](../02-arquitectura/contrato-api.md), [modelo-datos.md](../03-modelo-datos/modelo-datos.md), [manual-usuario.md](../manual-usuario.md), [guia-prueba-manual.md](../05-calidad-pruebas/guia-prueba-manual.md), [historial-cambios.md](historial-cambios.md), [CHANGELOG.md](../../CHANGELOG.md).

@@ -62,7 +62,12 @@ Pestaña **Historial**: creación, cambios de estado, documentos, pases, respons
 *Reportes* → filtrá por fechas, estado, prioridad, tipo o dependencia → *Exportar CSV* para abrirlo en Excel.
 
 ### Auditoría (Administrador, Auditor)
-*Auditoría* → filtrá por fecha, usuario, acción o resultado. Es solo de consulta.
+*Auditoría* → filtrá por fecha, acción o resultado. Es solo de consulta.
+
+### Desactivar o eliminar un expediente (Administrador)
+- **Desactivar:** en el expediente, botón **Desactivar** → escribí el motivo → *Desactivar*. Deja de aparecer en la lista, en Inicio, en los reportes y en los pendientes, y no se puede modificar. El historial se conserva.
+- **Expedientes desactivados** (menú *Sistema*): muestra quién, cuándo y por qué se desactivó cada uno. **Reactivar** lo devuelve a la lista.
+- **Eliminar:** solo se puede con expedientes sin ningún movimiento (sin documentos, actuaciones, tareas, pases ni cambios de estado). Si tiene historial, el sistema pide desactivarlo.
 
 ### Copia de seguridad (Administrador)
 *Administración → Copias de seguridad → Crear respaldo ahora*. La restauración se hace solo por consola, siguiendo la [guía de instalación §7](06-configuracion-devops/instalacion-ejecucion.md).
@@ -74,4 +79,6 @@ Pestaña **Historial**: creación, cambios de estado, documentos, pases, respons
 | "No tiene permiso para realizar esta acción" / *Acceso denegado* | Tu rol no permite esa función |
 | "No se puede pasar de Borrador a Archivado" | Ese cambio de estado no está permitido; usá los botones *Pasar a:* |
 | "El expediente está en tránsito hacia …" | Esperá a que la dependencia destino lo reciba |
+| "No se puede … un expediente desactivado" | El administrador lo dio de baja; hay que reactivarlo desde *Expedientes desactivados* |
+| "El expediente tiene documentos, actuaciones… y no se puede eliminar" | Tiene historial: desactivalo en lugar de eliminarlo |
 | "No existe la ruta …" | El frontend es más nuevo que el backend: reiniciá el backend de la misma versión |

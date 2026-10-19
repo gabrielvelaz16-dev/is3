@@ -40,7 +40,7 @@ npm run dev
 cd backend
 npm run demo:cargar
 ```
-✔ Esperado: `Datos de demostración cargados: 11 expedientes nuevos…` y una línea JSON con ids. Ejecutalo **otra vez**: tiene que decir `ya estaban cargados; no se agregó nada`.
+✔ Esperado: `Datos de demostración cargados: 12 expedientes nuevos (1 desactivado)…` y una línea JSON con ids. Ejecutalo **otra vez**: tiene que decir `ya estaban cargados; no se agregó nada`.
 
 **0.6 Frontend** (terminal 3):
 ```powershell
@@ -130,6 +130,9 @@ Este es el flujo principal: Mesa de Entradas registra, envía a Asesoría Juríd
 | 4.2 | Cerrá sesión y entrá con `prueba` / `12345` | Entra; Inicio dice *Situación de Recursos Humanos* |
 | 4.3 | Como `admin`: *Editar* en `prueba` → destildá *Usuario activo* → *Guardar*. Intentá entrar con `prueba` | Figura como **Inactivo** y no puede entrar |
 | 4.4 | `admin` → *Administración → Copias de seguridad → Crear respaldo ahora* | Aviso con la cantidad de filas y documentos; el respaldo aparece en la lista. **No** hay botón de restaurar (es a propósito, ADR-13) |
+| 4.4b | `admin` → menú *Expedientes desactivados* (CR-08) | Aparece el pedido de informe "cargado dos veces", con motivo y fecha. Inicio sigue mostrando **16** expedientes |
+| 4.4c | Abrí cualquier expediente activo → **Desactivar** → intentá confirmar sin motivo; después escribí "Prueba de baja" → *Desactivar* | Sin motivo el botón no se habilita. Con motivo: aviso gris de baja, sin *Editar* ni botones de estado; ya no está en la lista. En *Expedientes desactivados* → **Reactivar**: vuelve a la lista |
+| 4.4d | En el expediente desactivado de la demo → **Eliminar** → confirmar | Mensaje: tiene actividad y no se puede eliminar; hay que desactivarlo |
 | 4.5 | *(Opcional, 10 min más)* Restaurar ese respaldo en una base vacía siguiendo la [guía de instalación §7](../06-configuracion-devops/instalacion-ejecucion.md#7-copia-de-seguridad-y-restauración-sprint-7-adr-13) | El comando termina con "filas y documentos verificados" y al entrar está todo igual, incluido tu expediente archivado |
 
 ---
@@ -153,7 +156,7 @@ Copiá esta tabla en [resultados-pruebas.md §3](resultados-pruebas.md#3-pruebas
 | 1 Login y permisos | | | / 6 | | |
 | 2 Recorrido del expediente | | | / 17 | | |
 | 3 Búsqueda, reportes, auditoría | | | / 5 | | |
-| 4 Administración y respaldo | | | / 5 | | |
+| 4 Administración y respaldo | | | / 8 | | |
 | 5 Celular | | | / 2 | | |
 
 Si un paso falla: anotá el número de paso, qué esperabas, qué pasó y la captura. Se registra como defecto (D-13 en adelante) en [resultados-pruebas.md](resultados-pruebas.md).

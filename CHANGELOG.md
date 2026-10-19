@@ -16,6 +16,7 @@ Primera versión estable del prototipo (Sprint 8).
 - Botón para mostrar u ocultar la contraseña en el inicio de sesión y en el formulario de usuarios (CR-06).
 - Migas de pan, buscador rápido de expedientes (tecla `/`) y enlaces desde las tarjetas de Inicio (CR-06).
 - Documentos de texto (.txt) e imágenes GIF y WEBP, con verificación del contenido (CR-07).
+- Bajas de expedientes (CR-08): el administrador los desactiva con motivo, los reactiva desde la sección "Expedientes desactivados" y elimina los que no tienen actividad.
 
 ### Cambiado
 - Interfaz (CR-05): menú lateral agrupado, detalle del expediente con carátula y pestañas, componentes comunes y avisos flotantes.

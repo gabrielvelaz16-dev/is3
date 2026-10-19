@@ -24,10 +24,11 @@ Este documento reúne en un solo lugar dónde está el proyecto. El detalle de c
 | CR-05 — Mejora de la interfaz | Terminado | Verde (51 frontend; 16 capturas) | #16 |
 | Sprint 8 — Entrega | En curso | Verde (225 + 51) | #17 |
 | CR-06 — Contraseña visible, eliminar usuarios, navegación | Terminado | Local 230 + 59 | — (en `feature/S8-entrega`) |
-| CR-07 — Adjuntar texto e imágenes GIF y WEBP (+ D-13) | Terminado | Local 233 + 60; CI en curso | — (en `feature/S8-entrega`) |
+| CR-07 — Adjuntar texto e imágenes GIF y WEBP (+ D-13) | Terminado | Verde (233 + 60, run 39285882711) | — (en `feature/S8-entrega`) |
+| CR-08 — Desactivar, reactivar y eliminar expedientes | Terminado | Local 251 + 66 | — (en `feature/S8-entrega`) |
 
 - **Alcance:** 97 de 97 SP desarrollados. 23 requisitos funcionales y 13 no funcionales.
-- **Calidad:** 293 pruebas automáticas aprobadas (233 backend + 60 frontend); cobertura del backend 94,18 % (medida en local el 19/10, después de CR-06 y CR-07; la última CI registrada: 276 pruebas, 94,01 %).
+- **Calidad:** 317 pruebas automáticas aprobadas (251 backend + 66 frontend); cobertura del backend 94,45 % (medida en local el 19/10, después del CR-08). La última CI en verde: 293 pruebas (run 39285882711).
 - **Defectos:** 13 encontrados y corregidos (D-01 a D-13); ninguno abierto.
 - **CI:** 43 ejecuciones (28 en verde, 12 en rojo, 3 canceladas). Las últimas 15 seguidas en verde.
 - **Integración:** los 17 PR están abiertos y apilados; **ninguno integrado**. No hay etiquetas creadas.
@@ -57,6 +58,7 @@ Registro de expedientes con número único (`EXP-AAAA-NNNNNN`), búsqueda, filtr
   - D-12 estados legibles en historial y errores ✅
   - CR-06 contraseña visible, eliminar usuarios sin actividad y navegación ✅
   - CR-07 adjuntar texto (.txt) e imágenes GIF y WEBP ✅ · D-13 mensaje de expediente en tránsito ✅
+  - CR-08 desactivar, reactivar y eliminar expedientes; sección *Expedientes desactivados* ✅
   - S8-03 README, manual de usuario, `sprint-03.md`, `sprint-08.md` ✅
   - S8-04 CHANGELOG y versión 1.0.0 en los `package.json` ✅ — falta la etiqueta `v1.0.0`
   - S8-05 evidencias y capturas finales ✅ — falta la presentación de la defensa
@@ -72,7 +74,7 @@ Registro de expedientes con número único (`EXP-AAAA-NNNNNN`), búsqueda, filtr
 
 ## 5. Gestión
 
-- **Solicitudes de cambio:** CR-00 (backlog 97 SP), CR-01 (evento de cambio, analizado pero **no implementado**), CR-02 (login antes), CR-03 (notificaciones al S6), CR-04 (orden de recorte), CR-05 (interfaz), CR-06 (contraseña, eliminar usuarios, navegación), CR-07 (más tipos de documentos). → [control-cambios.md](04-gestion/control-cambios.md)
+- **Solicitudes de cambio:** CR-00 (backlog 97 SP), CR-01 (evento de cambio, analizado pero **no implementado**), CR-02 (login antes), CR-03 (notificaciones al S6), CR-04 (orden de recorte), CR-05 (interfaz), CR-06 (contraseña, eliminar usuarios, navegación), CR-07 (más tipos de documentos), CR-08 (bajas de expedientes). → [control-cambios.md](04-gestion/control-cambios.md)
 - **Riesgos:** 19 (12 amenazas + 3 oportunidades institucionales, 4 operativas). R15 (errores de IA) se materializó dos veces y se controló con CI y revisión. → [riesgos.md](04-gestion/riesgos.md)
 - **Decisiones técnicas:** ADR-01 a ADR-13. → [decisiones-tecnicas.md](02-arquitectura/decisiones-tecnicas.md)
 - **Métricas y decisiones:** [monitoreo-metricas.md](04-gestion/monitoreo-metricas.md). Alertas abiertas: PR sin integrar (0 de 17), 25 tarjetas en *En revisión*, costo sin horas registradas, adopción sin medir.

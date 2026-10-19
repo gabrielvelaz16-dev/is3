@@ -23,6 +23,8 @@ Además se corrigió **D-12**: el historial y los mensajes de error mostraban lo
 
 Durante la prueba en la PC, el PO pidió dos cambios, registrados como [CR-06](../control-cambios.md#cr-06--contraseña-visible-eliminación-de-usuarios-y-navegación) (contraseña visible, eliminar usuarios sin actividad, mejoras de navegación) y [CR-07](../control-cambios.md#cr-07--más-tipos-de-documentos-adjuntos) (adjuntar texto e imágenes GIF y WEBP). Al probar el CR-07 apareció **D-13** (mensaje de expediente en tránsito mal redactado), ya corregido. Pruebas después de los cambios: backend 233, frontend 60; cobertura del backend 94,18 % (medida en local).
 
+Después se aprobó [CR-08](../control-cambios.md#cr-08--bajas-de-expedientes): el administrador desactiva expedientes (con motivo), los reactiva desde la sección *Expedientes desactivados* y elimina los que no tienen actividad. Pruebas: backend 251, frontend 66; cobertura del backend 94,45 % (medida en local).
+
 ## 3. Archivos principales
 
 | Parte | Archivos |
