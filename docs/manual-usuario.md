@@ -14,7 +14,7 @@ Abrí http://localhost:5173 y entrá con tu usuario y contraseña. Con los datos
 | `funcionario` | Funcionario | Asesoría Jurídica | Modificar, registrar actuaciones, cambiar estados, gestionar tareas |
 | `auditor` | Auditor | Administración General | Consultar todo, reportes y auditoría, sin modificar nada |
 
-La contraseña de todos es `12345`. Después de 5 intentos fallidos hay que esperar 15 minutos para volver a probar.
+La contraseña de todos es `12345`. Al entrar, el sistema siempre abre **Inicio**. Después de 5 intentos fallidos hay que esperar 15 minutos para volver a probar.
 
 ## 2. La pantalla
 

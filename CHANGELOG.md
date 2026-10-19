@@ -21,6 +21,7 @@ Primera versión estable del prototipo (Sprint 8).
 ### Cambiado
 - Interfaz (CR-05): menú lateral agrupado, detalle del expediente con carátula y pestañas, componentes comunes y avisos flotantes.
 - La lista de expedientes conserva la búsqueda, los filtros y la página al volver de un expediente (CR-06).
+- Al iniciar sesión todos los usuarios entran por Inicio; al cerrarla se olvidan los filtros de la lista (Sprint 8).
 
 ### Corregido
 - D-12: el historial y los mensajes de error mostraban los nombres internos de los estados (`EN_TRAMITE`).

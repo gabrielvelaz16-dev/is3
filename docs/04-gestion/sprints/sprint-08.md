@@ -25,6 +25,8 @@ Durante la prueba en la PC, el PO pidió dos cambios, registrados como [CR-06](.
 
 Después se aprobó [CR-08](../control-cambios.md#cr-08--bajas-de-expedientes): el administrador desactiva expedientes (con motivo), los reactiva desde la sección *Expedientes desactivados* y elimina los que no tienen actividad. Pruebas: backend 251, frontend 66; cobertura del backend 94,45 % (medida en local).
 
+Ajuste de uso dentro del sprint (sin CR: no cambia requisitos): al iniciar sesión todos los usuarios entran por Inicio, en lugar de volver a la página pedida antes del login, y al cerrar sesión se olvidan los filtros guardados de la lista de expedientes. Frontend: 67 pruebas.
+
 ## 3. Archivos principales
 
 | Parte | Archivos |

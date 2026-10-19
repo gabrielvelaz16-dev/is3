@@ -24,6 +24,15 @@ export function recordarListaExpedientes(search: string) {
   }
 }
 
+/** Al cerrar sesión: el próximo usuario empieza con la lista sin filtros. */
+export function olvidarListaExpedientes() {
+  try {
+    sessionStorage.removeItem(CLAVE_LISTA);
+  } catch {
+    // Sin almacenamiento: no hay nada que borrar.
+  }
+}
+
 /** Ruta de la lista de expedientes tal como se dejó. */
 export function rutaListaExpedientes(): string {
   try {

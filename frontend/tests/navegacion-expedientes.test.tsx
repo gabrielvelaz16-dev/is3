@@ -92,6 +92,18 @@ describe('Navegación entre la lista y el expediente', () => {
     expect(document.title).toBe('EXP-2026-000007 · Expediente Electrónico');
   });
 
+  it('al cerrar sesión se olvidan los filtros de la lista: el próximo usuario empieza de cero', async () => {
+    const user = userEvent.setup();
+    renderApp('/expedientes?estado=EN_TRAMITE', { handlers: { 'GET /api/expedientes': lista([EXPEDIENTE]) } });
+    await screen.findByRole('link', { name: 'EXP-2026-000007' });
+    expect(sessionStorage.getItem('is3:lista-expedientes')).toBe('?estado=EN_TRAMITE');
+
+    await user.click(screen.getByRole('button', { name: 'Cerrar sesión' }));
+
+    expect(await screen.findByRole('button', { name: 'Ingresar' })).toBeInTheDocument();
+    expect(sessionStorage.getItem('is3:lista-expedientes')).toBeNull();
+  });
+
   it('el buscador de la barra superior lleva a la lista filtrada desde cualquier página', async () => {
     const user = userEvent.setup();
     const { fetchMock } = renderApp('/tareas', { handlers: { 'GET /api/expedientes': lista([EXPEDIENTE]) } });
