@@ -134,6 +134,22 @@ Fecha: 16/10/2026 · Detalle: [cr-05-interfaz.md](../04-gestion/sprints/cr-05-in
 | Capturas después (16) | 7 | [capturas/feature-S8-UI-interfaz-aebfa65](https://github.com/gabrielvelaz16-dev/is3/tree/capturas/feature-S8-UI-interfaz-aebfa65) | Hecho |
 | Prueba en la PC con la interfaz nueva | 7 | — | Pendiente |
 
+## Sprint 8 — Entrega
+
+Fecha: 19/10/2026 · Release: R4 · Detalle: [sprint-08.md](../04-gestion/sprints/sprint-08.md)
+
+| Evidencia | Unidad | Artefacto | Estado |
+|---|---|---|---|
+| Regresión completa en la CI: backend 225/225 (líneas 94,01 %), frontend 51/51 | 7, 8 | [run 39252901587](https://github.com/gabrielvelaz16-dev/is3/actions/runs/39252901587) | Hecho |
+| Datos de demostración: 16 expedientes en los 5 estados; segunda carga sin duplicar | 7, 8 | Paso "Datos de demostración por la API, dos veces" en [run 39252901587](https://github.com/gabrielvelaz16-dev/is3/actions/runs/39252901587) | Hecho |
+| Indicadores (97 comparaciones), restauración (225 filas, 4 documentos) y rendimiento (p95 ≤ 32 ms) sobre los datos de demostración | 7, 9 | [run 39252901587](https://github.com/gabrielvelaz16-dev/is3/actions/runs/39252901587) | Hecho |
+| D-12 corregido (estados legibles) | 7 | [resultados-pruebas.md](../05-calidad-pruebas/resultados-pruebas.md) | Hecho |
+| Manual de usuario, README, `sprint-03.md`, CHANGELOG | 8 | [manual-usuario.md](../manual-usuario.md) · [README](../../README.md) · [CHANGELOG](../../CHANGELOG.md) | Hecho |
+| Capturas finales con los datos de demostración | 7 | Rama `capturas` (se agrega el enlace al terminar el flujo) | En curso |
+| Versión v1.0.0 (etiqueta y release) | 8 | — | Pendiente: integración de los PR |
+| Prueba de usabilidad con 3 personas (PR-27) | 7 | [guia-usabilidad.md](../05-calidad-pruebas/guia-usabilidad.md) | Pendiente |
+| Informe final (S8-06) | 2–9 | — | Pendiente |
+
 ## Plantilla por sprint
 
 ```

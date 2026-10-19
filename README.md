@@ -11,9 +11,11 @@ Prototipo académico del trabajo práctico integrador de **Ingeniería de Softwa
 | Fase | Estado |
 |---|---|
 | Fase 0 — Preparación | Cerrada el 14/10/2026 ([acta G1](docs/07-evidencias/fase0/acta-puerta-g1.md)) |
-| Sprint 1 — Estructura inicial | Terminado; PR pendientes de integrar ([resultado](docs/04-gestion/sprints/sprint-01.md)) |
-| Sprint 2 — Base de datos y usuarios | Terminado, adelantado por CR-02; PR pendientes de integrar ([resultado](docs/04-gestion/sprints/sprint-02.md)) |
-| Sprints 3 a 8 | Pendientes ([backlog](docs/04-gestion/backlog.md)) |
+| Sprints 1 a 7 | Terminados con la CI en verde ([sprints](docs/04-gestion/sprints/)) |
+| CR-05 — Mejora de la interfaz | Terminado ([detalle](docs/04-gestion/sprints/cr-05-interfaz.md)) |
+| Sprint 8 — Entrega | En curso ([sprint-08.md](docs/04-gestion/sprints/sprint-08.md)) · versión v1.0.0 pendiente de integrar los PR |
+
+Funciones: expedientes con número único, búsqueda y filtros · documentos validados con SHA-256 · actuaciones e historial de solo inserción · pases entre dependencias · responsables, tareas y vencimientos · notificaciones · dashboard y reportes CSV · usuarios, roles y permisos verificados en el servidor · auditoría · copia de seguridad y restauración.
 
 ## Tecnologías y versiones
 
@@ -52,7 +54,11 @@ npm run db:migrate
 npm run db:seed
 npm run dev
 
-# 3. Frontend, en otra terminal (http://localhost:5173)
+# 3. (Opcional) Datos de demostración, en otra terminal con el backend levantado
+cd backend
+npm run demo:cargar
+
+# 4. Frontend, en otra terminal (http://localhost:5173)
 cd frontend
 npm install
 npm run dev
@@ -60,7 +66,7 @@ npm run dev
 
 Ingresar en http://localhost:5173 con usuario **`admin`** y contraseña **`12345`**. El administrador puede crear usuarios y asignarles rol y dependencia desde **Administración**. El seed también crea un usuario de prueba por rol (`mesa`, `funcionario`, `jefe`, `auditor`, todos con `12345`).
 
-La guía completa y los problemas frecuentes están en [instalación y ejecución](docs/06-configuracion-devops/instalacion-ejecucion.md).
+Cómo usar el sistema: [manual de usuario](docs/manual-usuario.md). La guía completa de instalación y los problemas frecuentes están en [instalación y ejecución](docs/06-configuracion-devops/instalacion-ejecucion.md).
 
 ## Estructura
 
@@ -68,7 +74,7 @@ La guía completa y los problemas frecuentes están en [instalación y ejecució
 backend/     API Express (capas: api → modules → database; security; integrations)
 frontend/    Aplicación React + Vite
 infra/       Docker Compose de PostgreSQL
-scripts/     Copias de seguridad y restauración
+scripts/     Datos de demostración, capturas y utilidades de la CI
 docs/        Gestión del proyecto y documentación técnica (ver docs/README.md)
 ```
 
@@ -85,6 +91,6 @@ docs/        Gestión del proyecto y documentación técnica (ver docs/README.md
 
 ## Documentación
 
-Índice completo en [docs/README.md](docs/README.md): alcance, requisitos, arquitectura, modelo de datos, gestión (Unidades 2 a 9), calidad, pruebas, configuración, evidencias y bitácora de IA.
+Versiones: [CHANGELOG.md](CHANGELOG.md). Índice completo en [docs/README.md](docs/README.md): alcance, requisitos, arquitectura, modelo de datos, gestión (Unidades 2 a 9), calidad, pruebas, configuración, evidencias y bitácora de IA.
 
 Responsable: Carlos Gabriel Velázquez Franco.

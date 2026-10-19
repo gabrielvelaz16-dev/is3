@@ -16,7 +16,7 @@ Este documento registra **solo resultados reales** obtenidos de la ejecución de
 | S5 | 15/10/2026 | Backend 115 · Frontend 34 | 149 (115 + 34) | 0 | Backend total: líneas 93,46 %, sentencias 91,37 %, funciones 93,64 %, ramas 85,46 % | [Run 38745648399](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38745648399) · commit `5f2a500` |
 | S6 | 16/10/2026 | Backend 130 · Frontend 45 | 175 (130 + 45) | 0 | Backend total: líneas 93,89 %, sentencias 92,07 %, funciones 94,52 %, ramas 86,4 % | [run 38901767797](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38901767797) · verificación de indicadores (S6-04) en verde |
 | S7 | 16/10/2026 | Backend 221 · Frontend 51 | 272 (221 + 51) | 0 | Backend total: líneas 94 %, sentencias 92,33 %, funciones 95,57 %, ramas 87,23 % | [run 38909943384](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38909943384) · restauración verificada (99 filas, 1 documento) · rendimiento p95 ≤ 34 ms |
-| S8 (regresión) | | | | | | |
+| S8 (regresión) | 19/10/2026 | Backend 225 · Frontend 51 | 276 (225 + 51) | 0 | Backend total: líneas 94,01 %, sentencias 92,35 %, funciones 95,59 %, ramas 87,42 % | [run 39252901587](https://github.com/gabrielvelaz16-dev/is3/actions/runs/39252901587) · 16 expedientes de demostración (carga doble sin duplicar) · 97 indicadores sin diferencias · restauración de 225 filas y 4 documentos · p95 ≤ 32 ms |
 
 ## 2. Detalle por caso
 
@@ -68,6 +68,7 @@ Este documento registra **solo resultados reales** obtenidos de la ejecución de
 | D-08 | CI de la corrección ([run 38739773468](https://github.com/gabrielvelaz16-dev/is3/actions/runs/38739773468)) | La prueba "busca por texto en carátula" buscaba "licencia", palabra presente en el asunto de los 3 expedientes de prueba: el sistema devolvía 3 (correcto) y la prueba esperaba 1 | La prueba busca "ANUAL", que solo está en una carátula (y verifica que la búsqueda no distingue mayúsculas) |
 | D-10 | Prueba manual en la PC (15/10/2026) | **Corregido el 16/10/2026** (script `predev` con `prisma generate`). Al cambiar a la rama del Sprint 5, `db:migrate` aplicó las migraciones pero no regeneró el cliente de Prisma: el seed falló con `Cannot read properties of undefined (reading 'findUnique')` y el backend en ejecución no conocía las tablas nuevas | Solución inmediata: `npm run db:generate` y reiniciar el backend. Corrección propuesta: script `predev` que ejecute `prisma generate` |
 | D-11 | CI del Sprint 6 (run 38901065290, 16/10/2026) | Las 16 pruebas del Sprint 5 fallaron al día siguiente de escribirlas: el reloj de la prueba estaba fijo en el 15/10, la cookie de sesión vencía 8 h después según ese reloj, y el agente de pruebas descarta las cookies vencidas según la hora real. Era un defecto de las pruebas, no del sistema | El reloj de prueba parte de la hora real (`Date.now()`). La CI ahora muestra las líneas de la pila de cada prueba fallida, lo que permitió encontrarlo |
+| D-12 | Revisión de capturas (CR-05, 16/10/2026) | El historial y los mensajes de error mostraban los nombres internos de los estados (`EN_TRAMITE`, `BORRADOR → ARCHIVADO`) | Textos legibles en `src/shared/etiquetas.ts`, usados por historial, errores de transición (expedientes y tareas) y reportes. Pruebas: `etiquetas.test.ts` (4) y aserción del mensaje 409 (Sprint 8) |
 
 ## 3. Pruebas manuales
 

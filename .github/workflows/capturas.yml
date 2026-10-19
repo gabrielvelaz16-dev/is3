@@ -7,7 +7,7 @@ name: Capturas de la interfaz
 on:
   workflow_dispatch:
   push:
-    branches: ['feature/S8-UI-*']
+    branches: ['feature/S8-UI-*', 'feature/S8-entrega']
 
 concurrency:
   group: capturas-${{ github.ref }}
