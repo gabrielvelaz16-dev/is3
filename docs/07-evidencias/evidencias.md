@@ -145,7 +145,7 @@ Fecha: 19/10/2026 · Release: R4 · Detalle: [sprint-08.md](../04-gestion/sprint
 | Indicadores (97 comparaciones), restauración (225 filas, 4 documentos) y rendimiento (p95 ≤ 32 ms) sobre los datos de demostración | 7, 9 | [run 39252901587](https://github.com/gabrielvelaz16-dev/is3/actions/runs/39252901587) | Hecho |
 | D-12 corregido (estados legibles) | 7 | [resultados-pruebas.md](../05-calidad-pruebas/resultados-pruebas.md) | Hecho |
 | Manual de usuario, README, `sprint-03.md`, CHANGELOG | 8 | [manual-usuario.md](../manual-usuario.md) · [README](../../README.md) · [CHANGELOG](../../CHANGELOG.md) | Hecho |
-| Capturas finales con los datos de demostración | 7 | Rama `capturas` (se agrega el enlace al terminar el flujo) | En curso |
+| Capturas finales (16) con los datos de demostración | 7 | [capturas/feature-S8-entrega-3195401](https://github.com/gabrielvelaz16-dev/is3/tree/capturas/feature-S8-entrega-3195401) · [run 39253440089](https://github.com/gabrielvelaz16-dev/is3/actions/runs/39253440089) | Hecho |
 | Versión v1.0.0 (etiqueta y release) | 8 | — | Pendiente: integración de los PR |
 | Prueba de usabilidad con 3 personas (PR-27) | 7 | [guia-usabilidad.md](../05-calidad-pruebas/guia-usabilidad.md) | Pendiente |
 | Informe final (S8-06) | 2–9 | — | Pendiente |

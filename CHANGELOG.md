@@ -5,6 +5,8 @@ El detalle de cada cambio está en [historial-cambios.md](docs/04-gestion/histor
 
 ## [1.0.0] — pendiente de etiquetar
 
+La versión que informa `/api/health` ya es `1.0.0` (`package.json` del backend y del frontend).
+
 Primera versión estable del prototipo (Sprint 8).
 
 ### Agregado

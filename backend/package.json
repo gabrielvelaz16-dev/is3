@@ -1,6 +1,6 @@
 {
   "name": "is3-backend",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "API del Sistema Institucional de Expediente Electrónico (IS3)",
   "type": "module",
