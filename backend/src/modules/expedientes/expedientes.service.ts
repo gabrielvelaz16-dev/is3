@@ -60,7 +60,7 @@ export function verificarEditable(
   }
   if (expediente.paseEnTransito) {
     throw new ConflictError(
-      `El expediente está en tránsito hacia ${expediente.paseEnTransito.destino.nombre}: no se puede ${accion} hasta que se reciba`,
+      `El expediente está en tránsito hacia ${expediente.paseEnTransito.destino.nombre}. No se puede ${accion} un expediente en tránsito hasta que la dependencia destino lo reciba`,
     );
   }
 }
