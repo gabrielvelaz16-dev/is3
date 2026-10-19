@@ -22,6 +22,7 @@ const incluirExpediente = {
   dependenciaActual: true,
   creadoPor: { select: { id: true, nombre: true, username: true } },
   responsable: { select: { id: true, nombre: true, username: true } },
+  desactivadoPor: { select: { id: true, nombre: true, username: true } },
   // Pase sin recibir (a lo sumo uno, por el índice único parcial).
   pases: { where: { recibidoEn: null }, select: { id: true, enviadoEn: true, destino: true }, take: 1 },
 } satisfies Prisma.ExpedienteInclude;
@@ -51,6 +52,10 @@ function aExpediente(e: ExpedienteCompleto): ExpedienteRecord {
     paseEnTransito: e.pases[0]
       ? { id: e.pases[0].id, enviadoEn: e.pases[0].enviadoEn, destino: aDependenciaRef(e.pases[0].destino) }
       : null,
+    activo: e.activo,
+    desactivadoEn: e.desactivadoEn,
+    desactivadoPor: e.desactivadoPor,
+    motivoDesactivacion: e.motivoDesactivacion,
   };
 }
 
@@ -125,7 +130,7 @@ function aPase(p: PaseCompleto): PaseRecord {
 
 /** Condición común del listado, el dashboard y los reportes (Sprint 6). */
 function whereReporte(f: FiltrosReporte): Prisma.ExpedienteWhereInput {
-  const where: Prisma.ExpedienteWhereInput = {};
+  const where: Prisma.ExpedienteWhereInput = { activo: f.activo ?? true };
   if (f.estado) where.estado = f.estado;
   if (f.prioridad) where.prioridad = f.prioridad;
   if (f.dependenciaId) where.dependenciaActualId = f.dependenciaId;
@@ -219,6 +224,35 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
       async update(id, data) {
         return aUsuario(await prisma.usuario.update({ where: { id }, data, include: incluirUsuario }));
       },
+      async tieneActividad(id) {
+        const u = await prisma.usuario.findUnique({
+          where: { id },
+          select: {
+            _count: {
+              select: {
+                auditoria: true,
+                expedientesCreados: true,
+                expedientesResponsable: true,
+                expedientesDesactivados: true,
+                documentosSubidos: true,
+                actuaciones: true,
+                cambiosEstado: true,
+                tareasAsignadas: true,
+                tareasCreadas: true,
+                pasesEnviados: true,
+                pasesRecibidos: true,
+                asignacionesHechas: true,
+                asignacionesRecibidas: true,
+              },
+            },
+          },
+        });
+        return !!u && Object.values(u._count).some((n) => n > 0);
+      },
+      async delete(id) {
+        // Las sesiones y las notificaciones se borran en cascada (onDelete: Cascade).
+        await prisma.usuario.delete({ where: { id } });
+      },
       countActivosConRol(rolClave, excluirId) {
         return prisma.usuario.count({
           where: { activo: true, rol: { clave: rolClave }, ...(excluirId ? { id: { not: excluirId } } : {}) },
@@ -310,6 +344,7 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
       async listPorVencer({ dependenciaId, hasta }) {
         const filas = await prisma.expediente.findMany({
           where: {
+            activo: true,
             fechaVencimiento: { lte: hasta },
             estado: { notIn: ['RESUELTO', 'ARCHIVADO'] },
             ...(dependenciaId ? { dependenciaActualId: dependenciaId } : {}),
@@ -342,7 +377,8 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
           prisma.expediente.findMany({
             where,
             include: incluirExpediente,
-            orderBy: { creadoEn: 'desc' },
+            // Los desactivados se ordenan por fecha de baja (la más reciente primero).
+            orderBy: filtros.activo === false ? { desactivadoEn: 'desc' } : { creadoEn: 'desc' },
             skip: filtros.skip,
             take: filtros.take,
           }),
@@ -355,6 +391,20 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
       },
       async update(id, data: CambiosExpediente) {
         return aExpediente(await prisma.expediente.update({ where: { id }, data, include: incluirExpediente }));
+      },
+      async tieneActividad(id) {
+        const e = await prisma.expediente.findUnique({
+          where: { id },
+          select: {
+            _count: {
+              select: { documentos: true, actuaciones: true, cambiosEstado: true, tareas: true, pases: true, asignaciones: true, notificaciones: true },
+            },
+          },
+        });
+        return !!e && Object.values(e._count).some((n) => n > 0);
+      },
+      async delete(id) {
+        await prisma.expediente.delete({ where: { id } });
       },
     },
 
@@ -412,7 +462,7 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
       },
       async listAbiertasDe(usuarioId) {
         const filas = await prisma.tarea.findMany({
-          where: { asignadoAId: usuarioId, estado: { in: ['PENDIENTE', 'EN_CURSO'] } },
+          where: { asignadoAId: usuarioId, estado: { in: ['PENDIENTE', 'EN_CURSO'] }, expediente: { activo: true } },
           include: incluirTarea,
           orderBy: { vencimiento: 'asc' },
         });
@@ -538,7 +588,7 @@ export function createPrismaRepos(prisma: PrismaClient): Repos {
         };
       },
       async seguimiento({ dependenciaId, ahora, hasta }) {
-        const alcance: Prisma.ExpedienteWhereInput = dependenciaId ? { dependenciaActualId: dependenciaId } : {};
+        const alcance: Prisma.ExpedienteWhereInput = { activo: true, ...(dependenciaId ? { dependenciaActualId: dependenciaId } : {}) };
         const tareaAbierta: Prisma.TareaWhereInput = { estado: { in: ['PENDIENTE', 'EN_CURSO'] }, expediente: alcance };
         const [vencidos, porVencer, enTransito, porRecibir, tareasAbiertas, tareasVencidas] = await Promise.all([
           prisma.expediente.count({ where: { ...alcance, ...ABIERTO, fechaVencimiento: { lt: ahora } } }),

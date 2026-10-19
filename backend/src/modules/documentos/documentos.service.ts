@@ -14,30 +14,55 @@ import { verificarEditable } from '../expedientes/expedientes.service.js';
 interface TipoPermitido {
   mime: string;
   extensiones: string[];
-  /** Primeros bytes del archivo ("firma"): el contenido debe coincidir con el tipo declarado. */
-  firma: number[];
+  /** El contenido real debe corresponder al tipo declarado (no alcanza con la extensión). */
+  contenidoValido: (contenido: Buffer) => boolean;
   descripcion: string;
 }
 
-const ZIP = [0x50, 0x4b, 0x03, 0x04]; // Los documentos de Office modernos son archivos ZIP.
+/** Compara los primeros bytes del archivo ("firma") desde una posición. */
+const tieneFirma = (firma: number[] | string, desde = 0) => (c: Buffer) => {
+  const bytes = typeof firma === 'string' ? [...Buffer.from(firma, 'latin1')] : firma;
+  return bytes.every((byte, i) => c[desde + i] === byte);
+};
+
+const ZIP = tieneFirma([0x50, 0x4b, 0x03, 0x04]); // Los documentos de Office modernos son archivos ZIP.
+
+/**
+ * Texto plano: UTF-16 con su marca inicial (BOM), o bytes sin caracteres de control fuera de
+ * tabulación, saltos de línea y salto de página (UTF-8 o ANSI). Un ejecutable o cualquier
+ * binario renombrado como .txt tiene bytes nulos o de control, y se rechaza.
+ */
+export function esTextoPlano(c: Buffer): boolean {
+  if (c.length >= 2 && ((c[0] === 0xff && c[1] === 0xfe) || (c[0] === 0xfe && c[1] === 0xff))) return c.length % 2 === 0;
+  for (const byte of c) {
+    if ((byte < 0x20 && byte !== 0x09 && byte !== 0x0a && byte !== 0x0c && byte !== 0x0d) || byte === 0x7f) return false;
+  }
+  return true;
+}
 
 export const TIPOS_PERMITIDOS: TipoPermitido[] = [
-  { mime: 'application/pdf', extensiones: ['.pdf'], firma: [0x25, 0x50, 0x44, 0x46, 0x2d], descripcion: 'PDF' },
-  { mime: 'image/png', extensiones: ['.png'], firma: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], descripcion: 'PNG' },
-  { mime: 'image/jpeg', extensiones: ['.jpg', '.jpeg'], firma: [0xff, 0xd8, 0xff], descripcion: 'JPG' },
+  { mime: 'application/pdf', extensiones: ['.pdf'], contenidoValido: tieneFirma('%PDF-'), descripcion: 'PDF' },
   {
     mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     extensiones: ['.docx'],
-    firma: ZIP,
+    contenidoValido: ZIP,
     descripcion: 'Word (.docx)',
   },
   {
     mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     extensiones: ['.xlsx'],
-    firma: ZIP,
+    contenidoValido: ZIP,
     descripcion: 'Excel (.xlsx)',
   },
+  { mime: 'text/plain', extensiones: ['.txt'], contenidoValido: esTextoPlano, descripcion: 'texto (.txt)' },
+  { mime: 'image/png', extensiones: ['.png'], contenidoValido: tieneFirma([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), descripcion: 'PNG' },
+  { mime: 'image/jpeg', extensiones: ['.jpg', '.jpeg'], contenidoValido: tieneFirma([0xff, 0xd8, 0xff]), descripcion: 'JPG' },
+  { mime: 'image/gif', extensiones: ['.gif'], contenidoValido: (c) => tieneFirma('GIF87a')(c) || tieneFirma('GIF89a')(c), descripcion: 'GIF' },
+  { mime: 'image/webp', extensiones: ['.webp'], contenidoValido: (c) => tieneFirma('RIFF')(c) && tieneFirma('WEBP', 8)(c), descripcion: 'WEBP' },
 ];
+
+/** Tipos que el navegador manda cuando no reconoce el archivo: entonces se deduce por la extensión. */
+const TIPOS_GENERICOS = new Set(['', 'application/octet-stream']);
 
 export const DESCRIPCION_TIPOS = TIPOS_PERMITIDOS.map((t) => t.descripcion).join(', ');
 
@@ -99,12 +124,12 @@ export class DocumentosService {
       throw new AppError(413, 'PAYLOAD_TOO_LARGE', 'El archivo supera el tamaño máximo permitido');
     }
 
-    const tipoMime = archivo.tipoMime.split(';')[0]!.trim().toLowerCase();
-    const tipo = TIPOS_PERMITIDOS.find((t) => t.mime === tipoMime);
-    const tipoValido =
-      tipo &&
-      tipo.extensiones.includes(extensionDe(nombre)) &&
-      tipo.firma.every((byte, i) => archivo.contenido[i] === byte);
+    const declarado = archivo.tipoMime.split(';')[0]!.trim().toLowerCase();
+    const extension = extensionDe(nombre);
+    const tipo = TIPOS_GENERICOS.has(declarado)
+      ? TIPOS_PERMITIDOS.find((t) => t.extensiones.includes(extension))
+      : TIPOS_PERMITIDOS.find((t) => t.mime === declarado);
+    const tipoValido = tipo && tipo.extensiones.includes(extension) && tipo.contenidoValido(archivo.contenido);
     if (!tipoValido) {
       throw new ValidationError(
         [{ field: 'archivo', message: `Tipo de archivo no permitido. Se aceptan: ${DESCRIPCION_TIPOS}` }],
@@ -117,7 +142,7 @@ export class DocumentosService {
       expedienteId: expediente.id,
       nombreOriginal: nombre,
       nombreAlmacenado,
-      tipoMime,
+      tipoMime: tipo.mime,
       tamanoBytes: archivo.contenido.length,
       hashSha256,
       descripcion: archivo.descripcion?.trim() || null,

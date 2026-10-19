@@ -23,6 +23,11 @@ const EXPEDIENTE = {
 const PDF = Buffer.concat([Buffer.from('%PDF-1.7\n'), Buffer.from('contenido de prueba')]);
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
 const EXE = Buffer.from([0x4d, 0x5a, 0x90, 0x00, 0x03]); // ejecutable de Windows ("MZ")
+const TXT = Buffer.from('Nota de Mesa de Entradas\r\nSe recibió el pedido con 3 anexos.\tFolio 12\n', 'utf8');
+const TXT_UTF16 = Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from('Nota en UTF-16', 'utf16le')]);
+const GIF = Buffer.from('GIF89a\x01\x00\x01\x00', 'latin1');
+const WEBP = Buffer.concat([Buffer.from('RIFF'), Buffer.from([0x0c, 0, 0, 0]), Buffer.from('WEBPVP8 ')]);
+const DOCX = Buffer.from([0x50, 0x4b, 0x03, 0x04, 0x14, 0x00]);
 
 function subir(agente: Agente, expedienteId: number, contenido: Buffer, nombre: string, tipo: string, descripcion?: string) {
   const req = agente
@@ -122,6 +127,35 @@ describe('Documentos, actuaciones e historial (Sprint 4: RF-08 a RF-11)', () => 
       const res = await admin.get(`/api/expedientes/${expedienteId}/documentos`);
       expect(res.status).toBe(200);
       expect(res.body.data.map((d: { nombreOriginal: string }) => d.nombreOriginal)).toEqual(['a.pdf', 'foto.png']);
+    });
+
+    it('acepta texto (.txt en UTF-8 o UTF-16), Word y las imágenes GIF y WEBP', async () => {
+      const casos: [Buffer, string, string][] = [
+        [TXT, 'nota.txt', 'text/plain'],
+        [TXT_UTF16, 'nota-unicode.txt', 'text/plain;charset=utf-16'],
+        [DOCX, 'dictamen.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        [GIF, 'sello.gif', 'image/gif'],
+        [WEBP, 'foto.webp', 'image/webp'],
+      ];
+      for (const [contenido, nombre, tipo] of casos) {
+        const res = await subir(admin, expedienteId, contenido, nombre, tipo);
+        expect(res.status, nombre).toBe(201);
+        expect(res.body.data.tipoMime, nombre).toBe(tipo.split(';')[0]);
+      }
+    });
+
+    it('si el navegador no informa el tipo, lo deduce por la extensión y verifica el contenido igual', async () => {
+      const ok = await subir(admin, expedienteId, TXT, 'nota.txt', 'application/octet-stream');
+      expect(ok.status).toBe(201);
+      expect(ok.body.data.tipoMime).toBe('text/plain');
+      expect((await subir(admin, expedienteId, EXE, 'factura.pdf', 'application/octet-stream')).status).toBe(400);
+    });
+
+    it('rechaza un binario renombrado como .txt o como imagen (400)', async () => {
+      expect((await subir(admin, expedienteId, EXE, 'leame.txt', 'text/plain')).status).toBe(400);
+      expect((await subir(admin, expedienteId, PNG, 'imagen.gif', 'image/gif')).status).toBe(400);
+      expect((await subir(admin, expedienteId, Buffer.from('RIFF0000WAVE'), 'audio.webp', 'image/webp')).status).toBe(400);
+      expect(e.documentos).toHaveLength(0);
     });
 
     it('rechaza un tipo no permitido (400)', async () => {

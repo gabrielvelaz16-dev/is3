@@ -4,6 +4,7 @@ import { MainLayout } from './layouts/MainLayout';
 import { AuditoriaPage } from './pages/AuditoriaPage';
 import { ExpedienteDetallePage } from './pages/ExpedienteDetallePage';
 import { ExpedienteFormPage } from './pages/ExpedienteFormPage';
+import { ExpedientesDesactivadosPage } from './pages/ExpedientesDesactivadosPage';
 import { ExpedientesPage } from './pages/ExpedientesPage';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
@@ -89,6 +90,14 @@ export function App() {
           element={
             <RequierePermiso permiso="usuarios.gestionar">
               <UsuariosPage />
+            </RequierePermiso>
+          }
+        />
+        <Route
+          path="/expedientes-desactivados"
+          element={
+            <RequierePermiso permiso="expedientes.desactivar">
+              <ExpedientesDesactivadosPage />
             </RequierePermiso>
           }
         />

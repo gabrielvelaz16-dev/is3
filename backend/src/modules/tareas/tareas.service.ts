@@ -3,6 +3,7 @@
  * Una tarea tiene responsable (de la dependencia del expediente) y vencimiento obligatorio.
  */
 import type { EstadoTarea, ExpedienteRecord, Repos, TareaRecord } from '../../database/repositories.js';
+import { ESTADO_TAREA_TEXTO } from '../../shared/etiquetas.js';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../shared/errors.js';
 import type { AuditoriaService, Contexto } from '../auditoria/auditoria.service.js';
 import { type ExpedientesService, verificarEditable } from '../expedientes/expedientes.service.js';
@@ -90,7 +91,7 @@ export class TareasService {
       tarea.asignadoA.id === usuario.id || tarea.creadoPor.id === usuario.id || usuario.permisos.includes('responsables.asignar');
     if (!autorizado) throw new ForbiddenError('Solo quien tiene la tarea, quien la creó o el jefe de la dependencia puede cambiarla');
     if (!TRANSICIONES_TAREA[tarea.estado].includes(estado)) {
-      throw new ConflictError(`Transición de tarea no permitida: ${tarea.estado} → ${estado}`);
+      throw new ConflictError(`Una tarea ${ESTADO_TAREA_TEXTO[tarea.estado].toLowerCase()} no puede pasar a ${ESTADO_TAREA_TEXTO[estado].toLowerCase()}`);
     }
 
     const actualizada = await this.repos.tareas.actualizarEstado(tareaId, estado, CERRADAS.includes(estado) ? this.ahora() : null);

@@ -6,6 +6,8 @@ import { ApiError } from '../services/api';
 import type { Dependencia, Rol, Usuario } from '../services/tipos';
 import { usuariosApi } from '../services/usuarios';
 import { useAviso } from '../components/ui/Avisos';
+import { Boton } from '../components/ui/Boton';
+import { CampoPassword } from '../components/ui/CampoPassword';
 
 const POR_PAGINA = 10;
 const inputClass = 'mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-marca-500 disabled:bg-slate-100';
@@ -23,6 +25,7 @@ export function UsuariosPage() {
   const [error, setError] = useState<string | null>(null);
   const avisar = useAviso();
   const [editando, setEditando] = useState<Usuario | 'nuevo' | null>(null);
+  const [eliminando, setEliminando] = useState<Usuario | null>(null);
 
   const cargar = useCallback(async () => {
     try {
@@ -49,6 +52,12 @@ export function UsuariosPage() {
   }, []);
 
   const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
+
+  function alEliminar(mensaje: string) {
+    setEliminando(null);
+    avisar(mensaje);
+    void cargar();
+  }
 
   function alGuardar(mensaje: string) {
     setEditando(null);
@@ -136,6 +145,18 @@ export function UsuariosPage() {
                   >
                     Editar
                   </button>
+                  {u.id !== yo?.id && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEliminando(u);
+                      }}
+                      className="ml-4 text-sm font-medium text-sello hover:underline"
+                      aria-label={`Eliminar a ${u.nombre}`}
+                    >
+                      Eliminar
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -174,6 +195,8 @@ export function UsuariosPage() {
           onGuardado={alGuardar}
         />
       )}
+
+      {eliminando && <ConfirmarEliminacion usuario={eliminando} onCancelar={() => setEliminando(null)} onEliminado={alEliminar} />}
 
       {puede('respaldo.gestionar') && <RespaldosPanel />}
     </>
@@ -300,16 +323,19 @@ function FormularioUsuario({ usuario, esUnoMismo, roles, dependencias, onCancela
             <label htmlFor="f-password" className="block text-sm font-medium text-slate-700">
               {nuevo ? 'Contraseña inicial' : 'Nueva contraseña (opcional)'}
             </label>
-            <input
+            <CampoPassword
               id="f-password"
-              type="password"
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className={inputClass}
               aria-describedby="ayuda-password"
             />
-            <p id="ayuda-password" className="mt-1 text-xs text-slate-500">Mínimo 5 caracteres.</p>
+            <p id="ayuda-password" className="mt-1 text-xs text-slate-500">
+              {nuevo
+                ? 'Mínimo 5 caracteres.'
+                : 'Mínimo 5 caracteres. La contraseña actual no se puede mostrar porque se guarda cifrada; escriba una nueva solo si quiere cambiarla.'}
+            </p>
             {errorCampo('password')}
           </div>
 
@@ -330,6 +356,55 @@ function FormularioUsuario({ usuario, esUnoMismo, roles, dependencias, onCancela
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+interface ConfirmarProps {
+  usuario: Usuario;
+  onCancelar: () => void;
+  onEliminado: (mensaje: string) => void;
+}
+
+/** Confirmación antes de borrar. El servidor rechaza (409) a los usuarios con actividad registrada. */
+function ConfirmarEliminacion({ usuario, onCancelar, onEliminado }: ConfirmarProps) {
+  const [error, setError] = useState<string | null>(null);
+  const [eliminando, setEliminando] = useState(false);
+
+  async function eliminar() {
+    setError(null);
+    setEliminando(true);
+    try {
+      await usuariosApi.eliminar(usuario.id);
+      onEliminado(`Usuario ${usuario.username} eliminado.`);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'No se pudo eliminar el usuario');
+      setEliminando(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-10 flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4 sm:items-center">
+      <div role="alertdialog" aria-modal="true" aria-labelledby="titulo-eliminar" aria-describedby="texto-eliminar" className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+        <h2 id="titulo-eliminar" className="text-lg font-semibold text-marca-900">
+          Eliminar usuario
+        </h2>
+        <p id="texto-eliminar" className="mt-3 text-sm text-slate-700">
+          ¿Eliminar a <strong>{usuario.nombre}</strong> ({usuario.username})? No se puede deshacer. Solo se pueden eliminar usuarios sin actividad;
+          si ya trabajó en el sistema, desactívelo desde <em>Editar</em> para conservar el historial.
+        </p>
+        {error && (
+          <p role="alert" className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+            {error}
+          </p>
+        )}
+        <div className="mt-6 flex justify-end gap-2">
+          <Boton onClick={onCancelar}>Cancelar</Boton>
+          <Boton variante="peligro" onClick={() => void eliminar()} disabled={eliminando}>
+            {eliminando ? 'Eliminando…' : 'Eliminar'}
+          </Boton>
+        </div>
       </div>
     </div>
   );

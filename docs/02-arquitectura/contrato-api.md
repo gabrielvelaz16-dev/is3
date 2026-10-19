@@ -82,6 +82,7 @@ La sesión viaja en la cookie `is3_sid` (`httpOnly`, `SameSite=Strict`, `Path=/a
 | `GET /api/usuarios/:id` | `usuarios.gestionar` | — | 200 `{ data: usuario }` · 404 |
 | `POST /api/usuarios` | `usuarios.gestionar` | `{ username, email, nombre, password, rolId, dependenciaId }` | 201 `{ data: usuario }` · 400 · 409 nombre de usuario o correo repetido |
 | `PATCH /api/usuarios/:id` | `usuarios.gestionar` | Al menos uno de `{ nombre, rolId, dependenciaId, activo, password }` | 200 `{ data: usuario }` · 400 · 404 · 409 (desactivarse o cambiarse el rol a uno mismo, o dejar el sistema sin administradores activos) |
+| `DELETE /api/usuarios/:id` (CR-06) | `usuarios.gestionar` | — | 204 sin cuerpo · 404 · 409 (eliminarse a uno mismo, dejar el sistema sin administradores activos, o usuario con actividad registrada: hay que desactivarlo) |
 | `GET /api/roles` | `usuarios.gestionar` | — | 200 `{ data: [rol con permisos] }` |
 | `GET /api/dependencias` | sesión | — | 200 `{ data: [dependencia activa] }` |
 
@@ -107,8 +108,12 @@ Todas requieren sesión. Las rutas de un expediente verifican además que el usu
 |---|---|---|---|
 | `GET /api/expedientes` | `expedientes.consultar` | `?q=&estado=&prioridad=&dependenciaId=&pagina=1&porPagina=20` | 200 `{ data: [expediente], paginacion: { total, pagina, porPagina, totalPaginas } }` |
 | `POST /api/expedientes` | `expedientes.crear` | `{ caratula, asunto, tipo, iniciador, prioridad?, descripcion?, fechaVencimiento?, responsableId? }` | 201 · 400 (incluye responsable inexistente) |
-| `GET /api/expedientes/:id` | `expedientes.consultar` | — | 200 · 403 · 404 |
-| `PATCH /api/expedientes/:id` | `expedientes.modificar` | Datos generales (`caratula`, `asunto`, `tipo`, `iniciador`, `prioridad`, `descripcion`, `fechaVencimiento`). **Desde el Sprint 5 no acepta `estado` ni `responsableId`** (400): tienen rutas propias | 200 · 400 · 403 · 404 · **409** archivado o en tránsito |
+| `GET /api/expedientes/:id` | `expedientes.consultar` | — | 200 · 403 · 404. Desde CR-08 el expediente trae `activo`, `desactivadoEn`, `desactivadoPor` y `motivoDesactivacion` |
+| `GET /api/expedientes/desactivados` (CR-08) | `expedientes.desactivar` | `?q=&pagina=1&porPagina=20` | 200 con la misma forma que el listado, ordenado por fecha de baja. `GET /api/expedientes`, el dashboard, los reportes y los pendientes **excluyen** los desactivados |
+| `POST /api/expedientes/:id/desactivar` (CR-08) | `expedientes.desactivar` | `{ motivo }` (5 a 500 caracteres) | 200 `{ data: expediente }` · 400 · 404 · 409 (ya desactivado o en tránsito) |
+| `POST /api/expedientes/:id/reactivar` (CR-08) | `expedientes.desactivar` | — | 200 · 404 · 409 (no está desactivado) |
+| `DELETE /api/expedientes/:id` (CR-08) | `expedientes.desactivar` | — | 204 sin cuerpo · 404 · 409 (tiene actividad: hay que desactivarlo) |
+| `PATCH /api/expedientes/:id` | `expedientes.modificar` | Datos generales (`caratula`, `asunto`, `tipo`, `iniciador`, `prioridad`, `descripcion`, `fechaVencimiento`). **Desde el Sprint 5 no acepta `estado` ni `responsableId`** (400): tienen rutas propias | 200 · 400 · 403 · 404 · **409** archivado, en tránsito o desactivado (CR-08) |
 | `GET /api/expedientes/:id/documentos` | `expedientes.consultar` | — | 200 `{ data: [documento] }` |
 | `POST /api/expedientes/:id/documentos` | `documentos.adjuntar` | **Cuerpo = archivo** (ADR-12). Encabezados: `Content-Type`, `X-Nombre-Archivo`, `X-Descripcion` opcional (codificados con `encodeURIComponent`) | 201 `{ data: documento }` · 400 tipo no permitido, vacío o sin nombre · 409 archivado · **413** supera `MAX_UPLOAD_MB` |
 | `GET /api/expedientes/:id/documentos/:documentoId/descarga` | `documentos.descargar` | — | 200 con el archivo (`Content-Disposition: attachment`, `X-Content-Type-Options: nosniff`, `Cache-Control: no-store`) · 404 si el documento no es de ese expediente · 500 genérico si el archivo falta o fue alterado (hash) |

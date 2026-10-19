@@ -18,8 +18,9 @@ async function contexto(usuario, viewport = { width: 1366, height: 800 }) {
   const page = await ctx.newPage();
   if (usuario) {
     await page.goto(`${BASE}/login`);
-    await page.getByLabel('Usuario').fill(usuario);
-    await page.getByLabel('Contraseña').fill(process.env.PASSWORD_DEMO ?? '12345');
+    await page.getByLabel('Usuario', { exact: true }).fill(usuario);
+    // exact: el botón del ojo (CR-06) se llama "Mostrar contraseña" y también coincidiría.
+    await page.getByLabel('Contraseña', { exact: true }).fill(process.env.PASSWORD_DEMO ?? '12345');
     await page.getByRole('button', { name: 'Ingresar' }).click();
     await page.waitForURL((u) => !u.pathname.startsWith('/login'));
   }

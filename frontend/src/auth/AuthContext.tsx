@@ -1,4 +1,5 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { olvidarListaExpedientes } from '../routes/navegacion';
 import type { UsuarioSesion } from '../services/tipos';
 import { authApi } from '../services/usuarios';
 
@@ -50,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await authApi.logout();
     } finally {
+      olvidarListaExpedientes();
       setUsuario(null);
       setEstado('anonimo');
     }

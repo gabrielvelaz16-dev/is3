@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useTituloPagina } from '../routes/navegacion';
 
 interface Props {
   title: string;
@@ -6,8 +7,9 @@ interface Props {
   children?: ReactNode;
 }
 
-/** Título de cada página con su descripción y las acciones principales a la derecha. */
+/** Título de cada página con su descripción y las acciones principales a la derecha. También titula la pestaña del navegador. */
 export function PageHeader({ title, subtitle, children }: Props) {
+  useTituloPagina(title);
   return (
     <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">

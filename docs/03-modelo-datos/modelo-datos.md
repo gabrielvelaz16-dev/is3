@@ -33,7 +33,7 @@ erDiagram
 | **Permiso** | id, clave (p. ej. `expediente.crear`), descripcion | `clave` única |
 | **RolPermiso** | rolId, permisoId | PK compuesta |
 | **Usuario** | id, username, email, nombre, passwordHash, rolId, dependenciaId, activo, ultimoAcceso, creadoEn | `username` y `email` únicos; FK a Rol y Dependencia; baja lógica con `activo` |
-| **Expediente** | id, numero, caratula, asunto, tipo, iniciador, estado, prioridad, dependenciaActualId, responsableId, creadoPorId, fechaVencimiento, creadoEn, actualizadoEn | `numero` único con formato `EXP-AAAA-NNNNNN`; `estado` enum |
+| **Expediente** | id, numero, caratula, asunto, tipo, iniciador, estado, prioridad, dependenciaActualId, responsableId, creadoPorId, fechaVencimiento, creadoEn, actualizadoEn, activo, desactivadoEn, desactivadoPorId, motivoDesactivacion (CR-08) | `numero` único con formato `EXP-AAAA-NNNNNN`; `estado` enum |
 | **Documento** | id, expedienteId, nombreOriginal, nombreAlmacenado, tipoMime, tamanoBytes, hashSha256, subidoPorId, subidoEn | FK a Expediente; `tamanoBytes` ≤ límite; tipo en lista permitida |
 | **Actuacion** | id, expedienteId, tipo (actuación / observación), texto, autorId, fecha | FK; no se edita, se agrega otra |
 | **Tarea** | id, expedienteId, titulo, descripcion, asignadoAId, vencimiento, estado, completadaEn | FK; `vencimiento` obligatorio |
@@ -107,3 +107,15 @@ Migración `20261016120000_notificaciones`.
 
 - No es una tabla de historial: la única modificación es registrar `leida_en`, y solo para el destinatario.
 - El dashboard y los reportes **no tienen tablas propias**: se calculan con `count` y `groupBy` sobre `expedientes`, `pases` y `tareas`, con la misma condición de alcance que el listado. `prisma/verificar-indicadores.ts` (S6-04) repite cada cálculo con SQL escrito a mano y lo compara en la CI.
+
+## 10. CR-08: bajas de expedientes
+
+Migración `20261019172842_expedientes_desactivados`.
+
+| Tabla | Columnas nuevas | Restricciones |
+|---|---|---|
+| `expedientes` | `activo` (boolean, por defecto `true`), `desactivado_en`, `desactivado_por_id`, `motivo_desactivacion` (≤ 500) | FK `desactivado_por_id` → `usuarios` con `RESTRICT`; índice `(activo)` |
+
+- Desactivar no borra nada: cambia estas columnas y deja constancia en la auditoría. Reactivar las limpia.
+- Las consultas del listado, el dashboard, los reportes, los vencimientos y las tareas pendientes filtran `activo = true`; `verificar-indicadores.ts` repite el filtro en SQL.
+- Eliminar un expediente solo es posible si ninguna tabla lo referencia (documentos, actuaciones, cambios de estado, tareas, pases, asignaciones, notificaciones). Las tablas de historial son de solo inserción y con `RESTRICT`, así que la base impediría borrarlo de todos modos.

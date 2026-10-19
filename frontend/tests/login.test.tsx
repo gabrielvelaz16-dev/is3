@@ -11,7 +11,7 @@ describe('Inicio y cierre de sesión (RF-01, S2-02)', () => {
     expect(screen.queryByRole('navigation', { name: 'Principal' })).not.toBeInTheDocument();
   });
 
-  it('con credenciales correctas entra y vuelve a la página que se había pedido', async () => {
+  it('con credenciales correctas entra por Inicio, aunque se hubiera pedido otra página', async () => {
     const user = userEvent.setup();
     const { fetchMock } = renderApp('/expedientes', {
       usuario: null,
@@ -22,7 +22,7 @@ describe('Inicio y cierre de sesión (RF-01, S2-02)', () => {
     await user.type(screen.getByLabelText('Contraseña'), '12345');
     await user.click(screen.getByRole('button', { name: 'Ingresar' }));
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Expedientes' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Inicio' })).toBeInTheDocument();
     const login = fetchMock.mock.calls.find(([url]) => url === '/api/auth/login');
     expect(JSON.parse(String(login?.[1]?.body))).toEqual({ usuario: 'admin', password: '12345' });
   });

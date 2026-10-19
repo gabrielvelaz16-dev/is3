@@ -77,6 +77,7 @@ Ejemplo del TP: Sprint 1 = 18 SP, Sprint 2 = 20 SP, Sprint 3 = 22 SP → velocid
 | S5 | 21 (29 antes de CR-03) | 21 | 16,0 | 34 | 2,1 → **3 sprints** |
 | S6 | 21 (13 + S5-06 por CR-03) | 21 | 17,7 | 13 | 0,7 → **1 sprint** |
 | S7 | 13 | 13 | 18,3 | 0 | — (el Sprint 8 tiene solo tareas técnicas) |
+| S8 | Tareas técnicas | En curso (S8-01 a S8-06 hechas salvo la etiqueta y la defensa) | — | 0 | — |
 
 Como los Sprints 1 y 8 tienen mayormente tareas técnicas sin SP, también se registran **horas reales por tarjeta** para no subestimar el esfuerzo.
 
@@ -131,7 +132,14 @@ Sprints de 2 semanas según el TP. **Las fechas reales dependen de la fecha de e
 
 | Sprint | Inicio | Fin | Release |
 |---|---|---|---|
-| Fase 0 | 13/10/2026 | a definir | R1 |
-| S1 a S8 | a definir | a definir | R1–R4 |
+| Fase 0 | 13/10/2026 | 14/10/2026 (puerta G1) | R1 |
+| S1 y S2 | 14/10/2026 | 14/10/2026 | R1 |
+| S3 | 14/10/2026 | 15/10/2026 (corrección) | R2 |
+| S4 y S5 | 15/10/2026 | 15/10/2026 | R2 / R3 |
+| S6 y S7 | 16/10/2026 | 16/10/2026 | R3 / R4 |
+| CR-05 | 16/10/2026 | 16/10/2026 | R4 |
+| S8 | 19/10/2026 | en curso | R4 |
+
+**Fechas reales (actualizado 19/10/2026):** los sprints del prototipo duraron horas o un día, no 2 semanas. La fecha de la defensa la fija la cátedra.
 
 Si el tiempo disponible hasta la entrega no alcanza para 8 sprints de 2 semanas, se acortan los sprints (por ejemplo, a 1 semana) mediante una solicitud de cambio, sin modificar el alcance comprometido sin aprobación.

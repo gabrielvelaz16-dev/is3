@@ -127,6 +127,32 @@ export class UsuariosService {
     return aPublico(actualizado);
   }
 
+  /**
+   * Borra un usuario creado por error. Solo se permite si no tiene actividad:
+   * la auditoría es de solo inserción (ADR-07) y el historial debe seguir
+   * mostrando quién hizo cada cosa. Con actividad, se desactiva en su lugar.
+   */
+  async eliminar(id: number, ctx: Contexto): Promise<void> {
+    const actual = await this.usuarios.findById(id);
+    if (!actual) throw new NotFoundError('Usuario no encontrado');
+    if (ctx.usuarioId === id) throw new ConflictError('No puede eliminar su propio usuario');
+    if (actual.rol.clave === ROL_ADMINISTRADOR && actual.activo && (await this.usuarios.countActivosConRol(ROL_ADMINISTRADOR, id)) === 0) {
+      throw new ConflictError('Debe quedar al menos un administrador activo en el sistema');
+    }
+    if (await this.usuarios.tieneActividad(id)) {
+      throw new ConflictError('El usuario tiene actividad registrada y no se puede eliminar; desactívelo para conservar el historial');
+    }
+
+    await this.usuarios.delete(id);
+    await this.auditoria.registrar(ctx, {
+      accion: 'USUARIO_ELIMINADO',
+      resultado: 'EXITO',
+      entidad: 'Usuario',
+      entidadId: String(id),
+      detalle: { username: actual.username, email: actual.email, rol: actual.rol.clave },
+    });
+  }
+
   private validarPassword(password: string): void {
     const problema = validarPoliticaPassword(password);
     if (problema) throw new ValidationError([{ field: 'password', message: problema }]);

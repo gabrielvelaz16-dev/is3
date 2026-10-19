@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Navigate, useLocation } from 'react-router';
+import { Navigate } from 'react-router';
 import { PageHeader } from '../components/PageHeader';
 import { useAuth } from './AuthContext';
 
@@ -11,12 +11,11 @@ function Cargando() {
   );
 }
 
-/** Rutas que requieren sesión: sin sesión, redirige al login y recuerda a dónde iba. */
+/** Rutas que requieren sesión: sin sesión, redirige al login (después se entra siempre por Inicio). */
 export function RequiereSesion({ children }: { children: ReactNode }) {
   const { estado } = useAuth();
-  const location = useLocation();
   if (estado === 'cargando') return <Cargando />;
-  if (estado === 'anonimo') return <Navigate to="/login" replace state={{ desde: location.pathname }} />;
+  if (estado === 'anonimo') return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
 

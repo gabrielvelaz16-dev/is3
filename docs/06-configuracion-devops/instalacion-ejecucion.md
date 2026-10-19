@@ -83,6 +83,8 @@ npm install
 npm run db:migrate          # aplica las migraciones de Prisma (crea las tablas)
 npm run db:seed             # dependencias, roles, permisos y administrador inicial
 npm run dev                 # http://localhost:3000/api/health
+# Opcional, en otra terminal con el backend levantado: 16 expedientes de demostración
+npm run demo:cargar
 
 # Frontend (otra terminal)
 cd frontend
@@ -115,6 +117,7 @@ Scripts del backend:
 | `npm test` / `npm run test:coverage` | Pruebas con Vitest y Supertest (con cobertura) |
 | `npm run db:migrate` | `prisma migrate dev`: aplica migraciones y regenera el cliente |
 | `npm run db:seed` | Datos iniciales (idempotente) |
+| `npm run demo:cargar` | Datos de demostración por la API (requiere el backend levantado; no duplica) |
 | `npm run db:generate` | Regenera el cliente de Prisma (`src/generated/`, fuera de Git) |
 | `npm run db:studio` | Explorador visual de la base (Prisma Studio) |
 

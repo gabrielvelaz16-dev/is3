@@ -10,10 +10,21 @@ import { ApiError } from '../services/api';
 import { type Dashboard as DatosDashboard, reportesApi } from '../services/reportes';
 import { ESTADOS_EXPEDIENTE, ETIQUETA_TIPO, PRIORIDADES } from '../services/tipos';
 
-function Tarjeta({ titulo, valor, detalle, alerta = false }: { titulo: string; valor: number; detalle?: string; alerta?: boolean }) {
+/** Con `to`, toda la tarjeta lleva a la lista correspondiente (el enlace cubre la tarjeta). */
+function Tarjeta({ titulo, valor, detalle, alerta = false, to }: { titulo: string; valor: number; detalle?: string; alerta?: boolean; to?: string }) {
   return (
-    <div className={`rounded-lg border bg-white p-4 ${alerta && valor > 0 ? 'border-l-4 border-sello/40 border-l-sello' : 'border-slate-200'}`}>
-      <dt className="text-sm text-slate-600">{titulo}</dt>
+    <div
+      className={`relative rounded-lg border bg-white p-4 ${alerta && valor > 0 ? 'border-l-4 border-sello/40 border-l-sello' : 'border-slate-200'} ${to ? 'transition-colors hover:border-marca-500 focus-within:border-marca-500' : ''}`}
+    >
+      <dt className="text-sm text-slate-600">
+        {to ? (
+          <Link to={to} className="after:absolute after:inset-0 after:rounded-lg hover:text-marca-900 focus:outline-none">
+            {titulo}
+          </Link>
+        ) : (
+          titulo
+        )}
+      </dt>
       <dd className={`mt-1 text-3xl font-semibold tracking-tight ${alerta && valor > 0 ? 'text-sello' : 'text-tinta'}`}>{valor}</dd>
       {detalle && <dd className="mt-1 text-xs text-slate-500">{detalle}</dd>}
     </div>
@@ -21,7 +32,7 @@ function Tarjeta({ titulo, valor, detalle, alerta = false }: { titulo: string; v
 }
 
 /** Tabla con barra proporcional: legible para lectores de pantalla y sin librerías de gráficos. */
-export function Distribucion({ titulo, filas, total }: { titulo: string; filas: { etiqueta: string; valor: number }[]; total: number }) {
+export function Distribucion({ titulo, filas, total }: { titulo: string; filas: { etiqueta: string; valor: number; to?: string }[]; total: number }) {
   const id = `dist-${titulo.toLowerCase().replace(/\s+/g, '-')}`;
   return (
     <section aria-labelledby={id} className="rounded-lg border border-slate-200 bg-white p-4">
@@ -34,7 +45,13 @@ export function Distribucion({ titulo, filas, total }: { titulo: string; filas: 
           {filas.map((f) => (
             <tr key={f.etiqueta}>
               <th scope="row" className="w-32 py-1 pr-2 text-left font-normal text-slate-600">
-                {f.etiqueta}
+                {f.to ? (
+                  <Link to={f.to} className="text-marca-700 hover:underline">
+                    {f.etiqueta}
+                  </Link>
+                ) : (
+                  f.etiqueta
+                )}
               </th>
               <td className="py-1">
                 <div className="h-2.5 rounded bg-slate-100" aria-hidden="true">
@@ -92,12 +109,13 @@ export function Dashboard() {
       </div>
 
       <dl className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-        <Tarjeta titulo="Expedientes" valor={resumen.total} />
-        <Tarjeta titulo="Vencidos" valor={seguimiento.vencidos} detalle="Sin resolver y con fecha pasada" alerta />
-        <Tarjeta titulo="Por vencer" valor={seguimiento.porVencer} detalle={`En los próximos ${datos.diasAviso} días`} />
+        <Tarjeta titulo="Expedientes" valor={resumen.total} to="/expedientes" />
+        <Tarjeta titulo="Vencidos" valor={seguimiento.vencidos} detalle="Sin resolver y con fecha pasada" alerta to="/tareas#titulo-por-vencer" />
+        <Tarjeta titulo="Por vencer" valor={seguimiento.porVencer} detalle={`En los próximos ${datos.diasAviso} días`} to="/tareas#titulo-por-vencer" />
         <Tarjeta titulo="En tránsito" valor={seguimiento.enTransito} detalle="Enviados, sin recibir" />
-        <Tarjeta titulo="Por recibir" valor={seguimiento.porRecibir} detalle="Pases hacia la dependencia" />
+        <Tarjeta titulo="Por recibir" valor={seguimiento.porRecibir} detalle="Pases hacia la dependencia" to={puede('expedientes.recibir') ? '/tareas#titulo-recibidos' : undefined} />
         <Tarjeta
+          to="/tareas"
           titulo="Tareas vencidas"
           valor={seguimiento.tareasVencidas}
           detalle={`de ${seguimiento.tareasAbiertas} tareas abiertas`}
@@ -109,12 +127,12 @@ export function Dashboard() {
         <Distribucion
           titulo="Por estado"
           total={resumen.total}
-          filas={ESTADOS_EXPEDIENTE.map((e) => ({ etiqueta: e.etiqueta, valor: resumen.porEstado[e.valor] }))}
+          filas={ESTADOS_EXPEDIENTE.map((e) => ({ etiqueta: e.etiqueta, valor: resumen.porEstado[e.valor], to: `/expedientes?estado=${e.valor}` }))}
         />
         <Distribucion
           titulo="Por prioridad"
           total={resumen.total}
-          filas={PRIORIDADES.map((p) => ({ etiqueta: p.etiqueta, valor: resumen.porPrioridad[p.valor] }))}
+          filas={PRIORIDADES.map((p) => ({ etiqueta: p.etiqueta, valor: resumen.porPrioridad[p.valor], to: `/expedientes?prioridad=${p.valor}` }))}
         />
         {datos.alcance.tipo === 'INSTITUCION' ? (
           <Distribucion

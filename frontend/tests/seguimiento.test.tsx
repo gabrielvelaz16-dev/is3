@@ -44,6 +44,10 @@ const EXPEDIENTE = {
   creadoPor: persona,
   responsable: null,
   paseEnTransito: null,
+  activo: true,
+  desactivadoEn: null,
+  desactivadoPor: null,
+  motivoDesactivacion: null,
 };
 
 const ok = (data: unknown, status = 200) => () => ({ status, body: { data } });

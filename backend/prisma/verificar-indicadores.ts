@@ -53,41 +53,41 @@ async function verificarAlcance(nombre: string, dependenciaId: number | null, ah
   const seg = await repos.estadisticas.seguimiento({ dependenciaId: dep ?? undefined, ahora, hasta: new Date(hasta) });
 
   const [{ n: total }] = await prisma.$queryRaw<[{ n: number }]>`
-    SELECT count(*)::int AS n FROM expedientes WHERE (${dep}::int IS NULL OR dependencia_actual_id = ${dep}::int)`;
+    SELECT count(*)::int AS n FROM expedientes WHERE activo AND (${dep}::int IS NULL OR dependencia_actual_id = ${dep}::int)`;
   comparar(nombre, 'total', resumen.total, total);
 
   const estados = aMapa(await prisma.$queryRaw<Fila[]>`
     SELECT estado::text AS clave, count(*)::int AS n FROM expedientes
-    WHERE (${dep}::int IS NULL OR dependencia_actual_id = ${dep}::int) GROUP BY estado`);
+    WHERE activo AND (${dep}::int IS NULL OR dependencia_actual_id = ${dep}::int) GROUP BY estado`);
   for (const [estado, n] of Object.entries(resumen.porEstado)) comparar(nombre, `estado ${estado}`, n, estados.get(estado) ?? 0);
 
   const prioridades = aMapa(await prisma.$queryRaw<Fila[]>`
     SELECT prioridad::text AS clave, count(*)::int AS n FROM expedientes
-    WHERE (${dep}::int IS NULL OR dependencia_actual_id = ${dep}::int) GROUP BY prioridad`);
+    WHERE activo AND (${dep}::int IS NULL OR dependencia_actual_id = ${dep}::int) GROUP BY prioridad`);
   for (const [prioridad, n] of Object.entries(resumen.porPrioridad)) comparar(nombre, `prioridad ${prioridad}`, n, prioridades.get(prioridad) ?? 0);
 
   const tipos = aMapa(await prisma.$queryRaw<Fila[]>`
     SELECT tipo AS clave, count(*)::int AS n FROM expedientes
-    WHERE (${dep}::int IS NULL OR dependencia_actual_id = ${dep}::int) GROUP BY tipo`);
+    WHERE activo AND (${dep}::int IS NULL OR dependencia_actual_id = ${dep}::int) GROUP BY tipo`);
   comparar(nombre, 'cantidad de tipos', resumen.porTipo.length, tipos.size);
   for (const { tipo, total: n } of resumen.porTipo) comparar(nombre, `tipo ${tipo}`, n, tipos.get(tipo) ?? 0);
 
   const [{ n: vencidos }] = await prisma.$queryRaw<[{ n: number }]>`
     SELECT count(*)::int AS n FROM expedientes
-    WHERE (${dep}::int IS NULL OR dependencia_actual_id = ${dep}::int)
+    WHERE activo AND (${dep}::int IS NULL OR dependencia_actual_id = ${dep}::int)
       AND estado NOT IN ('RESUELTO', 'ARCHIVADO') AND fecha_vencimiento < ${t}::timestamp`;
   comparar(nombre, 'vencidos', seg.vencidos, vencidos);
 
   const [{ n: porVencer }] = await prisma.$queryRaw<[{ n: number }]>`
     SELECT count(*)::int AS n FROM expedientes
-    WHERE (${dep}::int IS NULL OR dependencia_actual_id = ${dep}::int)
+    WHERE activo AND (${dep}::int IS NULL OR dependencia_actual_id = ${dep}::int)
       AND estado NOT IN ('RESUELTO', 'ARCHIVADO')
       AND fecha_vencimiento >= ${t}::timestamp AND fecha_vencimiento <= ${hasta}::timestamp`;
   comparar(nombre, 'por vencer', seg.porVencer, porVencer);
 
   const [{ n: enTransito }] = await prisma.$queryRaw<[{ n: number }]>`
     SELECT count(*)::int AS n FROM expedientes e
-    WHERE (${dep}::int IS NULL OR e.dependencia_actual_id = ${dep}::int)
+    WHERE e.activo AND (${dep}::int IS NULL OR e.dependencia_actual_id = ${dep}::int)
       AND EXISTS (SELECT 1 FROM pases p WHERE p.expediente_id = e.id AND p.recibido_en IS NULL)`;
   comparar(nombre, 'en tránsito', seg.enTransito, enTransito);
 
@@ -98,7 +98,7 @@ async function verificarAlcance(nombre: string, dependenciaId: number | null, ah
   const [{ abiertas, vencidas }] = await prisma.$queryRaw<[{ abiertas: number; vencidas: number }]>`
     SELECT count(*)::int AS abiertas, count(*) FILTER (WHERE t.vencimiento < ${t}::timestamp)::int AS vencidas
     FROM tareas t JOIN expedientes e ON e.id = t.expediente_id
-    WHERE t.estado IN ('PENDIENTE', 'EN_CURSO') AND (${dep}::int IS NULL OR e.dependencia_actual_id = ${dep}::int)`;
+    WHERE t.estado IN ('PENDIENTE', 'EN_CURSO') AND e.activo AND (${dep}::int IS NULL OR e.dependencia_actual_id = ${dep}::int)`;
   comparar(nombre, 'tareas abiertas', seg.tareasAbiertas, abiertas);
   comparar(nombre, 'tareas vencidas', seg.tareasVencidas, vencidas);
 
@@ -125,7 +125,7 @@ async function main() {
 
   // Un reporte con filtro también debe coincidir (S6-02).
   const filtrado = await repos.estadisticas.resumen({ estado: 'EN_TRAMITE' });
-  const [{ n }] = await prisma.$queryRaw<[{ n: number }]>`SELECT count(*)::int AS n FROM expedientes WHERE estado = 'EN_TRAMITE'`;
+  const [{ n }] = await prisma.$queryRaw<[{ n: number }]>`SELECT count(*)::int AS n FROM expedientes WHERE activo AND estado = 'EN_TRAMITE'`;
   comparar('Reporte estado=EN_TRAMITE', 'total', filtrado.total, n);
 
   // Sin datos la verificación no prueba nada (misma lección que D-09).

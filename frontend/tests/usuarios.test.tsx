@@ -126,4 +126,62 @@ describe('Administración de usuarios (RF-03, S2-05)', () => {
     expect(await screen.findByRole('status')).toHaveTextContent(`Usuario ${FUNCIONARIO.username} actualizado.`);
     expect(enviado).toEqual({ activo: false });
   });
+
+  it('el ojo muestra y oculta la contraseña que se escribe al editar', async () => {
+    const user = userEvent.setup();
+    renderApp('/administracion', { handlers: handlersBase([sinPermisos(ADMIN), sinPermisos(FUNCIONARIO)]) });
+
+    await user.click(await screen.findByRole('button', { name: `Editar a ${FUNCIONARIO.nombre}` }));
+    const dialogo = screen.getByRole('dialog', { name: 'Editar usuario' });
+    const campo = within(dialogo).getByLabelText('Nueva contraseña (opcional)');
+    await user.type(campo, 'clave9');
+    expect(campo).toHaveAttribute('type', 'password');
+
+    await user.click(within(dialogo).getByRole('button', { name: 'Mostrar contraseña' }));
+    expect(campo).toHaveAttribute('type', 'text');
+    expect(campo).toHaveValue('clave9');
+
+    await user.click(within(dialogo).getByRole('button', { name: 'Ocultar contraseña' }));
+    expect(campo).toHaveAttribute('type', 'password');
+  });
+
+  it('elimina un usuario después de confirmar y no ofrece eliminarse a uno mismo', async () => {
+    const user = userEvent.setup();
+    let llamado = false;
+    renderApp('/administracion', {
+      handlers: {
+        ...handlersBase([sinPermisos(ADMIN), sinPermisos(FUNCIONARIO)]),
+        'DELETE /api/usuarios/2': () => {
+          llamado = true;
+          return { status: 204, body: null };
+        },
+      },
+    });
+
+    await user.click(await screen.findByRole('button', { name: `Eliminar a ${FUNCIONARIO.nombre}` }));
+    expect(screen.queryByRole('button', { name: `Eliminar a ${ADMIN.nombre}` })).not.toBeInTheDocument();
+    const dialogo = screen.getByRole('alertdialog', { name: 'Eliminar usuario' });
+    await user.click(within(dialogo).getByRole('button', { name: 'Eliminar' }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent(`Usuario ${FUNCIONARIO.username} eliminado.`);
+    expect(llamado).toBe(true);
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  it('si el usuario tiene actividad, muestra el motivo del servidor y no lo borra', async () => {
+    const user = userEvent.setup();
+    const motivo = 'El usuario tiene actividad registrada y no se puede eliminar; desactívelo para conservar el historial';
+    renderApp('/administracion', {
+      handlers: {
+        ...handlersBase([sinPermisos(ADMIN), sinPermisos(FUNCIONARIO)]),
+        'DELETE /api/usuarios/2': () => ({ status: 409, body: { error: { code: 'CONFLICT', message: motivo, requestId: 't' } } }),
+      },
+    });
+
+    await user.click(await screen.findByRole('button', { name: `Eliminar a ${FUNCIONARIO.nombre}` }));
+    const dialogo = screen.getByRole('alertdialog', { name: 'Eliminar usuario' });
+    await user.click(within(dialogo).getByRole('button', { name: 'Eliminar' }));
+
+    expect(await within(dialogo).findByRole('alert')).toHaveTextContent(motivo);
+  });
 });

@@ -1,21 +1,23 @@
 import { type FormEvent, useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router';
+import { Navigate, useNavigate } from 'react-router';
 import { useAuth } from '../auth/AuthContext';
+import { CampoPassword } from '../components/ui/CampoPassword';
 import { ApiError } from '../services/api';
 
-/** Pantalla de inicio de sesión (RF-01). */
+/**
+ * Pantalla de inicio de sesión (RF-01). Todos los usuarios entran por Inicio, aunque antes
+ * hubieran pedido otra página: así nadie aparece en una pantalla de otro usuario o sin permiso.
+ */
 export function LoginPage() {
   const { estado, login } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const destino = (location.state as { desde?: string } | null)?.desde ?? '/';
 
   const [usuario, setUsuario] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
-  if (estado === 'autenticado') return <Navigate to={destino} replace />;
+  if (estado === 'autenticado') return <Navigate to="/" replace />;
 
   async function enviar(e: FormEvent) {
     e.preventDefault();
@@ -23,7 +25,7 @@ export function LoginPage() {
     setEnviando(true);
     try {
       await login(usuario, password);
-      navigate(destino, { replace: true });
+      navigate('/', { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'No se pudo iniciar sesión');
       setPassword('');
@@ -73,9 +75,8 @@ export function LoginPage() {
             <label htmlFor="password" className="block text-sm font-medium text-slate-700">
               Contraseña
             </label>
-            <input
+            <CampoPassword
               id="password"
-              type="password"
               autoComplete="current-password"
               required
               value={password}
@@ -92,8 +93,6 @@ export function LoginPage() {
             {enviando ? 'Ingresando…' : 'Ingresar'}
           </button>
         </form>
-
-        <p className="mt-4 text-center text-xs text-slate-500">Prototipo académico — uso exclusivo con datos ficticios.</p>
       </div>
     </main>
   );

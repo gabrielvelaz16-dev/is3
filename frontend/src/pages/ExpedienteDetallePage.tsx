@@ -10,9 +10,13 @@ import { useAuth } from '../auth/AuthContext';
 import { AccionesExpediente } from '../components/expediente/AccionesExpediente';
 import { AnexoExpediente, type ClaveAnexo } from '../components/expediente/AnexosExpediente';
 import { PageHeader } from '../components/PageHeader';
+import { useAviso } from '../components/ui/Avisos';
 import { Boton, BotonEnlace } from '../components/ui/Boton';
+import { DialogoConfirmacion } from '../components/ui/DialogoConfirmacion';
+import { MigasDePan } from '../components/ui/MigasDePan';
 import { EtiquetaEstado, EtiquetaPrioridad, etiquetaEstado } from '../components/ui/Etiquetas';
 import { type Pestana, Pestanas } from '../components/ui/Pestanas';
+import { rutaListaExpedientes, useTituloPagina } from '../routes/navegacion';
 import { ApiError } from '../services/api';
 import { expedientesApi } from '../services/expedientes';
 import { seguimientoApi } from '../services/seguimiento';
@@ -59,6 +63,11 @@ export function ExpedienteDetallePage() {
   /** Aumenta cuando cambia algo del expediente, para recargar documentos, actuaciones e historial. */
   const [version, setVersion] = useState(0);
   const [motivo, setMotivo] = useState('');
+  /** CR-08: diálogo abierto para dar de baja o eliminar el expediente. */
+  const [dialogo, setDialogo] = useState<'desactivar' | 'eliminar' | null>(null);
+  const avisar = useAviso();
+  const lista = rutaListaExpedientes();
+  useTituloPagina(expediente?.numero);
 
   const pestana = PESTANAS.some((p) => p.clave === params.get('pestana')) ? params.get('pestana')! : 'datos';
   const cambiarPestana = (clave: string) =>
@@ -114,7 +123,7 @@ export function ExpedienteDetallePage() {
         <p role="alert" className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
           {error}
         </p>
-        <BotonEnlace to="/expedientes" className="mt-4">
+        <BotonEnlace to={lista} className="mt-4">
           Volver a la lista
         </BotonEnlace>
       </>
@@ -126,13 +135,61 @@ export function ExpedienteDetallePage() {
   }
 
   const enTransito = expediente.paseEnTransito;
-  const editable = expediente.estado !== 'ARCHIVADO' && !enTransito;
+  const editable = expediente.activo && expediente.estado !== 'ARCHIVADO' && !enTransito;
+  const puedeDarDeBaja = puede('expedientes.desactivar');
+  const desactivados = '/expedientes-desactivados';
+
+  async function desactivar(motivoBaja: string) {
+    actualizado(await expedientesApi.desactivar(expediente!.id, motivoBaja));
+    setDialogo(null);
+    avisar(`Expediente ${expediente!.numero} desactivado. Está en "Expedientes desactivados".`);
+  }
+
+  async function reactivar() {
+    try {
+      actualizado(await expedientesApi.reactivar(expediente!.id));
+      avisar(`Expediente ${expediente!.numero} reactivado.`);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'No se pudo reactivar el expediente');
+    }
+  }
+
+  async function eliminar() {
+    await expedientesApi.eliminar(expediente!.id);
+    avisar(`Expediente ${expediente!.numero} eliminado.`);
+    navigate(expediente!.activo ? lista : desactivados, { replace: true });
+  }
   const transicionesDisponibles = editable ? (TRANSICIONES[expediente.estado] ?? []) : [];
   const abierto = expediente.estado !== 'RESUELTO' && expediente.estado !== 'ARCHIVADO';
   const vencido = abierto && expediente.fechaVencimiento !== null && new Date(expediente.fechaVencimiento).getTime() < Date.now();
 
   return (
     <>
+      <MigasDePan
+        items={[
+          expediente.activo ? { etiqueta: 'Expedientes', to: lista } : { etiqueta: 'Expedientes desactivados', to: puedeDarDeBaja ? desactivados : undefined },
+          { etiqueta: expediente.numero },
+        ]}
+      />
+      {!expediente.activo && (
+        <div role="status" className="mb-6 flex flex-col gap-3 rounded-md border border-slate-300 bg-slate-100 px-4 py-3 text-sm text-slate-800 sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            <strong>Expediente desactivado</strong> el {fecha(expediente.desactivadoEn)}
+            {expediente.desactivadoPor && <> por {expediente.desactivadoPor.nombre}</>}. Motivo: {expediente.motivoDesactivacion}. No aparece en las listas
+            ni en los indicadores y no se puede modificar.
+          </p>
+          {puedeDarDeBaja && (
+            <div className="flex shrink-0 gap-2">
+              <Boton tamano="chico" variante="primario" onClick={() => void reactivar()}>
+                Reactivar
+              </Boton>
+              <Boton tamano="chico" variante="fantasma" onClick={() => setDialogo('eliminar')}>
+                Eliminar
+              </Boton>
+            </div>
+          )}
+        </div>
+      )}
       {/* Carátula: la tapa de la carpeta, con el número en la pestaña. */}
       <div className="relative mt-7 mb-8">
         <span className="absolute -top-7 left-0 rounded-t-lg border border-b-0 border-carpeta/50 bg-carpeta-claro px-4 pt-1.5 pb-1 text-sm font-semibold tracking-wide text-tinta">
@@ -153,7 +210,15 @@ export function ExpedienteDetallePage() {
               {puede('expedientes.modificar') && editable && (
                 <Boton onClick={() => navigate(`/expedientes/${expediente.id}/editar`)}>Editar</Boton>
               )}
-              <BotonEnlace to="/expedientes" variante="fantasma">
+              {puedeDarDeBaja && expediente.activo && (
+                <>
+                  <Boton onClick={() => setDialogo('desactivar')}>Desactivar</Boton>
+                  <Boton variante="fantasma" onClick={() => setDialogo('eliminar')}>
+                    Eliminar
+                  </Boton>
+                </>
+              )}
+              <BotonEnlace to={expediente.activo ? lista : desactivados} variante="fantasma">
                 Volver a la lista
               </BotonEnlace>
             </div>
@@ -238,6 +303,26 @@ export function ExpedienteDetallePage() {
           <AnexoExpediente seccion={pestana as ClaveAnexo} expediente={expediente} version={version} onCambio={() => setVersion((v) => v + 1)} />
         )}
       </Pestanas>
+
+      {dialogo === 'desactivar' && (
+        <DialogoConfirmacion
+          titulo="Desactivar expediente"
+          textoConfirmar="Desactivar"
+          variante="primario"
+          pedirMotivo={{ etiqueta: 'Motivo de la baja', minimo: 5 }}
+          onConfirmar={desactivar}
+          onCancelar={() => setDialogo(null)}
+        >
+          <strong>{expediente.numero}</strong> dejará de aparecer en la lista, en los indicadores y en los pendientes, y no se podrá
+          modificar. Su historial se conserva completo y se puede reactivar desde <em>Expedientes desactivados</em>.
+        </DialogoConfirmacion>
+      )}
+      {dialogo === 'eliminar' && (
+        <DialogoConfirmacion titulo="Eliminar expediente" textoConfirmar="Eliminar" onConfirmar={eliminar} onCancelar={() => setDialogo(null)}>
+          ¿Eliminar <strong>{expediente.numero}</strong> definitivamente? No se puede deshacer. Solo se eliminan expedientes sin actividad (sin
+          documentos, actuaciones, tareas, pases ni cambios de estado); si tiene historial, desactívelo.
+        </DialogoConfirmacion>
+      )}
     </>
   );
 }

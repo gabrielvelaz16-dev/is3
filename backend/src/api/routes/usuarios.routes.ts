@@ -32,6 +32,12 @@ export function usuariosRouter(service: UsuariosService): Router {
     sendData(res, await service.modificar(id, input, contexto(req, res)));
   });
 
+  router.delete('/:id', async (req, res) => {
+    const { id } = idParamSchema.parse(req.params);
+    await service.eliminar(id, contexto(req, res));
+    res.status(204).end();
+  });
+
   return router;
 }
 

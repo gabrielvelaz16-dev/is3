@@ -61,6 +61,23 @@ jobs:
         run: npx prisma migrate deploy
       - name: Seed (usuarios, roles y permisos)
         run: npm run db:seed
+      - name: Datos de demostración por la API, dos veces (S8-02)
+        env:
+          NODE_ENV: development
+          LOG_LEVEL: warn
+        run: |
+          nohup npx tsx src/server.ts > ../backend-demo.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://localhost:3000/api/health >/dev/null && break; sleep 1; done
+          curl -sf http://localhost:3000/api/health >/dev/null || { echo "::error title=Demo::el backend no respondió"; tail -30 ../backend-demo.log; exit 1; }
+          npm run demo:cargar
+          antes=$(PGPASSWORD=ci psql -h localhost -U ci -d expediente_ci -tAc "SELECT count(*) FROM expedientes")
+          # La segunda vez no debe duplicar nada.
+          npm run demo:cargar
+          despues=$(PGPASSWORD=ci psql -h localhost -U ci -d expediente_ci -tAc "SELECT count(*) FROM expedientes")
+          [ "$antes" -eq "$despues" ] || { echo "::error title=Demo::la segunda carga duplicó expedientes ($antes → $despues)"; exit 1; }
+          resumen=$(PGPASSWORD=ci psql -h localhost -U ci -d expediente_ci -tAc "SELECT string_agg(estado || '=' || n, ', ' ORDER BY estado) FROM (SELECT estado, count(*) n FROM expedientes GROUP BY estado) t")
+          echo "::notice title=Datos de demostración::$despues expedientes ($resumen)"
+          kill %1 || true
       - name: Verificar tablas de solo inserción (ADR-07, historial de los Sprints 4 y 5)
         run: |
           # Una fila por tabla: en una tabla vacía un DELETE no dispara los triggers por fila

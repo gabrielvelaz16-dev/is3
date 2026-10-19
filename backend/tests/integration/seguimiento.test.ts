@@ -72,7 +72,7 @@ describe('Tareas y seguimiento (Sprint 5: RF-12 a RF-17)', () => {
       expect(res.status).toBe(200);
       expect(res.body.data.estado).toBe('EN_TRAMITE');
       const historial = (await funcionario.get(`/api/expedientes/${expedienteId}/historial`)).body.data;
-      expect(historial[1]).toMatchObject({ tipo: 'CAMBIO_ESTADO', descripcion: 'Estado: BORRADOR → EN_TRAMITE (Documentación completa)' });
+      expect(historial[1]).toMatchObject({ tipo: 'CAMBIO_ESTADO', descripcion: 'Estado: Borrador → En trámite (Documentación completa)' });
       expect(e.auditoria.some((a) => a.accion === 'expediente.cambiar_estado')).toBe(true);
     });
 
@@ -184,7 +184,12 @@ describe('Tareas y seguimiento (Sprint 5: RF-12 a RF-17)', () => {
       const bloqueado = await funcionario.patch(`/api/expedientes/${expedienteId}`).send({ caratula: 'Cambio' });
       expect(bloqueado.status).toBe(409);
       expect(bloqueado.body.error.message).toContain('en tránsito');
-      expect((await funcionario.post(`/api/expedientes/${expedienteId}/actuaciones`).send({ tipo: 'ACTUACION', texto: 'Intento en tránsito' })).status).toBe(409);
+      const actuacion = await funcionario.post(`/api/expedientes/${expedienteId}/actuaciones`).send({ tipo: 'ACTUACION', texto: 'Intento en tránsito' });
+      expect(actuacion.status).toBe(409);
+      // D-13: el mensaje se lee bien con cualquier acción (antes decía "registrar actuaciones en hasta que se reciba").
+      expect(actuacion.body.error.message).toBe(
+        'El expediente está en tránsito hacia Mesa de Entradas. No se puede registrar actuaciones en un expediente en tránsito hasta que la dependencia destino lo reciba',
+      );
       expect((await enviar()).status).toBe(409); // ya está en tránsito
     });
 

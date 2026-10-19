@@ -4,6 +4,11 @@
  * GET    /api/expedientes      → listar con búsqueda, filtros y paginación
  * GET    /api/expedientes/:id  → consultar expediente
  * PATCH  /api/expedientes/:id  → modificar expediente
+ * CR-08 (permiso expedientes.desactivar):
+ * GET    /api/expedientes/desactivados   → listar los desactivados
+ * POST   /api/expedientes/:id/desactivar → dar de baja (con motivo)
+ * POST   /api/expedientes/:id/reactivar  → volver a ponerlo en circulación
+ * DELETE /api/expedientes/:id            → eliminar (solo sin actividad)
  */
 import { Router } from 'express';
 import type { ExpedienteRecord } from '../../database/repositories.js';
@@ -15,6 +20,7 @@ import { contexto, requierePermiso, requiereSesion, usuarioActual } from '../mid
 import { type AnexosDeps, anexosRouter } from './anexos.routes.js';
 import {
   crearExpedienteSchema,
+  desactivarExpedienteSchema,
   idExpedienteSchema,
   listarExpedientesSchema,
   modificarExpedienteSchema,
@@ -49,6 +55,16 @@ export function expedientesRouter(expedientes: ExpedientesService, anexos: Anexo
 
   // Todas las rutas requieren sesión
   router.use(requiereSesion);
+
+  // GET /expedientes/desactivados — antes de '/:id', para que no se lea como un id (CR-08)
+  router.get('/desactivados', requierePermiso('expedientes.desactivar'), async (req, res) => {
+    const { pagina, porPagina, ...filtros } = listarExpedientesSchema.parse(req.query);
+    const resultado = await expedientes.listar({ ...filtros, activo: false, skip: (pagina - 1) * porPagina, take: porPagina });
+    res.json({
+      data: resultado.items,
+      paginacion: { total: resultado.total, pagina, porPagina, totalPaginas: Math.ceil(resultado.total / porPagina) },
+    });
+  });
 
   // Documentos, actuaciones e historial de cada expediente (Sprint 4)
   router.use('/:id', anexosRouter(expedientes, anexos));
@@ -97,6 +113,30 @@ export function expedientesRouter(expedientes: ExpedientesService, anexos: Anexo
     const usuario = usuarioActual(res)!;
     await expedienteVisible(expedientes, id, usuario);
     sendData(res, await expedientes.modificar(id, body, usuario.id, contexto(req, res)));
+  });
+
+  // CR-08: dar de baja, reactivar y eliminar
+  router.post('/:id/desactivar', requierePermiso('expedientes.desactivar'), async (req, res) => {
+    const { id } = idExpedienteSchema.parse(req.params);
+    const { motivo } = desactivarExpedienteSchema.parse(req.body);
+    const usuario = usuarioActual(res)!;
+    await expedienteVisible(expedientes, id, usuario);
+    sendData(res, await expedientes.desactivar(id, motivo, usuario.id, contexto(req, res)));
+  });
+
+  router.post('/:id/reactivar', requierePermiso('expedientes.desactivar'), async (req, res) => {
+    const { id } = idExpedienteSchema.parse(req.params);
+    const usuario = usuarioActual(res)!;
+    await expedienteVisible(expedientes, id, usuario);
+    sendData(res, await expedientes.reactivar(id, usuario.id, contexto(req, res)));
+  });
+
+  router.delete('/:id', requierePermiso('expedientes.desactivar'), async (req, res) => {
+    const { id } = idExpedienteSchema.parse(req.params);
+    const usuario = usuarioActual(res)!;
+    await expedienteVisible(expedientes, id, usuario);
+    await expedientes.eliminar(id, usuario.id, contexto(req, res));
+    res.status(204).end();
   });
 
   return router;

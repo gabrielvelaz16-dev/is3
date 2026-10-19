@@ -7,15 +7,17 @@ Esta carpeta reúne los artefactos de gestión y técnicos del proyecto. Cada do
 
 ## Índice
 
+**Estado general del proyecto:** [avance-del-proyecto.md](avance-del-proyecto.md) (resumen de todos los avances y pendientes).
+
 | Carpeta | Documento | Unidad | Estado |
 |---|---|---|---|
 | 01-alcance-requisitos | [alcance.md](01-alcance-requisitos/alcance.md) | 3 | Línea base inicial |
 | 01-alcance-requisitos | [requisitos.md](01-alcance-requisitos/requisitos.md) | 3 · 7 | Línea base inicial |
 | 01-alcance-requisitos | [resumen-alcance-requisitos.md](01-alcance-requisitos/resumen-alcance-requisitos.md) | 3 · 7 | Aprobado (G1) |
-| 02-arquitectura | [arquitectura.md](02-arquitectura/arquitectura.md) | 8 | Inicial |
-| 02-arquitectura | [decisiones-tecnicas.md](02-arquitectura/decisiones-tecnicas.md) | 8 | Inicial |
+| 02-arquitectura | [arquitectura.md](02-arquitectura/arquitectura.md) | 8 | Vigente |
+| 02-arquitectura | [decisiones-tecnicas.md](02-arquitectura/decisiones-tecnicas.md) | 8 | Vivo (ADR-01 a ADR-13) |
 | 02-arquitectura | [contrato-api.md](02-arquitectura/contrato-api.md) | 8 | Vigente (Sprint 1) |
-| 03-modelo-datos | [modelo-datos.md](03-modelo-datos/modelo-datos.md) | 3 | Borrador (se refina en Sprint 2) |
+| 03-modelo-datos | [modelo-datos.md](03-modelo-datos/modelo-datos.md) | 3 | Vigente (modelo implementado) |
 | 04-gestion | [enfoque-gobernanza.md](04-gestion/enfoque-gobernanza.md) | 2 | Completo (TP Unidad 2) |
 | 04-gestion | [planificacion.md](04-gestion/planificacion.md) | 3 | Completo (TP Unidad 3) |
 | 04-gestion | [estimacion-calendario.md](04-gestion/estimacion-calendario.md) | 4 | Completo (TP Unidad 4) + actualización |
@@ -26,17 +28,19 @@ Esta carpeta reúne los artefactos de gestión y técnicos del proyecto. Cada do
 | 04-gestion | [trazabilidad.md](04-gestion/trazabilidad.md) | 2–9 (Anexo A) | Vivo |
 | 04-gestion | [monitoreo-metricas.md](04-gestion/monitoreo-metricas.md) | 9 | Vivo (mediciones reales 15 y 16/10/2026) |
 | 04-gestion | [historial-cambios.md](04-gestion/historial-cambios.md) | 8 | Vivo |
-| 04-gestion/sprints | [sprint-01.md](04-gestion/sprints/sprint-01.md) | 3 · 9 | En curso |
-| 04-gestion/sprints | [sprint-02.md](04-gestion/sprints/sprint-02.md) | 3 · 9 | En curso (CR-02) |
-| 04-gestion/sprints | [sprint-04.md](04-gestion/sprints/sprint-04.md) · [sprint-05.md](04-gestion/sprints/sprint-05.md) · [sprint-06.md](04-gestion/sprints/sprint-06.md) · [sprint-07.md](04-gestion/sprints/sprint-07.md) | 3 · 9 | Terminados con CI en verde; prueba manual pendiente |
+| 04-gestion/sprints | [sprint-01.md](04-gestion/sprints/sprint-01.md) · [sprint-02.md](04-gestion/sprints/sprint-02.md) · [sprint-03.md](04-gestion/sprints/sprint-03.md) · [sprint-04.md](04-gestion/sprints/sprint-04.md) · [sprint-05.md](04-gestion/sprints/sprint-05.md) · [sprint-06.md](04-gestion/sprints/sprint-06.md) · [sprint-07.md](04-gestion/sprints/sprint-07.md) | 3 · 9 | Terminados con CI en verde; prueba manual pendiente |
+| 04-gestion/sprints | [cr-05-interfaz.md](04-gestion/sprints/cr-05-interfaz.md) · [sprint-08.md](04-gestion/sprints/sprint-08.md) | 3 · 7 · 9 | CR-05 terminado · Sprint 8 en curso |
 | 05-calidad-pruebas | [plan-calidad.md](05-calidad-pruebas/plan-calidad.md) | 7 | Plan inicial |
 | 05-calidad-pruebas | [plan-pruebas.md](05-calidad-pruebas/plan-pruebas.md) | 7 | Plan inicial |
-| 05-calidad-pruebas | [resultados-pruebas.md](05-calidad-pruebas/resultados-pruebas.md) | 7 | Con ejecuciones reales (Sprints 1 a 7) |
+| 05-calidad-pruebas | [resultados-pruebas.md](05-calidad-pruebas/resultados-pruebas.md) | 7 | Con ejecuciones reales (Sprints 1 a 8) |
+| 05-calidad-pruebas | [guia-prueba-manual.md](05-calidad-pruebas/guia-prueba-manual.md) | 7 | Lista para ejecutar en la PC |
 | 05-calidad-pruebas | [guia-usabilidad.md](05-calidad-pruebas/guia-usabilidad.md) | 7 | Preparada; pendiente de ejecución |
 | 06-configuracion-devops | [plan-configuracion.md](06-configuracion-devops/plan-configuracion.md) | 8 | Vigente |
-| 06-configuracion-devops | [instalacion-ejecucion.md](06-configuracion-devops/instalacion-ejecucion.md) | 8 | Se verifica en Sprint 1 |
+| 06-configuracion-devops | [instalacion-ejecucion.md](06-configuracion-devops/instalacion-ejecucion.md) | 8 | Vigente (Sprint 8) |
+| — | [manual-usuario.md](manual-usuario.md) | 7 · 8 | Vigente (Sprint 8) |
 | 07-evidencias | [evidencias.md](07-evidencias/evidencias.md) | 2–9 | Vivo |
 | 07-evidencias/fase0 | [acta-puerta-g1.md](07-evidencias/fase0/acta-puerta-g1.md) | 7 | Aprobada |
+| 08-trabajos-practicos | [Informe final del TP 6 (Word)](08-trabajos-practicos/Informe_Final_TP6_Expediente_Electronico.docx) | 2–9 | Borrador para revisión (19/10/2026) |
 | 08-trabajos-practicos | [tp-unidades-8-9.md](08-trabajos-practicos/tp-unidades-8-9.md) · [versión Word](08-trabajos-practicos/TP_Unidades_8_y_9_Expediente_Electronico.docx) | 8 · 9 | Entregable (15/10/2026) |
 | bitacora-ia | [bitacora-ia.md](bitacora-ia/bitacora-ia.md) | Transversal (Anexo D) | Vivo |
 

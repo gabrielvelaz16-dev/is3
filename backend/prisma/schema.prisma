@@ -75,6 +75,7 @@ model Usuario {
 
   expedientesCreados     Expediente[] @relation("creadoPor")
   expedientesResponsable Expediente[] @relation("responsable")
+  expedientesDesactivados Expediente[] @relation("desactivadoPor")
   documentosSubidos      Documento[]
   actuaciones            Actuacion[]
   cambiosEstado          CambioEstado[]
@@ -159,8 +160,14 @@ model Expediente {
   descripcion        String?          @db.Text
   creadoEn           DateTime         @default(now()) @map("creado_en")
   actualizadoEn      DateTime         @updatedAt @map("actualizado_en")
+  /// CR-08: un expediente desactivado sale de listas, indicadores y pendientes, y queda en solo lectura.
+  activo              Boolean          @default(true)
+  desactivadoEn       DateTime?        @map("desactivado_en")
+  desactivadoPorId    Int?             @map("desactivado_por_id")
+  motivoDesactivacion String?          @map("motivo_desactivacion") @db.VarChar(500)
 
   dependenciaActual Dependencia @relation(fields: [dependenciaActualId], references: [id], onDelete: Restrict)
+  desactivadoPor    Usuario?    @relation("desactivadoPor", fields: [desactivadoPorId], references: [id], onDelete: Restrict)
   creadoPor         Usuario     @relation("creadoPor", fields: [creadoPorId], references: [id], onDelete: Restrict)
   responsable       Usuario?    @relation("responsable", fields: [responsableId], references: [id], onDelete: Restrict)
   documentos        Documento[]
@@ -175,6 +182,7 @@ model Expediente {
   @@index([dependenciaActualId])
   @@index([fechaVencimiento])
   @@index([creadoPorId])
+  @@index([activo])
   @@map("expedientes")
 }
 

@@ -50,7 +50,9 @@ export function crearReposEnMemoria() {
   const fechasAuditoria: Date[] = [];
 
   // Sprint 3: expedientes en memoria
-  type FilaExp = Omit<ExpedienteRecord, 'dependenciaActual' | 'creadoPor' | 'responsable' | 'paseEnTransito'>;
+  type FilaExp = Omit<ExpedienteRecord, 'dependenciaActual' | 'creadoPor' | 'responsable' | 'paseEnTransito' | 'desactivadoPor'> & {
+    desactivadoPorId: number | null;
+  };
   const expedientes: FilaExp[] = [];
   const secuencias = new Map<number, number>();
 
@@ -105,8 +107,11 @@ export function crearReposEnMemoria() {
     const dep = dependencias.find((d) => d.id === f.dependenciaActualId)!;
     const creador = usuarios.find((u) => u.id === f.creadoPorId)!;
     const resp = f.responsableId ? usuarios.find((u) => u.id === f.responsableId) : null;
+    const { desactivadoPorId, ...resto } = f;
+    const baja = desactivadoPorId ? usuarios.find((u) => u.id === desactivadoPorId) : null;
     return {
-      ...f,
+      ...resto,
+      desactivadoPor: baja ? { id: baja.id, nombre: baja.nombre, username: baja.username } : null,
       dependenciaActual: dep,
       creadoPor: creador ? { id: creador.id, nombre: creador.nombre, username: creador.username } : { id: f.creadoPorId, nombre: '', username: '' },
       responsable: resp ? { id: resp.id, nombre: resp.nombre, username: resp.username } : null,
@@ -118,6 +123,7 @@ export function crearReposEnMemoria() {
   };
 
   const cumpleReporte = (e: FilaExp, f: FiltrosReporte) =>
+    e.activo === (f.activo ?? true) &&
     (!f.estado || e.estado === f.estado) &&
     (!f.prioridad || e.prioridad === f.prioridad) &&
     (!f.dependenciaId || e.dependenciaActualId === f.dependenciaId) &&
@@ -157,7 +163,8 @@ export function crearReposEnMemoria() {
         return { items: filtrados.slice(skip, skip + take).map(completar), total: filtrados.length };
       },
       create: async (data) => {
-        const fila: Fila = { id: usuarios.length + 1, activo: true, ultimoAcceso: null, creadoEn: new Date(), ...data };
+        const id = Math.max(0, ...usuarios.map((u) => u.id)) + 1;
+        const fila: Fila = { id, activo: true, ultimoAcceso: null, creadoEn: new Date(), ...data };
         usuarios.push(fila);
         return completar(fila);
       },
@@ -166,6 +173,23 @@ export function crearReposEnMemoria() {
         if (!fila) throw new Error('no existe');
         Object.assign(fila, data);
         return completar(fila);
+      },
+      tieneActividad: async (id) =>
+        auditoria.some((e) => e.usuarioId === id) ||
+        expedientes.some((e) => e.creadoPorId === id || e.responsableId === id || e.desactivadoPorId === id) ||
+        documentos.some((d) => d.subidoPor.id === id) ||
+        actuaciones.some((a) => a.autor.id === id) ||
+        cambiosEstado.some((c) => c.usuario.id === id) ||
+        tareas.some((t) => t.asignadoAId === id || t.creadoPorId === id) ||
+        pases.some((p) => p.enviadoPorId === id || p.recibidoPorId === id) ||
+        asignaciones.some((a) => a.usuario.id === id || a.responsable?.id === id),
+      delete: async (id) => {
+        usuarios.splice(
+          usuarios.findIndex((u) => u.id === id),
+          1,
+        );
+        for (const [k, s] of sesiones) if (s.usuarioId === id) sesiones.delete(k);
+        for (let i = notificaciones.length - 1; i >= 0; i--) if (notificaciones[i]!.usuarioId === id) notificaciones.splice(i, 1);
       },
       listActivosDeDependencia: async (dependenciaId) =>
         usuarios
@@ -239,6 +263,7 @@ export function crearReposEnMemoria() {
         expedientes
           .filter(
             (e) =>
+              e.activo &&
               e.fechaVencimiento &&
               e.fechaVencimiento.getTime() <= hasta.getTime() &&
               !['RESUELTO', 'ARCHIVADO'].includes(e.estado) &&
@@ -266,13 +291,14 @@ export function crearReposEnMemoria() {
               e.iniciador.toLowerCase().includes(q),
           );
         }
-        filtrados.sort((a, b) => b.creadoEn.getTime() - a.creadoEn.getTime());
+        if (filtros.activo === false) filtrados.sort((a, b) => b.desactivadoEn!.getTime() - a.desactivadoEn!.getTime());
+        else filtrados.sort((a, b) => b.creadoEn.getTime() - a.creadoEn.getTime());
         return { items: filtrados.slice(filtros.skip, filtros.skip + filtros.take).map(completarExp), total: filtrados.length };
       },
       create: async (data: NuevoExpediente) => {
         const now = ahora();
         const fila: FilaExp = {
-          id: expedientes.length + 1,
+          id: Math.max(0, ...expedientes.map((e) => e.id)) + 1,
           numero: data.numero,
           caratula: data.caratula,
           asunto: data.asunto,
@@ -287,6 +313,10 @@ export function crearReposEnMemoria() {
           descripcion: data.descripcion ?? null,
           creadoEn: now,
           actualizadoEn: now,
+          activo: true,
+          desactivadoEn: null,
+          desactivadoPorId: null,
+          motivoDesactivacion: null,
         };
         expedientes.push(fila);
         return completarExp(fila);
@@ -296,6 +326,20 @@ export function crearReposEnMemoria() {
         if (!fila) throw new Error('expediente no existe');
         Object.assign(fila, data, { actualizadoEn: new Date() });
         return completarExp(fila);
+      },
+      tieneActividad: async (id) =>
+        documentos.some((d) => d.expedienteId === id) ||
+        actuaciones.some((a) => a.expedienteId === id) ||
+        cambiosEstado.some((c) => c.expedienteId === id) ||
+        tareas.some((t) => t.expedienteId === id) ||
+        pases.some((p) => p.expedienteId === id) ||
+        asignaciones.some((a) => a.expedienteId === id) ||
+        notificaciones.some((n) => n.expedienteId === id),
+      delete: async (id) => {
+        expedientes.splice(
+          expedientes.findIndex((e) => e.id === id),
+          1,
+        );
       },
     },
 
@@ -329,7 +373,7 @@ export function crearReposEnMemoria() {
       listByExpediente: async (expedienteId) => tareas.filter((t) => t.expedienteId === expedienteId).map(completarTarea),
       listAbiertasDe: async (usuarioId) =>
         tareas
-          .filter((t) => t.asignadoAId === usuarioId && (t.estado === 'PENDIENTE' || t.estado === 'EN_CURSO'))
+          .filter((t) => t.asignadoAId === usuarioId && (t.estado === 'PENDIENTE' || t.estado === 'EN_CURSO') && expedientes.find((e) => e.id === t.expedienteId)?.activo)
           .sort((a, b) => a.vencimiento.getTime() - b.vencimiento.getTime())
           .map(completarTarea),
       findById: async (id) => {
@@ -433,7 +477,7 @@ export function crearReposEnMemoria() {
         };
       },
       seguimiento: async ({ dependenciaId, ahora: t, hasta }) => {
-        const enAlcance = (e: FilaExp) => !dependenciaId || e.dependenciaActualId === dependenciaId;
+        const enAlcance = (e: FilaExp) => e.activo && (!dependenciaId || e.dependenciaActualId === dependenciaId);
         const lista = expedientes.filter(enAlcance);
         const fv = (e: FilaExp) => e.fechaVencimiento?.getTime();
         const idsAlcance = new Set(lista.map((e) => e.id));

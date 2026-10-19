@@ -12,7 +12,7 @@ const env = loadEnv();
 const db = createDbCheck(env.DATABASE_URL);
 const prisma = createPrismaClient(env.DATABASE_URL);
 const repos = createPrismaRepos(prisma);
-const version = process.env.npm_package_version ?? '0.1.0';
+const version = process.env.npm_package_version ?? '1.0.0';
 
 const app = createApp({
   dbCheck: db.check,

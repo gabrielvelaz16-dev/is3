@@ -38,6 +38,11 @@ export const asignarResponsableSchema = z
   .object({ responsableId: z.number().int().positive().nullable() })
   .strict();
 
+/** CR-08: el motivo queda en el expediente y en la auditoría. */
+export const desactivarExpedienteSchema = z
+  .object({ motivo: z.string().trim().min(5, 'Escriba el motivo (al menos 5 caracteres)').max(500) })
+  .strict();
+
 export const listarExpedientesSchema = z.object({
   q: z.string().max(200).optional(),
   estado: z.enum(ESTADOS_EXPEDIENTE).optional(),
