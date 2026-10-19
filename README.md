@@ -91,6 +91,6 @@ docs/        Gestión del proyecto y documentación técnica (ver docs/README.md
 
 ## Documentación
 
-Versiones: [CHANGELOG.md](CHANGELOG.md). Índice completo en [docs/README.md](docs/README.md): alcance, requisitos, arquitectura, modelo de datos, gestión (Unidades 2 a 9), calidad, pruebas, configuración, evidencias y bitácora de IA.
+Avance general: [docs/avance-del-proyecto.md](docs/avance-del-proyecto.md). Versiones: [CHANGELOG.md](CHANGELOG.md). Índice completo en [docs/README.md](docs/README.md): alcance, requisitos, arquitectura, modelo de datos, gestión (Unidades 2 a 9), calidad, pruebas, configuración, evidencias y bitácora de IA.
 
 Responsable: Carlos Gabriel Velázquez Franco.

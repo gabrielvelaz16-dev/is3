@@ -7,6 +7,8 @@ Esta carpeta reúne los artefactos de gestión y técnicos del proyecto. Cada do
 
 ## Índice
 
+**Estado general del proyecto:** [avance-del-proyecto.md](avance-del-proyecto.md) (resumen de todos los avances y pendientes).
+
 | Carpeta | Documento | Unidad | Estado |
 |---|---|---|---|
 | 01-alcance-requisitos | [alcance.md](01-alcance-requisitos/alcance.md) | 3 | Línea base inicial |
