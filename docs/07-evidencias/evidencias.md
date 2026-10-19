@@ -144,6 +144,8 @@ Fecha: 19/10/2026 · Release: R4 · Detalle: [sprint-08.md](../04-gestion/sprint
 | Datos de demostración: 16 expedientes en los 5 estados; segunda carga sin duplicar | 7, 8 | Paso "Datos de demostración por la API, dos veces" en [run 39252901587](https://github.com/gabrielvelaz16-dev/is3/actions/runs/39252901587) | Hecho |
 | Indicadores (97 comparaciones), restauración (225 filas, 4 documentos) y rendimiento (p95 ≤ 32 ms) sobre los datos de demostración | 7, 9 | [run 39252901587](https://github.com/gabrielvelaz16-dev/is3/actions/runs/39252901587) | Hecho |
 | D-12 corregido (estados legibles) | 7 | [resultados-pruebas.md](../05-calidad-pruebas/resultados-pruebas.md) | Hecho |
+| CR-06 y CR-07: pruebas en verde en local, backend 233/233 (líneas 94,18 %), frontend 60/60; matriz de permisos con 41 rutas | 7, 8 | [control-cambios.md](../04-gestion/control-cambios.md) · tarjetas [CR-06](https://trello.com/c/GfT0ub9W) y [CR-07](https://trello.com/c/P9D7Y7X9) | Hecho en local · CI [run 39284967003](https://github.com/gabrielvelaz16-dev/is3/actions/runs/39284967003) pendiente |
+| D-13 corregido (mensaje de expediente en tránsito) | 7 | [resultados-pruebas.md](../05-calidad-pruebas/resultados-pruebas.md) | Hecho |
 | Manual de usuario, README, `sprint-03.md`, CHANGELOG | 8 | [manual-usuario.md](../manual-usuario.md) · [README](../../README.md) · [CHANGELOG](../../CHANGELOG.md) | Hecho |
 | Capturas finales (16) con los datos de demostración | 7 | [capturas/feature-S8-entrega-3195401](https://github.com/gabrielvelaz16-dev/is3/tree/capturas/feature-S8-entrega-3195401) · [run 39253440089](https://github.com/gabrielvelaz16-dev/is3/actions/runs/39253440089) | Hecho |
 | Versión v1.0.0 (etiqueta y release) | 8 | — | Pendiente: integración de los PR |

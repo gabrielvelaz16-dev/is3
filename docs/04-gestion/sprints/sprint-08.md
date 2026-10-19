@@ -21,6 +21,8 @@ Dejar una versión estable v1.0.0, probada y documentada, con las evidencias lis
 
 Además se corrigió **D-12**: el historial y los mensajes de error mostraban los nombres internos de los estados (`EN_TRAMITE`). Ahora dicen "En trámite" y los textos están en un solo lugar (`backend/src/shared/etiquetas.ts`).
 
+Durante la prueba en la PC, el PO pidió dos cambios, registrados como [CR-06](../control-cambios.md#cr-06--contraseña-visible-eliminación-de-usuarios-y-navegación) (contraseña visible, eliminar usuarios sin actividad, mejoras de navegación) y [CR-07](../control-cambios.md#cr-07--más-tipos-de-documentos-adjuntos) (adjuntar texto e imágenes GIF y WEBP). Al probar el CR-07 apareció **D-13** (mensaje de expediente en tránsito mal redactado), ya corregido. Pruebas después de los cambios: backend 233, frontend 60; cobertura del backend 94,18 % (medida en local).
+
 ## 3. Archivos principales
 
 | Parte | Archivos |
